@@ -704,7 +704,6 @@ Algunas mejoras futuras serían:
 * Gestión multi-caso.
 * Integración productiva con SharePoint o Microsoft Graph.
 * Mejora de control de permisos y auditoría.
-* Extracción de prompts a ficheros independientes.
 * Uso de plantillas documentales más robustas.
 * Mejora del catálogo de riesgos.
 * Incorporación de un agente previo para recoger instrucciones especiales del analista.
