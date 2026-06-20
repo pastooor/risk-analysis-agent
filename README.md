@@ -649,19 +649,7 @@ Esto levanta:
 docker exec -it tfm_ollama ollama pull nomic-embed-text
 ```
 
-### 17.3. Indexar el catálogo en Qdrant
-
-```bash
-docker exec -it tfm_n8n python /data/scripts/index_manual_qdrant.py \
-  --catalog-json /data/rag_manual/catalog_questions_v2.json \
-  --collection tfm_rag_manual_agent \
-  --qdrant-url http://qdrant:6333 \
-  --ollama-url http://ollama:11434 \
-  --embedding-model nomic-embed-text \
-  --recreate
-```
-
-### 17.4. Importar los workflows en n8n
+### 17.3. Importar los workflows en n8n
 
 Desde la interfaz de n8n:
 
