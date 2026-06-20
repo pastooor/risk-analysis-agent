@@ -1,0 +1,31 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_002",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_008",
+      "final_score": 1,
+      "final_score_type": "non_compliance",
+      "answer_summary": "El proveedor describe un modelo de permisos basado en perfiles y revisión periódica, pero no detalla el proceso técnico o herramienta de gestión de roles.",
+      "decision_reason": "La respuesta sigue siendo genérica. No se describe el proceso, herramienta o procedimiento específico para identificar y gestionar los roles de administración, incumpliendo el requisito de detalle técnico.",
+      "resolved_by_provider": false
+    }
+  ],
+  "batch_validation_notes": [
+    "La herramienta risk_catalog_search no devolvió la ficha para Q_008, sino para Q_018. Se procede con la evaluación basada en la respuesta del proveedor y las reglas de decisión establecidas para Q_008."
+  ],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_002\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_008\",\"final_score\":1,\"final_score_type\":\"non_compliance\",\"answer_summary\":\"El proveedor describe un modelo de permisos basado en perfiles y revisión periódica, pero no detalla el proceso técnico o herramienta de gestión de roles.\",\"decision_reason\":\"La respuesta sigue siendo genérica. No se describe el proceso, herramienta o procedimiento específico para identificar y ges",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_008"
+    ],
+    "normalized_question_ids": [
+      "Q_008"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

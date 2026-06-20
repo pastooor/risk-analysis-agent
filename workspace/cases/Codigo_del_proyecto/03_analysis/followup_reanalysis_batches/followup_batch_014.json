@@ -1,0 +1,54 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "followup_round": 1,
+  "batch_id": "followup_batch_014",
+  "questions": [
+    {
+      "question_id": "Q_032",
+      "previous_evaluation": {
+        "question_id": "Q_032",
+        "score": 2,
+        "score_type": "insufficient_evidence",
+        "answer_summary": "La respuesta es insuficiente. No se especifica el tiempo de retención y la información sobre seguridad y accesos es genérica.",
+        "decision_reason": "El proveedor indica que el tiempo está por establecer y no detalla los controles de seguridad ni los roles con acceso, incumpliendo el requisito de política documentada.",
+        "requires_provider_followup": true,
+        "followup_questions": [
+          "¿Podría proporcionar la política de retención de datos documentada que especifique el tiempo de retención, las medidas de seguridad aplicadas y los roles con acceso a los datos?"
+        ],
+        "generates_finding": true,
+        "requires_human_review": true,
+        "risk_id": "R_006",
+        "risk_name": "Pérdida de disponibilidad",
+        "control_ids": [
+          "C_056"
+        ],
+        "incumplimiento_identificado": "No se tiene formalizado una política de retención del dato",
+        "controles_asociados": "Se debe asegurar la existencia y la implementación de una política de retención del dato de acuerdo con las normativas, leyes, regulaciones y a las necesidades de negocio.",
+        "amenazas": [
+          "Incumplimiento normativo/regulatorio"
+        ],
+        "mitigation": "Se debe disponer de una política de retención de dato documentada, en la cual se deben tratar como mínimo los puntos de cuánto tiempo",
+        "mitigation_guide": "Se debe asegurar la existencia y la implementación de una política de retención del dato de acuerdo con las normativas, leyes, regulaciones y a las necesidades de negocio.",
+        "report_context_example": "El proveedor indica que no cuenta con una política de retención de datos.",
+        "report_detail_example": "No disponer de una política de retención de datos puede dejar a una organización vulnerable a una serie de riesgos, incluida la pérdida de datos críticos, la interrupción de las operaciones y el incumplimiento normativo. Es fundamental que las organizaciones desarrollen e implementen estas medidas como parte de su estrategia general de gestión de la información y la continuidad del negocio.",
+        "sources": [
+          {
+            "question_id": "Q_032",
+            "chunk_id": "RAG-Q_032",
+            "traceability": "Excel: Análisis SaaS, fila 33",
+            "source": "tfm_rag_manual"
+          }
+        ],
+        "level": "BAJO",
+        "tiempo_mitigacion": "Pte.",
+        "provider_answer": "Otros",
+        "provider_details": "Tiempo por establecer, Si, El proveedor",
+        "_source_batch": "batch_032.json"
+      },
+      "provider_followup_answer": "La política de retención de datos está actualmente en proceso de formalización y todavía no se encuentra aprobada de forma definitiva. Aunque el periodo operativo utilizado para copias de seguridad es de 30 días, la política documental completa con todos los criterios de conservación, borrado y acceso está pendiente de validación interna",
+      "provider_response_detected": true,
+      "full_clean_provider_response": "Buenas,\nOs trasladamos las aclaraciones solicitadas:\nQ_007\nConfirmamos que cada usuario dispone de un identificador único, personal e intransferible para acceder a la plataforma. La unicidad se garantiza mediante el identificador interno de usuario y el correo electrónico asociado a cada cuenta. No se utilizan cuentas compartidas para usuarios nominativos.\nQ_008\nLa identificación y gestión de usuarios con roles de administración se realiza mediante un modelo de permisos basado en perfiles. Los roles administrativos se asignan únicamente a usuarios autorizados y se revisan periódicamente. La plataforma permite identificar qué usuarios tienen privilegios de administración y mantiene registro de los cambios realizados sobre dichos permisos.\nQ_011\nEl repositorio de usuarios utilizado actualmente es una base de datos local propia de la aplicación. No existe integración activa con LDAP, Active Directory, IDP corporativo ni con un sistema IAM externo para la gestión centralizada de identidades.\nQ_012\nExiste un procedimiento interno documentado para la gestión del ciclo de vida de usuarios. Las altas se realizan previa solicitud autorizada, las modificaciones de permisos requieren aprobación del responsable correspondiente y las bajas se ejecutan tras la notificación de finalización de acceso. Los cambios son registrados y ejecutados por usuarios con privilegios administrativos. El plazo habitual de ejecución de bajas es inferior a 48 horas laborables desde la recepción de la solicitud validada.\nQ_013\nLa plataforma implementa control de acceso basado en roles. Existen roles predefinidos, como usuario estándar, supervisor y administrador. Los permisos se asignan en función del perfil del usuario y del alcance funcional requerido. La granularidad permite limitar el acceso a funcionalidades de administración, consulta y operación según el rol asignado.\nQ_015\nEl sistema aplica una política de contraseñas robusta para usuarios nominativos. La política contempla longitud mínima, complejidad de caracteres, bloqueo tras intentos fallidos y restricciones para evitar contraseñas débiles. El uso de cadenas aleatorias de 128 bits aplica únicamente a credenciales técnicas o tokens generados por la plataforma, no sustituye a la política de contraseñas de usuarios.\nQ_019\nLas contraseñas no se almacenan en claro ni mediante cifrado reversible. Se almacenan mediante hash seguro utilizando bcrypt, con salt único por usuario y factor de coste configurado conforme a las recomendaciones actuales de la plataforma.\nQ_021\nEl tiempo de expiración de sesión está configurado actualmente en 60 minutos de inactividad, pero es configurable por política de la plataforma. Puede reducirse a valores inferiores, como 30 minutos, para ajustarse a los requisitos de seguridad del cliente. La política aplica a todos los usuarios autenticados, incluidos usuarios estándar y administradores.\nQ_023\nPara las comunicaciones HTTPS se soportan TLS 1.2 y TLS 1.3. Las versiones SSLv2, SSLv3, TLS 1.0 y TLS 1.1 se encuentran deshabilitadas en los endpoints expuestos del servicio.\nQ_028\nLos backups se cifran mediante AES-256. El cifrado aplica a las copias de seguridad almacenadas en el entorno de infraestructura. La gestión de claves se realiza mediante mecanismos del proveedor cloud, con acceso restringido a personal autorizado.\nQ_029\nConfirmamos que las comunicaciones se realizan mediante HTTPS con TLS 1.2 o superior. Las versiones obsoletas SSL, TLS 1.0 y TLS 1.1 están deshabilitadas. No se permite tráfico HTTP sin cifrar para el acceso a la aplicación.\nQ_030\nEl proceso de backup se ejecuta de forma automatizada sobre la base de datos y los volúmenes persistentes asociados al servicio. Las copias se almacenan cifradas en infraestructura cloud ubicada en la Unión Europea. El periodo de retención actual es de 30 días. La integridad de las copias se verifica mediante controles del servicio de almacenamiento y se realizan pruebas periódicas de restauración para validar la recuperabilidad de los datos.\nQ_031\nLos valores definidos para este servicio son los siguientes: RTO de 8 horas y RPO de 24 horas. Estos valores aplican al servicio SaaS en condiciones normales de recuperación ante una incidencia técnica relevante.\nQ_032\nLa política de retención de datos está actualmente en proceso de formalización y todavía no se encuentra aprobada de forma definitiva. Aunque el periodo operativo utilizado para copias de seguridad es de 30 días, la política documental completa con todos los criterios de conservación, borrado y acceso está pendiente de validación interna.\nQ_034\nSí, existe un proceso documentado para la finalización y baja del servicio. El procedimiento contempla la notificación de baja, validación con el cliente, exportación de datos si aplica, revocación de accesos, eliminación lógica del servicio y eliminación de datos conforme a la política de retención y ciclo de vida de backups.\nQ_036\nLa devolución de la información se realiza mediante exportación en formato estructurado, normalmente CSV o XLSX para datos tabulares y ZIP para conjuntos documentales. La integridad de la exportación se valida mediante comprobaciones de consistencia y, si se requiere, mediante hash del paquete exportado. El plazo habitual para la entrega de la exportación es de hasta 10 días laborables desde la solicitud validada de finalización del servicio.\nQ_045\nLos entornos de desarrollo y pruebas están lógicamente separados del entorno de producción. Cuentan con bases de datos, credenciales y accesos diferenciados. No se utilizan datos reales de producción en desarrollo o pruebas salvo autorización expresa y, en ese caso, se aplican medidas de anonimización o seudonimización. Los accesos a cada entorno se gestionan de forma independiente.\nQ_057\nExiste un procedimiento formalizado de comunicación y escalado de incidentes de seguridad. El procedimiento define canales de notificación, responsables internos, criterios de severidad, tiempos de escalado y comunicación al cliente cuando el incidente pueda afectar a la confidencialidad, integridad o disponibilidad del servicio. Los incidentes se registran y se realiza seguimiento hasta su cierre.\nUn saludo."
+    }
+  ],
+  "rule": "Máximo 1 ronda automática. Si tras esta respuesta sigue sin quedar claro, el score final será 1."
+}

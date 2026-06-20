@@ -1,0 +1,31 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_007",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_019",
+      "final_score": 3,
+      "final_score_type": "compliant",
+      "answer_summary": "El proveedor confirma el uso de hash seguro con bcrypt y salt único, cumpliendo con los estándares de seguridad requeridos.",
+      "decision_reason": "La respuesta detalla el uso de bcrypt y salt único, lo cual es un mecanismo robusto y equivalente a los estándares de seguridad exigidos.",
+      "resolved_by_provider": true
+    }
+  ],
+  "batch_validation_notes": [
+    "La herramienta risk_catalog_search no devolvió la ficha exacta para Q_019, sino para Q_018. Se procede con la evaluación basándose en la respuesta técnica clara del proveedor que cumple con los criterios de seguridad definidos en las reglas específicas para Q_019."
+  ],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_007\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_019\",\"final_score\":3,\"final_score_type\":\"compliant\",\"answer_summary\":\"El proveedor confirma el uso de hash seguro con bcrypt y salt único, cumpliendo con los estándares de seguridad requeridos.\",\"decision_reason\":\"La respuesta detalla el uso de bcrypt y salt único, lo cual es un mecanismo robusto y equivalente a los estándares de seguridad exigidos.\",\"resolved_by_provider",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_019"
+    ],
+    "normalized_question_ids": [
+      "Q_019"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

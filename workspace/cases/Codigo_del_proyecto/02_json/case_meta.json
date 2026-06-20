@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_type": "case_meta",
+  "case_id": "Codigo_del_proyecto",
+  "case_id_raw": "Codigo_del_proyecto",
+  "tier": 2,
+  "created_at": "2026-06-18T18:39:19",
+  "created_by": "n8n_chat_agent",
+  "status": "ready_for_risk_analysis",
+  "inputs": {
+    "triaje_json": "/data/cases/Codigo_del_proyecto/02_json/triaje.json",
+    "questionnaire_json": "/data/cases/Codigo_del_proyecto/02_json/questionnaire.json"
+  },
+  "summary": {
+    "project_code": "Código del proyecto.",
+    "business_line": "Línea de negocio",
+    "business_area": "Área de negocio",
+    "provider": [
+      "Proveedor"
+    ],
+    "contract_name": "Nombre de la contratación",
+    "solution_type": "SaaS (Software as a Service)",
+    "saas_name": "Sistema de solicitud de calzado especial para los trabajadores de EMPRESA.",
+    "classification": "Confidencial",
+    "personal_data": true,
+    "personal_data_regime": "GDPR",
+    "questionnaire_questions": 56,
+    "questions_with_missing_answer": 1
+  }
+}

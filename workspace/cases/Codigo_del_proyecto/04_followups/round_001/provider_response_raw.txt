@@ -1,0 +1,129 @@
+Buenas,
+Os trasladamos las aclaraciones solicitadas:
+Q_007
+Confirmamos que cada usuario dispone de un identificador único, personal e intransferible para acceder a la plataforma. La unicidad se garantiza mediante el identificador interno de usuario y el correo electrónico asociado a cada cuenta. No se utilizan cuentas compartidas para usuarios nominativos.
+Q_008
+La identificación y gestión de usuarios con roles de administración se realiza mediante un modelo de permisos basado en perfiles. Los roles administrativos se asignan únicamente a usuarios autorizados y se revisan periódicamente. La plataforma permite identificar qué usuarios tienen privilegios de administración y mantiene registro de los cambios realizados sobre dichos permisos.
+Q_011
+El repositorio de usuarios utilizado actualmente es una base de datos local propia de la aplicación. No existe integración activa con LDAP, Active Directory, IDP corporativo ni con un sistema IAM externo para la gestión centralizada de identidades.
+Q_012
+Existe un procedimiento interno documentado para la gestión del ciclo de vida de usuarios. Las altas se realizan previa solicitud autorizada, las modificaciones de permisos requieren aprobación del responsable correspondiente y las bajas se ejecutan tras la notificación de finalización de acceso. Los cambios son registrados y ejecutados por usuarios con privilegios administrativos. El plazo habitual de ejecución de bajas es inferior a 48 horas laborables desde la recepción de la solicitud validada.
+Q_013
+La plataforma implementa control de acceso basado en roles. Existen roles predefinidos, como usuario estándar, supervisor y administrador. Los permisos se asignan en función del perfil del usuario y del alcance funcional requerido. La granularidad permite limitar el acceso a funcionalidades de administración, consulta y operación según el rol asignado.
+Q_015
+El sistema aplica una política de contraseñas robusta para usuarios nominativos. La política contempla longitud mínima, complejidad de caracteres, bloqueo tras intentos fallidos y restricciones para evitar contraseñas débiles. El uso de cadenas aleatorias de 128 bits aplica únicamente a credenciales técnicas o tokens generados por la plataforma, no sustituye a la política de contraseñas de usuarios.
+Q_019
+Las contraseñas no se almacenan en claro ni mediante cifrado reversible. Se almacenan mediante hash seguro utilizando bcrypt, con salt único por usuario y factor de coste configurado conforme a las recomendaciones actuales de la plataforma.
+Q_021
+El tiempo de expiración de sesión está configurado actualmente en 60 minutos de inactividad, pero es configurable por política de la plataforma. Puede reducirse a valores inferiores, como 30 minutos, para ajustarse a los requisitos de seguridad del cliente. La política aplica a todos los usuarios autenticados, incluidos usuarios estándar y administradores.
+Q_023
+Para las comunicaciones HTTPS se soportan TLS 1.2 y TLS 1.3. Las versiones SSLv2, SSLv3, TLS 1.0 y TLS 1.1 se encuentran deshabilitadas en los endpoints expuestos del servicio.
+Q_028
+Los backups se cifran mediante AES-256. El cifrado aplica a las copias de seguridad almacenadas en el entorno de infraestructura. La gestión de claves se realiza mediante mecanismos del proveedor cloud, con acceso restringido a personal autorizado.
+Q_029
+Confirmamos que las comunicaciones se realizan mediante HTTPS con TLS 1.2 o superior. Las versiones obsoletas SSL, TLS 1.0 y TLS 1.1 están deshabilitadas. No se permite tráfico HTTP sin cifrar para el acceso a la aplicación.
+Q_030
+El proceso de backup se ejecuta de forma automatizada sobre la base de datos y los volúmenes persistentes asociados al servicio. Las copias se almacenan cifradas en infraestructura cloud ubicada en la Unión Europea. El periodo de retención actual es de 30 días. La integridad de las copias se verifica mediante controles del servicio de almacenamiento y se realizan pruebas periódicas de restauración para validar la recuperabilidad de los datos.
+Q_031
+Los valores definidos para este servicio son los siguientes: RTO de 8 horas y RPO de 24 horas. Estos valores aplican al servicio SaaS en condiciones normales de recuperación ante una incidencia técnica relevante.
+Q_032
+La política de retención de datos está actualmente en proceso de formalización y todavía no se encuentra aprobada de forma definitiva. Aunque el periodo operativo utilizado para copias de seguridad es de 30 días, la política documental completa con todos los criterios de conservación, borrado y acceso está pendiente de validación interna.
+Q_034
+Sí, existe un proceso documentado para la finalización y baja del servicio. El procedimiento contempla la notificación de baja, validación con el cliente, exportación de datos si aplica, revocación de accesos, eliminación lógica del servicio y eliminación de datos conforme a la política de retención y ciclo de vida de backups.
+Q_036
+La devolución de la información se realiza mediante exportación en formato estructurado, normalmente CSV o XLSX para datos tabulares y ZIP para conjuntos documentales. La integridad de la exportación se valida mediante comprobaciones de consistencia y, si se requiere, mediante hash del paquete exportado. El plazo habitual para la entrega de la exportación es de hasta 10 días laborables desde la solicitud validada de finalización del servicio.
+Q_045
+Los entornos de desarrollo y pruebas están lógicamente separados del entorno de producción. Cuentan con bases de datos, credenciales y accesos diferenciados. No se utilizan datos reales de producción en desarrollo o pruebas salvo autorización expresa y, en ese caso, se aplican medidas de anonimización o seudonimización. Los accesos a cada entorno se gestionan de forma independiente.
+Q_057
+Existe un procedimiento formalizado de comunicación y escalado de incidentes de seguridad. El procedimiento define canales de notificación, responsables internos, criterios de severidad, tiempos de escalado y comunicación al cliente cuando el incidente pueda afectar a la confidencialidad, integridad o disponibilidad del servicio. Los incidentes se registran y se realiza seguimiento hasta su cierre.
+Un saludo.
+
+________________________________
+De: arquitectura.seguridad.tfm@gmail.com <arquitectura.seguridad.tfm@gmail.com>
+Enviado: jueves, 18 de junio de 2026 13:21
+Para: proveedor.tfm@outlook.es <proveedor.tfm@outlook.es>
+Asunto: [Follow-up] Codigo_del_proyecto
+
+Buenas,
+
+Durante el análisis del cuestionario de seguridad del proyecto Codigo_del_proyecto, necesitamos aclarar algunos puntos para poder completar la evaluación.
+
+Por favor, responded manteniendo el identificador de cada pregunta.
+
+Q_007 - Aclaración requerida
+Motivo: La respuesta es genérica. Se requiere confirmar si el sistema utiliza identificadores únicos (como email o ID interno) y cómo se garantiza la unicidad en el registro.
+Pregunta: ¿Qué campo o atributo técnico se utiliza como identificador único para cada usuario en la plataforma y cómo se garantiza que no existan duplicados?
+
+Q_008 - Aclaración requerida
+Motivo: La respuesta es insuficiente. Se requiere evidencia técnica o procedimental que confirme la capacidad de identificar unívocamente a los usuarios con privilegios de administración.
+Pregunta: Por favor, proporcione evidencia o detalle el procedimiento utilizado para identificar y auditar a los usuarios que poseen roles de administración en la plataforma.
+
+Q_011 - Aclaración requerida
+Motivo: La respuesta no confirma si el repositorio es centralizado para la gestión de identidades, ni si evita la gestión de usuarios locales, conforme al control C_009.
+Pregunta: ¿El repositorio SQL mencionado actúa como un sistema centralizado de gestión de identidades (IAM) para toda la plataforma o es una base de datos local de la aplicación? ¿Permite la gestión centralizada de usuarios evitando la creación de cuentas locales dispersas?
+
+Q_012 - Aclaración requerida
+Motivo: La respuesta es insuficiente. Se requiere confirmar la existencia de un procedimiento documentado de Alta, Baja y Modificación (ABM) para cumplir con el control C_005.
+Pregunta: ¿Podría proporcionar el documento o la descripción detallada del procedimiento de Alta, Baja y Modificación de usuarios en el servicio?
+
+Q_013 - Aclaración requerida
+Motivo: La respuesta es ambigua. Se requiere confirmar si la gestión de usuarios permite asignar roles o perfiles específicos para cumplir con el principio de mínimo privilegio.
+Pregunta: ¿La gestión de usuarios permite la asignación de roles o perfiles específicos para restringir el acceso según el principio de mínimo privilegio? Por favor, describa cómo se configuran.
+
+Q_015 - Aclaración requerida
+Motivo: La respuesta es ambigua respecto a si existen reglas de complejidad aplicables a usuarios, ya que se refiere a una gestión técnica interna del proveedor.
+Pregunta: ¿Existe una política de contraseñas definida para los usuarios que acceden a la plataforma? Por favor, detalle los requisitos de complejidad (longitud, caracteres, rotación).
+
+Q_019 - Aclaración requerida
+Motivo: La respuesta es afirmativa, pero falta detalle técnico sobre el algoritmo o mecanismo de protección de contraseñas.
+Pregunta: ¿Qué algoritmo de cifrado o función de hash con salt se utiliza para almacenar las contraseñas de los usuarios?
+
+Q_021 - Aclaración requerida
+Motivo: Aunque se confirma la existencia de timeout, 60 minutos es un tiempo elevado que requiere validación según la política de seguridad interna del cliente.
+Pregunta: ¿Es posible configurar un tiempo de inactividad menor a 60 minutos para cumplir con estándares de seguridad más estrictos?
+
+Q_023 - Aclaración requerida
+Motivo: Se requiere confirmar si únicamente se soporta TLS 1.2 o superior y si TLS 1.0/1.1/SSL están deshabilitados.
+Pregunta: ¿Qué versiones de TLS están habilitadas en sus servicios? Por favor, confirme que solo se soportan TLS 1.2 y superiores.
+
+Q_028 - Aclaración requerida
+Motivo: Se requiere confirmar el algoritmo utilizado y su configuración.
+Pregunta: ¿Podría confirmar si el algoritmo de cifrado utilizado en los backups es AES-256 o superior?
+
+Q_029 - Aclaración requerida
+Motivo: Se requiere aclarar si se usa TLS 1.2 o superior y qué protocolos inseguros están deshabilitados.
+Pregunta: ¿Podría confirmar si el cifrado en tránsito utiliza TLS 1.2 o una versión superior? Por favor, especifique la versión exacta utilizada.
+
+Q_030 - Aclaración requerida
+Motivo: La respuesta es insuficiente. Se requiere describir el proceso técnico de backup y confirmar el cumplimiento del tiempo de recuperación (RTO) según el control C_053.
+Pregunta: Por favor, detalle el proceso técnico de realización de los backups (herramientas, almacenamiento, inmutabilidad) y confirme el tiempo de recuperación (RTO) garantizado.
+
+Q_031 - Aclaración requerida
+Motivo: La respuesta es ambigua y no proporciona los valores técnicos requeridos para evaluar el cumplimiento del control C_054.
+Pregunta: Por favor, proporcione los valores específicos de RTO (Objetivo de Tiempo de Recuperación) y RPO (Objetivo de Punto de Recuperación) definidos para este servicio.
+
+Q_032 - Aclaración requerida
+Motivo: El proveedor indica que el tiempo está por establecer y no detalla los controles de seguridad ni los roles con acceso, incumpliendo el requisito de política documentada.
+Pregunta: ¿Podría proporcionar la política de retención de datos documentada que especifique el tiempo de retención, las medidas de seguridad aplicadas y los roles con acceso a los datos?
+
+Q_034 - Aclaración requerida
+Motivo: La respuesta indica que está a consultar o depende de terceros, por lo que requiere aclaración.
+Pregunta: ¿Dispone el proveedor de un proceso estandarizado y documentado para la finalización y baja de servicio, independientemente de las directrices del cliente?
+
+Q_036 - Aclaración requerida
+Motivo: La respuesta es insuficiente. Se requiere un proceso formal y documentado, no una mención genérica a la recuperación desde el hosting, para garantizar la portabilidad y disponibilidad.
+Pregunta: ¿Existe un procedimiento estandarizado y documentado para la devolución de datos y backups al finalizar el servicio? Por favor, adjunte o describa dicho proceso.
+
+Q_045 - Aclaración requerida
+Motivo: La respuesta no aclara si existen entornos diferenciados de desarrollo y pruebas, ni si están aislados del entorno de producción para evitar riesgos de disponibilidad.
+Pregunta: ¿Puede confirmar explícitamente si dispone de un entorno de desarrollo y un entorno de pruebas separados entre sí y del entorno de producción?
+
+Q_057 - Aclaración requerida
+Motivo: La respuesta es insuficiente al indicar 'Por especificar'. Se requiere evidencia documental o descripción detallada del procedimiento de escalado para validar el cumplimiento del control.
+Pregunta: Por favor, proporcione el procedimiento formalizado de comunicación y escalado de incidentes de seguridad o un resumen detallado que incluya los canales y tiempos de respuesta.
+
+Gracias.
+
+---
+This email was sent automatically with n8n
+https://n8n.io

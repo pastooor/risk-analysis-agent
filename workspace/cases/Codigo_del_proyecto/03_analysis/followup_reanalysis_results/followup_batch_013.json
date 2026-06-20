@@ -1,0 +1,29 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_013",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_031",
+      "final_score": 3,
+      "final_score_type": "compliant",
+      "answer_summary": "El proveedor ha definido valores concretos de RTO (8 horas) y RPO (24 horas) para el servicio SaaS.",
+      "decision_reason": "La respuesta adicional proporciona los valores técnicos requeridos (RTO y RPO) cumpliendo con el control C_054, eliminando la ambigüedad inicial.",
+      "resolved_by_provider": true
+    }
+  ],
+  "batch_validation_notes": [],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_013\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_031\",\"final_score\":3,\"final_score_type\":\"compliant\",\"answer_summary\":\"El proveedor ha definido valores concretos de RTO (8 horas) y RPO (24 horas) para el servicio SaaS.\",\"decision_reason\":\"La respuesta adicional proporciona los valores técnicos requeridos (RTO y RPO) cumpliendo con el control C_054, eliminando la ambigüedad inicial.\",\"resolved_by_provider\":true,\"rag_used",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_031"
+    ],
+    "normalized_question_ids": [
+      "Q_031"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

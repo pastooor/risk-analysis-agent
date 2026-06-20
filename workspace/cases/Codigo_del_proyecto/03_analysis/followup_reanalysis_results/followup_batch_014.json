@@ -1,0 +1,29 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_014",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_032",
+      "final_score": 1,
+      "final_score_type": "non_compliance",
+      "answer_summary": "La política de retención está en proceso de formalización y pendiente de aprobación definitiva, por lo que no existe una política documentada y aprobada actualmente.",
+      "decision_reason": "El proveedor confirma que la política no está aprobada ni formalizada, incumpliendo el requisito de disponer de una política de retención documentada y aprobada.",
+      "resolved_by_provider": false
+    }
+  ],
+  "batch_validation_notes": [],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_014\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_032\",\"final_score\":1,\"final_score_type\":\"non_compliance\",\"answer_summary\":\"La política de retención está en proceso de formalización y pendiente de aprobación definitiva, por lo que no existe una política documentada y aprobada actualmente.\",\"decision_reason\":\"El proveedor confirma que la política no está aprobada ni formalizada, incumpliendo el requisito de disponer de u",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_032"
+    ],
+    "normalized_question_ids": [
+      "Q_032"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "batch_id": "batch_037",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_041",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "La respuesta es demasiado genérica (hosting, PHP, SQL) y no detalla la arquitectura base necesaria para una evaluación técnica adecuada.",
+      "decision_reason": "La información proporcionada carece de detalles técnicos específicos sobre servidores, sistemas operativos y versiones, impidiendo una evaluación de riesgos de arquitectura efectiva.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_041",
+          "chunk_id": "RAG-Q_041",
+          "traceability": "Excel: Análisis SaaS, fila 42",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "SI",
+      "provider_details": "Alojamiento en hosting, PHP, SQL"
+    }
+  ],
+  "batch_validation_notes": []
+}

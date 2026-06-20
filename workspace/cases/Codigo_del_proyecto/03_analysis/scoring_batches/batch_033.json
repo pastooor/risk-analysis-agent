@@ -1,0 +1,40 @@
+{
+  "batch_id": "batch_033",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_033",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma el despliegue de antivirus y una frecuencia de actualización diaria, cumpliendo con el requisito de actualización continua.",
+      "decision_reason": "La respuesta confirma explícitamente el despliegue de la solución y una periodicidad de actualización diaria, lo cual satisface el control C_001 de protección contra malware.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_033",
+          "chunk_id": "RAG-Q_033",
+          "traceability": "Excel: Análisis SaaS, fila 34",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "provider_answer": "SI",
+      "provider_details": "Diariamente"
+    }
+  ],
+  "batch_validation_notes": []
+}

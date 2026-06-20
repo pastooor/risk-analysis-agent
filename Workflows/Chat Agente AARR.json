@@ -1,0 +1,165 @@
+{
+  "name": "Chat Agente AARR",
+  "nodes": [
+    {
+      "parameters": {
+        "command": "=python /data/scripts/parse_ingesta_n8n.py chat-tier --message \"{{$json.chatInput}}\" --session-id \"{{$json.sessionId}}\" --cases-root \"/data/cases\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a3ad812b-888f-4cdd-9ba4-050d8339e38d",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (error) {\n  throw new Error(\"No se pudo parsear la salida del comando chat-tier: \" + stdout);\n}\n\nreturn [{\n  json: {\n    text: parsed.message,\n    action: parsed.action,\n    case_id: parsed.case_id,\n    case_id_raw: parsed.case_id_raw,\n    tier: parsed.tier\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "0320fddb-5c01-4462-9f27-e9afcfa6a4f5",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        0
+      ],
+      "id": "6c90ba2a-38e5-4a59-90cb-f1138635b012",
+      "name": "When chat message received",
+      "webhookId": "4cb98ff8-e79c-4923-9d80-9a14c91c3e1b"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "XFmNtVPA2OcXghXs",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/XFmNtVPA2OcXghXs"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "case_id": "={{ $json.case_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "case_id",
+              "displayName": "case_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "tier",
+              "displayName": "tier",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "case_meta_path",
+              "displayName": "case_meta_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "aea0f598-130e-4a58-8425-d373f3525ed3",
+      "name": "Call 'GROQ copy'"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Call 'GROQ copy'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "444326fd-949d-4342-99df-a87bbd9837a2",
+  "meta": {
+    "instanceId": "ab1e990902e95383f4a54076b8865c550cd63d72778d0fe5c251c70d680c4dce"
+  },
+  "id": "IkrcoByk7u7EdiJY",
+  "tags": []
+}

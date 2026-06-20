@@ -1,0 +1,79 @@
+Buenas,
+
+Durante el análisis del cuestionario de seguridad del proyecto Codigo_del_proyecto, necesitamos aclarar algunos puntos para poder completar la evaluación.
+
+Por favor, responded manteniendo el identificador de cada pregunta.
+
+Q_007 - Aclaración requerida
+Motivo: La respuesta es genérica. Se requiere confirmar si el sistema utiliza identificadores únicos (como email o ID interno) y cómo se garantiza la unicidad en el registro.
+Pregunta: ¿Qué campo o atributo técnico se utiliza como identificador único para cada usuario en la plataforma y cómo se garantiza que no existan duplicados?
+
+Q_008 - Aclaración requerida
+Motivo: La respuesta es insuficiente. Se requiere evidencia técnica o procedimental que confirme la capacidad de identificar unívocamente a los usuarios con privilegios de administración.
+Pregunta: Por favor, proporcione evidencia o detalle el procedimiento utilizado para identificar y auditar a los usuarios que poseen roles de administración en la plataforma.
+
+Q_011 - Aclaración requerida
+Motivo: La respuesta no confirma si el repositorio es centralizado para la gestión de identidades, ni si evita la gestión de usuarios locales, conforme al control C_009.
+Pregunta: ¿El repositorio SQL mencionado actúa como un sistema centralizado de gestión de identidades (IAM) para toda la plataforma o es una base de datos local de la aplicación? ¿Permite la gestión centralizada de usuarios evitando la creación de cuentas locales dispersas?
+
+Q_012 - Aclaración requerida
+Motivo: La respuesta es insuficiente. Se requiere confirmar la existencia de un procedimiento documentado de Alta, Baja y Modificación (ABM) para cumplir con el control C_005.
+Pregunta: ¿Podría proporcionar el documento o la descripción detallada del procedimiento de Alta, Baja y Modificación de usuarios en el servicio?
+
+Q_013 - Aclaración requerida
+Motivo: La respuesta es ambigua. Se requiere confirmar si la gestión de usuarios permite asignar roles o perfiles específicos para cumplir con el principio de mínimo privilegio.
+Pregunta: ¿La gestión de usuarios permite la asignación de roles o perfiles específicos para restringir el acceso según el principio de mínimo privilegio? Por favor, describa cómo se configuran.
+
+Q_015 - Aclaración requerida
+Motivo: La respuesta es ambigua respecto a si existen reglas de complejidad aplicables a usuarios, ya que se refiere a una gestión técnica interna del proveedor.
+Pregunta: ¿Existe una política de contraseñas definida para los usuarios que acceden a la plataforma? Por favor, detalle los requisitos de complejidad (longitud, caracteres, rotación).
+
+Q_019 - Aclaración requerida
+Motivo: La respuesta es afirmativa, pero falta detalle técnico sobre el algoritmo o mecanismo de protección de contraseñas.
+Pregunta: ¿Qué algoritmo de cifrado o función de hash con salt se utiliza para almacenar las contraseñas de los usuarios?
+
+Q_021 - Aclaración requerida
+Motivo: Aunque se confirma la existencia de timeout, 60 minutos es un tiempo elevado que requiere validación según la política de seguridad interna del cliente.
+Pregunta: ¿Es posible configurar un tiempo de inactividad menor a 60 minutos para cumplir con estándares de seguridad más estrictos?
+
+Q_023 - Aclaración requerida
+Motivo: Se requiere confirmar si únicamente se soporta TLS 1.2 o superior y si TLS 1.0/1.1/SSL están deshabilitados.
+Pregunta: ¿Qué versiones de TLS están habilitadas en sus servicios? Por favor, confirme que solo se soportan TLS 1.2 y superiores.
+
+Q_028 - Aclaración requerida
+Motivo: Se requiere confirmar el algoritmo utilizado y su configuración.
+Pregunta: ¿Podría confirmar si el algoritmo de cifrado utilizado en los backups es AES-256 o superior?
+
+Q_029 - Aclaración requerida
+Motivo: Se requiere aclarar si se usa TLS 1.2 o superior y qué protocolos inseguros están deshabilitados.
+Pregunta: ¿Podría confirmar si el cifrado en tránsito utiliza TLS 1.2 o una versión superior? Por favor, especifique la versión exacta utilizada.
+
+Q_030 - Aclaración requerida
+Motivo: La respuesta es insuficiente. Se requiere describir el proceso técnico de backup y confirmar el cumplimiento del tiempo de recuperación (RTO) según el control C_053.
+Pregunta: Por favor, detalle el proceso técnico de realización de los backups (herramientas, almacenamiento, inmutabilidad) y confirme el tiempo de recuperación (RTO) garantizado.
+
+Q_031 - Aclaración requerida
+Motivo: La respuesta es ambigua y no proporciona los valores técnicos requeridos para evaluar el cumplimiento del control C_054.
+Pregunta: Por favor, proporcione los valores específicos de RTO (Objetivo de Tiempo de Recuperación) y RPO (Objetivo de Punto de Recuperación) definidos para este servicio.
+
+Q_032 - Aclaración requerida
+Motivo: El proveedor indica que el tiempo está por establecer y no detalla los controles de seguridad ni los roles con acceso, incumpliendo el requisito de política documentada.
+Pregunta: ¿Podría proporcionar la política de retención de datos documentada que especifique el tiempo de retención, las medidas de seguridad aplicadas y los roles con acceso a los datos?
+
+Q_034 - Aclaración requerida
+Motivo: La respuesta indica que está a consultar o depende de terceros, por lo que requiere aclaración.
+Pregunta: ¿Dispone el proveedor de un proceso estandarizado y documentado para la finalización y baja de servicio, independientemente de las directrices del cliente?
+
+Q_036 - Aclaración requerida
+Motivo: La respuesta es insuficiente. Se requiere un proceso formal y documentado, no una mención genérica a la recuperación desde el hosting, para garantizar la portabilidad y disponibilidad.
+Pregunta: ¿Existe un procedimiento estandarizado y documentado para la devolución de datos y backups al finalizar el servicio? Por favor, adjunte o describa dicho proceso.
+
+Q_045 - Aclaración requerida
+Motivo: La respuesta no aclara si existen entornos diferenciados de desarrollo y pruebas, ni si están aislados del entorno de producción para evitar riesgos de disponibilidad.
+Pregunta: ¿Puede confirmar explícitamente si dispone de un entorno de desarrollo y un entorno de pruebas separados entre sí y del entorno de producción?
+
+Q_057 - Aclaración requerida
+Motivo: La respuesta es insuficiente al indicar 'Por especificar'. Se requiere evidencia documental o descripción detallada del procedimiento de escalado para validar el cumplimiento del control.
+Pregunta: Por favor, proporcione el procedimiento formalizado de comunicación y escalado de incidentes de seguridad o un resumen detallado que incluya los canales y tiempos de respuesta.
+
+Gracias.

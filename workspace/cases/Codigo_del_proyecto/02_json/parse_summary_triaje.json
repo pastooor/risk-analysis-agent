@@ -1,0 +1,49 @@
+{
+  "ok": true,
+  "command": "parse-triaje",
+  "case_id": "Codigo_del_proyecto",
+  "case_id_raw": "Codigo_del_proyecto",
+  "output": "/data/cases/Codigo_del_proyecto/02_json/triaje.json",
+  "triaje_modules": 8,
+  "fields_count": 31,
+  "contract": {
+    "contract_name": "Nombre de la contratación",
+    "short_description": "La gestión del calzado de seguridad especial se integra dentro de la contratación del calzado de seguridad.",
+    "providers": [
+      "Proveedor"
+    ],
+    "business_activity": "Actividad de Negocio: incluye tratamiento y/o intercambio de información. Esta actividad es gestionada por compras del Negocio",
+    "procurement_model": "Licitación competitiva entre varios proveedores",
+    "contract_duration": "Por ahora se ha adjudicado por un año, con renovaciones anuales con un máximo de 3.",
+    "award_date_expected": "Ya está adjudicado el contrato de calzado de seguridad.",
+    "language": [
+      "Castellano"
+    ],
+    "responsible_person": "Responsable de la contratación",
+    "project_code": "Código del proyecto.",
+    "business_line": "Línea de negocio",
+    "business_area": "Área de negocio"
+  },
+  "solution": {
+    "solution_type": "SaaS (Software as a Service)",
+    "saas_name": "Sistema de solicitud de calzado especial para los trabajadores de EMPRESA.",
+    "saas_functionality": "Es una aplicación para la gestión de las solicitudes y base de datos de usuarios de calzado de seguridad especial.",
+    "user_types": [
+      "Usuarios internos",
+      "Usuarios externos (proveedores y colaboradores)"
+    ],
+    "connection_with_company": false,
+    "involves_ai": false
+  },
+  "information": {
+    "classification": "Confidencial",
+    "classification_detail": "Información de los trabajadores incluyendo información médica para la gestión del calzado especial.",
+    "personal_data": true,
+    "personal_data_regime": "GDPR",
+    "personal_data_types": [
+      "Datos identificativos y personales (CIF, DNI, firma, edad, sexo, ubicación, etc.) "
+    ],
+    "personal_data_volume": "Entre 20 y 100.000",
+    "processing_location": "En la infraestructura del proveedor"
+  }
+}

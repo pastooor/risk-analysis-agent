@@ -1,0 +1,37 @@
+services:
+  n8n:
+    build:
+      context: ./n8n_custom
+    container_name: tfm_n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Europe/Madrid
+      - TZ=Europe/Madrid
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_RUNNERS_ENABLED=true
+      - NODES_EXCLUDE=[]
+      - N8N_RESTRICT_FILE_ACCESS_TO=/data;/home/node/.n8n-files
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+      - ./workspace:/data
+    depends_on:
+      - qdrant
+      - ollama
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: tfm_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./qdrant_storage:/qdrant/storage
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tfm_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama_data:/root/.ollama

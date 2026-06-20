@@ -1,0 +1,41 @@
+{
+  "batch_id": "batch_047",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_051",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que no existe integración Cloud-OnPremise, pero no proporciona detalles técnicos sobre la arquitectura de red o los mecanismos de seguridad implementados.",
+      "decision_reason": "La respuesta es insuficiente. Aunque indica que no hay integración, se requiere confirmar si existen túneles VPN, firewalls o APIs expuestas que requieran validación de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_051",
+          "chunk_id": "RAG-Q_051",
+          "traceability": "Excel: Análisis SaaS, fila 52",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "NO",
+      "provider_details": "Detallar mecanismos de integración Cloud-to-OnPremise"
+    }
+  ],
+  "batch_validation_notes": []
+}

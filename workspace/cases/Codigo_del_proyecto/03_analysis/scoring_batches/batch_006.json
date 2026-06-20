@@ -1,0 +1,49 @@
+{
+  "batch_id": "batch_006",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_006",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que nunca se realizan tests de intrusión.",
+      "decision_reason": "La respuesta 'Nunca' implica incumplimiento del requisito de realizar pruebas de intrusión o validaciones de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "R_004",
+      "risk_name": "Demora en la detección de vulnerabilidades",
+      "control_ids": [
+        "C_025"
+      ],
+      "incumplimiento_identificado": "No se realizan test de intrusión o pentesting",
+      "controles_asociados": "Se deben realizar test de intrusión o pentesting",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Recopilación de información",
+        "Inyección de código",
+        "Vulnerabilidades en dependencias"
+      ],
+      "mitigation": "Se deben realizar test de intrusión o en su defecto, ejercicios similares en los que se obtengan resultados similares a los anteriores",
+      "mitigation_guide": "Se debe realizar tests de intrusión, al menos una vez al año.",
+      "report_context_example": "El proveedor indica que no realiza test de intrusión.",
+      "report_detail_example": "No realizar test de intrusión puede suponer una demora en la detección de las vulnerabilidades que un atacante podría aprovechar para abrir una brecha de seguridad\nLa ausencia de estos ejercicios supone un riesgo en la pérdida de integridad, confidencialidad y disponibilidad de los datos de la herramienta, así como de los sistemas del proveedor. Pudiendo resultar en la explotación de vulnerabilidades no identificadas por parte de atacantes, a lo que se sumaría la falta de preparación para incidentes de seguridad y la incapacidad para detectar y mitigar proactivamente debilidades de la herramienta. Estos ejercicios, permiten una evaluación exhaustiva de la infraestructura digital, asegurando así la robustez y la preparación del sistema frente a amenazas reales",
+      "sources": [
+        {
+          "question_id": "Q_006",
+          "chunk_id": "RAG-Q_006",
+          "traceability": "Excel: Análisis SaaS, fila 7",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "Nunca",
+      "provider_details": "Detallar el proceso, alcance y periodicidad de los tests de intrusión"
+    }
+  ],
+  "batch_validation_notes": []
+}

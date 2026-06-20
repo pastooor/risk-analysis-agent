@@ -1,0 +1,49 @@
+{
+  "batch_id": "batch_005",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_005",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que nunca se realizan ejercicios de seguridad sobre el servicio.",
+      "decision_reason": "La respuesta 'Nunca' implica incumplimiento del requisito de realizar ejercicios o revisiones de seguridad con periodicidad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "",
+      "risk_name": "Demora en la detección de vulnerabilidades",
+      "control_ids": [
+        "C_024"
+      ],
+      "incumplimiento_identificado": "No se realizan ejercicios de Red/Blue Team",
+      "controles_asociados": "Se deben realizar ejercicios de Red/Blue Team",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Recopilación de información",
+        "Inyección de código",
+        "Vulnerabilidades en dependencias"
+      ],
+      "mitigation": "Se deben realizar ejercicios de Red Team / Blue Team o en su defecto, ejercicios similares en los que se obtengan resultados similares a los anteriores",
+      "mitigation_guide": "Se deben realizar ejercicios de Red/Blue Team, al menos una vez al año.",
+      "report_context_example": "El proveedor indica que no realiza ejercicios de Red/Blue Team.",
+      "report_detail_example": "No se realizan ejercicios de Red/Blue Team, dejando en el aire y sin solucionar vulnerabilidades. Esto deriva a que se facilite a los atacantes el aprovechamiento de vulnerabilidades para que puedan entrar y obtener el poder del sistema.\nLos simulacros de Red Team, que emulan ataques externos, desempeñan un papel crucial al identificar posibles vulnerabilidades y explorar debilidades en la seguridad de un sistema o red. Por otro lado, el Blue Team se encarga de detectar, prevenir y responder a los ataques simulados del Red Team. Fortaleciendo las defensas del sistema, identificando brechas de seguridad y mejorando la postura general de seguridad.\nLa ausencia de estos ejercicios supone un riesgo en la pérdida de integridad, confidencialidad y disponibilidad de los datos de la herramienta, así como de los sistemas del proveedor. Pudiendo resultar en la explotación de vulnerabilidades no identificadas por parte de atacantes, a lo que se sumaría la falta de preparación para incidentes de seguridad y la incapacidad para detectar y mitigar proactivamente debilidades de la herramienta. Estos ejercicios, permiten una evaluación exhaustiva de la infraestructura digital, asegurando así la robustez y la preparación del sistema frente a amenazas reales.",
+      "sources": [
+        {
+          "question_id": "Q_005",
+          "chunk_id": "RAG-Q_005",
+          "traceability": "Excel: Análisis SaaS, fila 6",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "BAJO",
+      "tiempo_mitigacion": "Pte.",
+      "provider_answer": "Nunca",
+      "provider_details": "Detallar el proceso, alcance y periodicidad de los ejercicios"
+    }
+  ],
+  "batch_validation_notes": []
+}

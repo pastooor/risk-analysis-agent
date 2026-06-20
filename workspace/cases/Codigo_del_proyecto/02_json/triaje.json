@@ -1,0 +1,310 @@
+{
+  "schema_version": "1.1.0",
+  "artifact_type": "triaje",
+  "source_file": "triaje_email.txt",
+  "source_sha256": "9d444dfe694c2f5c5a655379db9d20e061e5965c4f6b244a00fa67c6f6b444d5",
+  "analysis_date": "18/06/2026",
+  "modules": [
+    {
+      "module_number": null,
+      "module_name": "Sin módulo",
+      "fields": [
+        {
+          "item_number": null,
+          "label": "De",
+          "value_raw": "seguridad.tfm@outlook.es <seguridad.tfm@outlook.es>",
+          "value": "seguridad.tfm@outlook.es <seguridad.tfm@outlook.es>"
+        },
+        {
+          "item_number": null,
+          "label": "Enviado",
+          "value_raw": "jueves, 18 de junio de 2026 13:05",
+          "value": "jueves, 18 de junio de 2026 13:05"
+        },
+        {
+          "item_number": null,
+          "label": "Para",
+          "value_raw": "arquitectura.seguridad.tfm@gmail.com <arquitectura.seguridad.tfm@gmail.com>",
+          "value": "arquitectura.seguridad.tfm@gmail.com <arquitectura.seguridad.tfm@gmail.com>"
+        },
+        {
+          "item_number": null,
+          "label": "Asunto",
+          "value_raw": "[Triaje] Código del proyecto.",
+          "value": "[Triaje] Código del proyecto."
+        }
+      ]
+    },
+    {
+      "module_number": 2,
+      "module_name": "Características de la actividad",
+      "fields": [
+        {
+          "item_number": 1,
+          "label": "Nombre de la contratación",
+          "value_raw": "Nombre de la contratación",
+          "value": "Nombre de la contratación"
+        },
+        {
+          "item_number": 2,
+          "label": "Descripción breve de la contratación",
+          "value_raw": "La gestión del calzado de seguridad especial se integra dentro de la contratación del calzado de seguridad.",
+          "value": "La gestión del calzado de seguridad especial se integra dentro de la contratación del calzado de seguridad."
+        },
+        {
+          "item_number": 3,
+          "label": "Proveedor/es",
+          "value_raw": "Proveedor",
+          "value": "Proveedor"
+        },
+        {
+          "item_number": 4,
+          "label": "La actividad conlleva IA",
+          "value_raw": "No",
+          "value": "No"
+        },
+        {
+          "item_number": 5,
+          "label": "Características de la actividad",
+          "value_raw": "Actividad de Negocio: incluye tratamiento y/o intercambio de información. Esta actividad es gestionada por compras del Negocio",
+          "value": "Actividad de Negocio: incluye tratamiento y/o intercambio de información. Esta actividad es gestionada por compras del Negocio"
+        }
+      ]
+    },
+    {
+      "module_number": 4,
+      "module_name": "Solución tecnológica",
+      "fields": [
+        {
+          "item_number": 8,
+          "label": "Solución tecnológica",
+          "value_raw": "SaaS (Software as a Service)",
+          "value": "SaaS (Software as a Service)"
+        }
+      ]
+    },
+    {
+      "module_number": 5,
+      "module_name": "Solución propuesta por el proveedor",
+      "fields": [
+        {
+          "item_number": 9,
+          "label": "Nombre del SaaS",
+          "value_raw": "Sistema de solicitud de calzado especial para los trabajadores de EMPRESA.",
+          "value": "Sistema de solicitud de calzado especial para los trabajadores de EMPRESA."
+        },
+        {
+          "item_number": 10,
+          "label": "Funcionalidad del SaaS",
+          "value_raw": "Es una aplicación para la gestión de las solicitudes y base de datos de usuarios de calzado de seguridad especial.",
+          "value": "Es una aplicación para la gestión de las solicitudes y base de datos de usuarios de calzado de seguridad especial."
+        },
+        {
+          "item_number": 11,
+          "label": "Tipos de usuarios que acceden al SaaS",
+          "value_raw": "[\"Usuarios internos\",\"Usuarios externos (proveedores y colaboradores)\"]",
+          "value": [
+            "Usuarios internos",
+            "Usuarios externos (proveedores y colaboradores)"
+          ]
+        },
+        {
+          "item_number": 12,
+          "label": "Conexión del SaaS con EMPRESA",
+          "value_raw": "No",
+          "value": "No"
+        }
+      ]
+    },
+    {
+      "module_number": 6,
+      "module_name": "Identificación del tipo de información",
+      "fields": [
+        {
+          "item_number": 1,
+          "label": "Tipo de información",
+          "value_raw": "Confidencial",
+          "value": "Confidencial"
+        },
+        {
+          "item_number": 16,
+          "label": "Detalle del tipo de información",
+          "value_raw": "Información de los trabajadores incluyendo información médica para la gestión del calzado especial.",
+          "value": "Información de los trabajadores incluyendo información médica para la gestión del calzado especial."
+        },
+        {
+          "item_number": 17,
+          "label": "Datos de carácter personal",
+          "value_raw": "Sí se manejará datos de carácter personal, sujeto a GDPR (Reglamento General de Protección de Datos).",
+          "value": "Sí se manejará datos de carácter personal, sujeto a GDPR (Reglamento General de Protección de Datos)."
+        },
+        {
+          "item_number": 2,
+          "label": "Tipos de datos de carácter personal",
+          "value_raw": "[\"Datos identificativos y personales (CIF, DNI, firma, edad, sexo, ubicación, etc.) \"]",
+          "value": [
+            "Datos identificativos y personales (CIF, DNI, firma, edad, sexo, ubicación, etc.) "
+          ]
+        },
+        {
+          "item_number": 3,
+          "label": "Volumen de datos personales que se va a tratar",
+          "value_raw": "Entre 20 y 100.000",
+          "value": "Entre 20 y 100.000"
+        },
+        {
+          "item_number": 4,
+          "label": "Lugar donde se realiza el tratamiento de la información",
+          "value_raw": "En la infraestructura del proveedor",
+          "value": "En la infraestructura del proveedor"
+        }
+      ]
+    },
+    {
+      "module_number": 7,
+      "module_name": "Interacción de los usuarios del proveedor con la infraestructura de EMPRESA",
+      "fields": [
+        {
+          "item_number": 22,
+          "label": "Número de usuarios del proveedor que acceden a EMPRESA",
+          "value_raw": "No acceden a los sistemas/infraestructura de EMPRESA",
+          "value": "No acceden a los sistemas/infraestructura de EMPRESA"
+        },
+        {
+          "item_number": 23,
+          "label": "Con qué sistemas/plataformas de EMPRESA interactua el proveedor",
+          "value_raw": "No acceden a los sistemas/infraestructura de EMPRESA",
+          "value": "No acceden a los sistemas/infraestructura de EMPRESA"
+        }
+      ]
+    },
+    {
+      "module_number": 8,
+      "module_name": "Riesgos introducidos",
+      "fields": [
+        {
+          "item_number": 24,
+          "label": "El servicio, proyecto o solución es critico",
+          "value_raw": "No",
+          "value": "No"
+        }
+      ]
+    },
+    {
+      "module_number": 9,
+      "module_name": "Datos generales de la contratación",
+      "fields": [
+        {
+          "item_number": 25,
+          "label": "Codigo del proyecto",
+          "value_raw": "Código del proyecto.",
+          "value": "Código del proyecto."
+        },
+        {
+          "item_number": 26,
+          "label": "Línea de negocio",
+          "value_raw": "Línea de negocio",
+          "value": "Línea de negocio"
+        },
+        {
+          "item_number": 27,
+          "label": "Área de negocio",
+          "value_raw": "Área de negocio",
+          "value": "Área de negocio"
+        },
+        {
+          "item_number": 28,
+          "label": "Responsable de la contratación",
+          "value_raw": "Responsable de la contratación",
+          "value": "Responsable de la contratación"
+        },
+        {
+          "item_number": 29,
+          "label": "Gestión de la contratación",
+          "value_raw": "Licitación competitiva entre varios proveedores",
+          "value": "Licitación competitiva entre varios proveedores"
+        },
+        {
+          "item_number": 30,
+          "label": "Duración del contrato",
+          "value_raw": "Por ahora se ha adjudicado por un año, con renovaciones anuales con un máximo de 3.",
+          "value": "Por ahora se ha adjudicado por un año, con renovaciones anuales con un máximo de 3."
+        },
+        {
+          "item_number": 31,
+          "label": "Fecha prevista de adjudicación",
+          "value_raw": "Ya está adjudicado el contrato de calzado de seguridad.",
+          "value": "Ya está adjudicado el contrato de calzado de seguridad."
+        },
+        {
+          "item_number": 32,
+          "label": "Idioma de la contratación",
+          "value_raw": "[\"Castellano\"]",
+          "value": [
+            "Castellano"
+          ]
+        }
+      ]
+    }
+  ],
+  "contract": {
+    "contract_name": "Nombre de la contratación",
+    "short_description": "La gestión del calzado de seguridad especial se integra dentro de la contratación del calzado de seguridad.",
+    "providers": [
+      "Proveedor"
+    ],
+    "business_activity": "Actividad de Negocio: incluye tratamiento y/o intercambio de información. Esta actividad es gestionada por compras del Negocio",
+    "procurement_model": "Licitación competitiva entre varios proveedores",
+    "contract_duration": "Por ahora se ha adjudicado por un año, con renovaciones anuales con un máximo de 3.",
+    "award_date_expected": "Ya está adjudicado el contrato de calzado de seguridad.",
+    "language": [
+      "Castellano"
+    ],
+    "responsible_person": "Responsable de la contratación",
+    "project_code": "Código del proyecto.",
+    "business_line": "Línea de negocio",
+    "business_area": "Área de negocio"
+  },
+  "solution": {
+    "solution_type": "SaaS (Software as a Service)",
+    "saas_name": "Sistema de solicitud de calzado especial para los trabajadores de EMPRESA.",
+    "saas_functionality": "Es una aplicación para la gestión de las solicitudes y base de datos de usuarios de calzado de seguridad especial.",
+    "user_types": [
+      "Usuarios internos",
+      "Usuarios externos (proveedores y colaboradores)"
+    ],
+    "connection_with_company": false,
+    "involves_ai": false
+  },
+  "information": {
+    "classification": "Confidencial",
+    "classification_detail": "Información de los trabajadores incluyendo información médica para la gestión del calzado especial.",
+    "personal_data": true,
+    "personal_data_regime": "GDPR",
+    "personal_data_types": [
+      "Datos identificativos y personales (CIF, DNI, firma, edad, sexo, ubicación, etc.) "
+    ],
+    "personal_data_volume": "Entre 20 y 100.000",
+    "processing_location": "En la infraestructura del proveedor"
+  },
+  "provider_interaction": {
+    "provider_access_to_company_infrastructure": false,
+    "provider_access_detail": "No acceden a los sistemas/infraestructura de EMPRESA",
+    "systems_interaction": "No acceden a los sistemas/infraestructura de EMPRESA"
+  },
+  "risk_context": {
+    "service_is_critical": false
+  },
+  "derived_flags": {
+    "has_personal_data": true,
+    "is_saas": true,
+    "has_provider_internal_access": false,
+    "involves_ai": false
+  },
+  "case": {
+    "case_id": "Codigo_del_proyecto",
+    "case_id_raw": "Codigo_del_proyecto",
+    "source_subject": null,
+    "ingested_at": "2026-06-18T13:08:33"
+  }
+}

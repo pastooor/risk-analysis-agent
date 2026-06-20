@@ -1,0 +1,44 @@
+{
+  "batch_id": "batch_011",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_011",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor indica que el repositorio es una base de datos SQL cifrada.",
+      "decision_reason": "La respuesta no confirma si el repositorio es centralizado para la gestión de identidades, ni si evita la gestión de usuarios locales, conforme al control C_009.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿El repositorio SQL mencionado actúa como un sistema centralizado de gestión de identidades (IAM) para toda la plataforma o es una base de datos local de la aplicación? ¿Permite la gestión centralizada de usuarios evitando la creación de cuentas locales dispersas?"
+      ],
+      "generates_finding": true,
+      "requires_human_review": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_009"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "Debe utilizarse un repositorio central para gestión de identidades, restringiéndose al mínimo y excepcionalmente la gestión de usuarios locales.",
+      "amenazas": [],
+      "mitigation": "En caso de no poder implementar el sistema de federación contra el IDP de EMPRESA, es necesario tener un repositorio centralizado de las cuentas de los usuarios que acceden a la plataforma.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_011",
+          "chunk_id": "RAG-Q_011",
+          "traceability": "Excel: Análisis SaaS, fila 12",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "SI",
+      "provider_details": "El repositorio se encuentra en una base de datos SQL y esta cifrada"
+    }
+  ],
+  "batch_validation_notes": []
+}

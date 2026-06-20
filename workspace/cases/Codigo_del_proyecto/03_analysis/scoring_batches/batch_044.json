@@ -1,0 +1,46 @@
+{
+  "batch_id": "batch_044",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_048",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma explícitamente que no dispone de sistemas de filtrado de tráfico IPS/IDS ni firewall de capa 7.",
+      "decision_reason": "La respuesta negativa del proveedor constituye un incumplimiento directo del control de seguridad perimetral requerido (C_061/C_062), exponiendo la plataforma a riesgos de intrusión.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_010",
+      "risk_name": "Demora en la detección de intrusiones",
+      "control_ids": [
+        "C_061/C_062"
+      ],
+      "incumplimiento_identificado": "El proveedor no dispone de equipos de filtrado de tráfico IPS/IDS y/o firewall de capa 7",
+      "controles_asociados": "Se debe disponer de IPS/IDS y/o un firewall de capa 7",
+      "amenazas": [
+        "Denegación de Servicio",
+        "Manipulación no autorizada de la API de servicios",
+        "Compromiso de credenciales",
+        "Inyección de código"
+      ],
+      "mitigation": "Se debe contar con ciertos componentes (IPS/IDS y/o firewall de capa 7, etc.)que garanticen la seguridad perimetral que rodea a la arquitectura que dispone el proveedor para dar el servicio a EMPRESA.",
+      "mitigation_guide": "Se debe implementar de manera integral y efectiva sistemas avanzados de prevención y detección de intrusiones (IPS/IDS), o en su defecto un WAF.",
+      "report_context_example": "El proveedor indica que actualmente no filtran el tráfico mediante IPS/IDS y/o firewall de capa 7.",
+      "report_detail_example": "El proveedor indica que no dispone de IDS/IPS o WAF. La detección temprana y la prevención activa son críticas para salvaguardar la integridad, confidencialidad y disponibilidad de la información en el sistema, lo cual puede exponer a la infraestructura a un mayor riesgo en el compromiso de seguridad.\nEstos sistemas desempeñan un papel crucial al monitorear y analizar el tráfico de red en busca de actividades maliciosas o patrones anómalos. La falta de un IPS deja a la red vulnerable a ataques avanzados, como intrusiones y exploits, que podrían pasar desapercibidos. Por otro lado, la carencia de un IDS significa que la organización no cuenta con una capa efectiva de detección temprana, lo que impide la identificación oportuna de posibles amenazas. Adicionalmente, un WAF añade seguridad a la capa de aplicación proporcionando protección ante vulnerabilidades web y ataques de denegación de servicio. Por ello, aseguran la plataforma con estos sistemas, puede haber un riesgo de la pérdida de integridad y disponibilidad.",
+      "sources": [
+        {
+          "question_id": "Q_048",
+          "chunk_id": "RAG-Q_048",
+          "traceability": "Excel: Análisis SaaS, fila 49",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar"
+    }
+  ],
+  "batch_validation_notes": []
+}

@@ -1,0 +1,425 @@
+{
+  "batch_id": "batch_022",
+  "case_id": "Codigo_del_proyecto",
+  "case_meta": {
+    "schema_version": "1.0.0",
+    "artifact_type": "case_meta",
+    "case_id": "Codigo_del_proyecto",
+    "case_id_raw": "Codigo_del_proyecto",
+    "tier": 2,
+    "created_at": "2026-06-18T18:39:19",
+    "created_by": "n8n_chat_agent",
+    "status": "ready_for_risk_analysis",
+    "inputs": {
+      "triaje_json": "/data/cases/Codigo_del_proyecto/02_json/triaje.json",
+      "questionnaire_json": "/data/cases/Codigo_del_proyecto/02_json/questionnaire.json"
+    },
+    "summary": {
+      "project_code": "Código del proyecto.",
+      "business_line": "Línea de negocio",
+      "business_area": "Área de negocio",
+      "provider": [
+        "Proveedor"
+      ],
+      "contract_name": "Nombre de la contratación",
+      "solution_type": "SaaS (Software as a Service)",
+      "saas_name": "Sistema de solicitud de calzado especial para los trabajadores de EMPRESA.",
+      "classification": "Confidencial",
+      "personal_data": true,
+      "personal_data_regime": "GDPR",
+      "questionnaire_questions": 56,
+      "questions_with_missing_answer": 1
+    }
+  },
+  "auth_context": {
+    "description": "Contexto común para Q_010-Q_021. La severidad se resuelve con las observaciones del catálogo, no con TIER directo si severity_source=conditional_rules.",
+    "empresa_users_access_question_id": "Q_009",
+    "empresa_users_access_answer": "SI",
+    "empresa_users_access_explanation": "Los que se requiera",
+    "federation_question_id": "Q_010",
+    "federation_supported_or_used_answer": "NO",
+    "federation_supported_or_used_explanation": "Detallar tecnologías de federación",
+    "information_classification": "Confidencial",
+    "tier": 2,
+    "rules_summary": [
+      "Si no hay accesos de usuarios de EMPRESA, normalmente no se levanta riesgo de autenticación.",
+      "Si hay accesos de usuarios de EMPRESA y existe federación corporativa suficiente, los controles alternativos de repositorio, contraseñas, MFA y timeout pueden quedar sin riesgo según catalog_entry.",
+      "Si hay accesos de usuarios de EMPRESA, no hay federación y el control concreto no se cumple, se genera hallazgo aplicando las observaciones del catalog_entry.",
+      "Q_020 MFA: si no hay federación y no hay MFA, MEDIO si información pública y ALTO para Uso Interno o superior.",
+      "Q_011-Q_019: si no hay federación y no cumplen, MEDIO para Uso Interno y ALTO para Confidencial o superior.",
+      "Q_021 timeout: si no hay federación y no cumple, MEDIO."
+    ]
+  },
+  "logging_context": {
+    "description": "Contexto común para Q_037-Q_040. Se evalúan conjuntamente: logs, SIEM propio, integración con SIEM de EMPRESA y alertas.",
+    "tier": 2,
+    "questions": {
+      "Q_037": {
+        "question_id": "Q_037",
+        "question_text": "",
+        "provider_answer": "NO",
+        "provider_explanation": "Detallar los campos de los registros de Logs y el periodo de tiempo de conservación de los mismos.",
+        "answer_missing": false,
+        "raw_question": {
+          "question_id": "Q_037",
+          "block": "SEGURIDAD",
+          "section": "TRAZABILIDAD",
+          "requirement": "Recogida de logs e integración en SIEM o en repositorio externo",
+          "requirement_source": "questionnaire",
+          "question_text": "¿Se recogen Logs en las operaciones y/o accesos realizados por los usuarios finales y operadores del servicio en las distintas infraestructuras involucradas en el servicio (Servidores (web, aplicación, BBDDs), dispositivos de red, …)?",
+          "question_text_source": "questionnaire_description",
+          "answer_raw": "No",
+          "answer": "NO",
+          "answer_missing": false,
+          "explanation": "Detallar los campos de los registros de Logs y el periodo de tiempo de conservación de los mismos.",
+          "source": {
+            "sheet": "Cuestionario Plataforma",
+            "row": 54
+          },
+          "parse_notes": [
+            "answer_normalized"
+          ]
+        }
+      },
+      "Q_038": {
+        "question_id": "Q_038",
+        "question_text": "",
+        "provider_answer": "NO",
+        "provider_explanation": "Detallar el SIEM utilizado. Especificar el tiempo de conservación de los Logs recolectados.",
+        "answer_missing": false,
+        "raw_question": {
+          "question_id": "Q_038",
+          "block": "SEGURIDAD",
+          "section": "TRAZABILIDAD",
+          "requirement": null,
+          "requirement_source": null,
+          "question_text": "¿Se envían los logs recogidos a un SIEM propio del proveedor?",
+          "question_text_source": "questionnaire_description",
+          "answer_raw": "No",
+          "answer": "NO",
+          "answer_missing": false,
+          "explanation": "Detallar el SIEM utilizado. Especificar el tiempo de conservación de los Logs recolectados.",
+          "source": {
+            "sheet": "Cuestionario Plataforma",
+            "row": 55
+          },
+          "parse_notes": [
+            "answer_normalized"
+          ]
+        }
+      },
+      "Q_039": {
+        "question_id": "Q_039",
+        "question_text": "",
+        "provider_answer": "NO",
+        "provider_explanation": "Indicar el mecanismo de integración con un SIEM externo.",
+        "answer_missing": false,
+        "raw_question": {
+          "question_id": "Q_039",
+          "block": "SEGURIDAD",
+          "section": "TRAZABILIDAD",
+          "requirement": null,
+          "requirement_source": null,
+          "question_text": "¿Existe la posibilidad de integrar los logs con el SIEM de EMPRESA?",
+          "question_text_source": "questionnaire_description",
+          "answer_raw": "No",
+          "answer": "NO",
+          "answer_missing": false,
+          "explanation": "Indicar el mecanismo de integración con un SIEM externo.",
+          "source": {
+            "sheet": "Cuestionario Plataforma",
+            "row": 56
+          },
+          "parse_notes": [
+            "answer_normalized"
+          ]
+        }
+      },
+      "Q_040": {
+        "question_id": "Q_040",
+        "question_text": "",
+        "provider_answer": "NO",
+        "provider_explanation": "Detallar el proceso de actuación sobre incidentes a raíz de una alerta generada por el SIEM",
+        "answer_missing": false,
+        "raw_question": {
+          "question_id": "Q_040",
+          "block": "SEGURIDAD",
+          "section": "TRAZABILIDAD",
+          "requirement": null,
+          "requirement_source": null,
+          "question_text": "La recogida de los logs anteriormente mencionados en el SIEM, ¿provoca alertas generadas por éste?",
+          "question_text_source": "questionnaire_description",
+          "answer_raw": "No",
+          "answer": "NO",
+          "answer_missing": false,
+          "explanation": "Detallar el proceso de actuación sobre incidentes a raíz de una alerta generada por el SIEM",
+          "source": {
+            "sheet": "Cuestionario Plataforma",
+            "row": 57
+          },
+          "parse_notes": [
+            "answer_normalized"
+          ]
+        }
+      }
+    },
+    "rules_summary": [
+      "No disponer de SIEM propio no genera riesgo por sí solo si el proveedor permite enviar logs al SIEM de EMPRESA o existe mecanismo equivalente suficiente.",
+      "El objetivo es que haya gestión efectiva de logs y alertas de eventos.",
+      "Si no se recogen logs, sí puede existir hallazgo.",
+      "Si la información sobre logs/SIEM/alertas es insuficiente, score=2 y follow-up."
+    ]
+  },
+  "triaje_summary": {
+    "contract": {
+      "contract_name": "Nombre de la contratación",
+      "short_description": "La gestión del calzado de seguridad especial se integra dentro de la contratación del calzado de seguridad.",
+      "providers": [
+        "Proveedor"
+      ],
+      "business_activity": "Actividad de Negocio: incluye tratamiento y/o intercambio de información. Esta actividad es gestionada por compras del Negocio",
+      "procurement_model": "Licitación competitiva entre varios proveedores",
+      "contract_duration": "Por ahora se ha adjudicado por un año, con renovaciones anuales con un máximo de 3.",
+      "award_date_expected": "Ya está adjudicado el contrato de calzado de seguridad.",
+      "language": [
+        "Castellano"
+      ],
+      "responsible_person": "Responsable de la contratación",
+      "project_code": "Código del proyecto.",
+      "business_line": "Línea de negocio",
+      "business_area": "Área de negocio"
+    },
+    "solution": {
+      "solution_type": "SaaS (Software as a Service)",
+      "saas_name": "Sistema de solicitud de calzado especial para los trabajadores de EMPRESA.",
+      "saas_functionality": "Es una aplicación para la gestión de las solicitudes y base de datos de usuarios de calzado de seguridad especial.",
+      "user_types": [
+        "Usuarios internos",
+        "Usuarios externos (proveedores y colaboradores)"
+      ],
+      "connection_with_company": false,
+      "involves_ai": false
+    },
+    "information": {
+      "classification": "Confidencial",
+      "classification_detail": "Información de los trabajadores incluyendo información médica para la gestión del calzado especial.",
+      "personal_data": true,
+      "personal_data_regime": "GDPR",
+      "personal_data_types": [
+        "Datos identificativos y personales (CIF, DNI, firma, edad, sexo, ubicación, etc.) "
+      ],
+      "personal_data_volume": "Entre 20 y 100.000",
+      "processing_location": "En la infraestructura del proveedor"
+    },
+    "provider_interaction": {
+      "provider_access_to_company_infrastructure": false,
+      "provider_access_detail": "No acceden a los sistemas/infraestructura de EMPRESA",
+      "systems_interaction": "No acceden a los sistemas/infraestructura de EMPRESA"
+    },
+    "risk_context": {
+      "service_is_critical": false
+    },
+    "derived_flags": {
+      "has_personal_data": true,
+      "is_saas": true,
+      "has_provider_internal_access": false,
+      "involves_ai": false
+    }
+  },
+  "questionnaire_provider": {
+    "name": "PROVEEDOR",
+    "platform_name": "PLATAFORMA",
+    "url": "URL",
+    "functional_description": null,
+    "stores_personal_data_raw": "SÍ",
+    "stores_personal_data": true
+  },
+  "units": [
+    {
+      "unit_type": "single",
+      "group_id": "",
+      "group_reason": "",
+      "shared_context": {},
+      "questions": [
+        {
+          "question_id": "Q_022",
+          "question_text": "",
+          "provider_answer": "No se soporta ninguno",
+          "provider_explanation": "Detallar comunicaciones",
+          "answer_missing": false,
+          "raw_question": {
+            "question_id": "Q_022",
+            "block": "SEGURIDAD",
+            "section": "ACCESOS",
+            "requirement": "Comunicaciones",
+            "requirement_source": "questionnaire",
+            "question_text": "¿Están deshabilitadas las versiones SSL V3 o inferiores?",
+            "question_text_source": "questionnaire_adjacent_column",
+            "answer_raw": "No se soporta ninguno",
+            "answer": "No se soporta ninguno",
+            "answer_missing": false,
+            "explanation": "Detallar comunicaciones",
+            "source": {
+              "sheet": "Cuestionario Plataforma",
+              "row": 39
+            },
+            "parse_notes": [
+              "question_text_read_from_adjacent_column_due_to_merged_layout"
+            ]
+          },
+          "catalog_entry": {
+            "doc_type": "risk_catalog_question",
+            "chunk_id": "RAG-Q_022",
+            "question_id": "Q_022",
+            "question_number": 22,
+            "dimension": "Seguridad de los sistemas",
+            "bloque": "SEGURIDAD",
+            "apartado": "ACCESOS",
+            "requisito": "Comunicaciones",
+            "question_text": "¿Están deshabilitadas las versiones SSL V3 o inferiores?",
+            "control_id": "C_057",
+            "control_ids": [
+              "C_057"
+            ],
+            "control_text": "Las versiones SSL V3 o inferiores deben estar deshabilitadas",
+            "incumplimiento_identificado": "No están deshabilitadas las versiones SSL V3 o inferiores.",
+            "controles_asociados": "Se deben deshabilitar las versiones SSL V3 o inferiores",
+            "amenazas": [
+              "Denegación de Servicio",
+              "Intercepción de comunicaciones",
+              "Manipulación no autorizada de las comunicaciones"
+            ],
+            "risk_id": "R_001",
+            "risk_name": "Robo de información",
+            "risk_description": "Las versiones antiguas de SSL pueden ser vulnerables a ataques de intercepción de la información transmitida a través de la conexión SSL, como contraseñas y datos sensibles. También pueden producirse ataques de Man-in-the-Middle que intercepten y alteren la información transmitida a través de dicha conexión.",
+            "severity_by_tier": {
+              "TIER 1": "MEDIO",
+              "TIER 2": "MEDIO",
+              "TIER 3": "ALTO"
+            },
+            "severity_source": "direct_tier_columns",
+            "evaluation_group": "INDIVIDUAL",
+            "severity_logic": "TIER",
+            "depends_on_questions": [],
+            "conditional_severity_logic": "TIER",
+            "mitigation": "Se debe tener las versiones inseguras del protocolo SSL, V3 e inferiores.",
+            "mitigation_guide": "Se deben deshabilitar las versiones SSL V3 o inferiores.",
+            "conditional_rules": [],
+            "raw_observations": "",
+            "report_context_example": "La plataforma no tiene deshabilitadas las versiones SSL V3 o inferiores.",
+            "report_detail_example": "Debido al uso de protocolos vulnerables como SSL v3 o inferior, las comunicaciones desde y hacia la plataforma pueden considerarse inseguras, debido a que se corre el riesgo de sufrir ataques de Man-in-the-middle, que puede desencadenar que un tercero no autorizado consiga interceptar y manipular los datos en tránsito, derivando este hecho en una pérdida de confidencialidad e integridad. Así mismo, en caso de que se transmita información sensible (p.e credenciales) podría conllevar un acceso no autorizado tanto a la plataforma como a la información disponibilizada en ella.",
+            "traceability": "Excel: Análisis SaaS, fila 23",
+            "evaluation": {
+              "group_id": "",
+              "evaluation_mode": "individual",
+              "group_questions": [],
+              "group_reason": "",
+              "applies_to_saas_default": true,
+              "has_direct_tier_severity": true,
+              "has_conditional_severity_rules": false,
+              "is_informational_or_na": false,
+              "requires_human_review_if_no_rag_match": true,
+              "requires_human_review_if_missing_core_catalog_fields": false,
+              "severity_logic": "TIER"
+            }
+          },
+          "retrieval": {
+            "status": "FOUND_LOCAL_FALLBACK",
+            "method": "local_catalog_question_id",
+            "collection": "tfm_rag_manual"
+          }
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "question_id": "Q_022",
+      "question_text": "",
+      "provider_answer": "No se soporta ninguno",
+      "provider_explanation": "Detallar comunicaciones",
+      "answer_missing": false,
+      "raw_question": {
+        "question_id": "Q_022",
+        "block": "SEGURIDAD",
+        "section": "ACCESOS",
+        "requirement": "Comunicaciones",
+        "requirement_source": "questionnaire",
+        "question_text": "¿Están deshabilitadas las versiones SSL V3 o inferiores?",
+        "question_text_source": "questionnaire_adjacent_column",
+        "answer_raw": "No se soporta ninguno",
+        "answer": "No se soporta ninguno",
+        "answer_missing": false,
+        "explanation": "Detallar comunicaciones",
+        "source": {
+          "sheet": "Cuestionario Plataforma",
+          "row": 39
+        },
+        "parse_notes": [
+          "question_text_read_from_adjacent_column_due_to_merged_layout"
+        ]
+      },
+      "catalog_entry": {
+        "doc_type": "risk_catalog_question",
+        "chunk_id": "RAG-Q_022",
+        "question_id": "Q_022",
+        "question_number": 22,
+        "dimension": "Seguridad de los sistemas",
+        "bloque": "SEGURIDAD",
+        "apartado": "ACCESOS",
+        "requisito": "Comunicaciones",
+        "question_text": "¿Están deshabilitadas las versiones SSL V3 o inferiores?",
+        "control_id": "C_057",
+        "control_ids": [
+          "C_057"
+        ],
+        "control_text": "Las versiones SSL V3 o inferiores deben estar deshabilitadas",
+        "incumplimiento_identificado": "No están deshabilitadas las versiones SSL V3 o inferiores.",
+        "controles_asociados": "Se deben deshabilitar las versiones SSL V3 o inferiores",
+        "amenazas": [
+          "Denegación de Servicio",
+          "Intercepción de comunicaciones",
+          "Manipulación no autorizada de las comunicaciones"
+        ],
+        "risk_id": "R_001",
+        "risk_name": "Robo de información",
+        "risk_description": "Las versiones antiguas de SSL pueden ser vulnerables a ataques de intercepción de la información transmitida a través de la conexión SSL, como contraseñas y datos sensibles. También pueden producirse ataques de Man-in-the-Middle que intercepten y alteren la información transmitida a través de dicha conexión.",
+        "severity_by_tier": {
+          "TIER 1": "MEDIO",
+          "TIER 2": "MEDIO",
+          "TIER 3": "ALTO"
+        },
+        "severity_source": "direct_tier_columns",
+        "evaluation_group": "INDIVIDUAL",
+        "severity_logic": "TIER",
+        "depends_on_questions": [],
+        "conditional_severity_logic": "TIER",
+        "mitigation": "Se debe tener las versiones inseguras del protocolo SSL, V3 e inferiores.",
+        "mitigation_guide": "Se deben deshabilitar las versiones SSL V3 o inferiores.",
+        "conditional_rules": [],
+        "raw_observations": "",
+        "report_context_example": "La plataforma no tiene deshabilitadas las versiones SSL V3 o inferiores.",
+        "report_detail_example": "Debido al uso de protocolos vulnerables como SSL v3 o inferior, las comunicaciones desde y hacia la plataforma pueden considerarse inseguras, debido a que se corre el riesgo de sufrir ataques de Man-in-the-middle, que puede desencadenar que un tercero no autorizado consiga interceptar y manipular los datos en tránsito, derivando este hecho en una pérdida de confidencialidad e integridad. Así mismo, en caso de que se transmita información sensible (p.e credenciales) podría conllevar un acceso no autorizado tanto a la plataforma como a la información disponibilizada en ella.",
+        "traceability": "Excel: Análisis SaaS, fila 23",
+        "evaluation": {
+          "group_id": "",
+          "evaluation_mode": "individual",
+          "group_questions": [],
+          "group_reason": "",
+          "applies_to_saas_default": true,
+          "has_direct_tier_severity": true,
+          "has_conditional_severity_rules": false,
+          "is_informational_or_na": false,
+          "requires_human_review_if_no_rag_match": true,
+          "requires_human_review_if_missing_core_catalog_fields": false,
+          "severity_logic": "TIER"
+        }
+      },
+      "retrieval": {
+        "status": "FOUND_LOCAL_FALLBACK",
+        "method": "local_catalog_question_id",
+        "collection": "tfm_rag_manual"
+      }
+    }
+  ]
+}

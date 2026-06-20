@@ -1,0 +1,41 @@
+{
+  "batch_id": "batch_046",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_050",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que no existen integraciones Cloud-to-Cloud.",
+      "decision_reason": "La pregunta es informativa (INFO_OR_NA). Al confirmar que no existen integraciones, se considera cumplido el requisito de reporte de métodos de integración.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_050",
+          "chunk_id": "RAG-Q_050",
+          "traceability": "Excel: Análisis SaaS, fila 51",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "NO",
+      "provider_details": "Detallar mecanismos de integración Cloud-to-Cloud"
+    }
+  ],
+  "batch_validation_notes": []
+}

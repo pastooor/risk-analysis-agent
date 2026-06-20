@@ -1,0 +1,44 @@
+{
+  "batch_id": "batch_013",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_013",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor indica que gestiona usuarios, pero no confirma explícitamente la implementación de un control de acceso basado en roles (RBAC) o perfiles.",
+      "decision_reason": "La respuesta es ambigua. Se requiere confirmar si la gestión de usuarios permite asignar roles o perfiles específicos para cumplir con el principio de mínimo privilegio.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿La gestión de usuarios permite la asignación de roles o perfiles específicos para restringir el acceso según el principio de mínimo privilegio? Por favor, describa cómo se configuran."
+      ],
+      "generates_finding": true,
+      "requires_human_review": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_014"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "Se debe ejecutar el control de acceso basado en roles y/o perfiles en el servicio ofrecido siguiendo el principio de mínimo privilegio",
+      "amenazas": [],
+      "mitigation": "Se debe tener un control de acceso basado en Roles y/o perfiles a la plataforma que el proveedor ofrece a EMPRESA.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_013",
+          "chunk_id": "RAG-Q_013",
+          "traceability": "Excel: Análisis SaaS, fila 14",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "SI",
+      "provider_details": "Hay un gestion de usuarios por parte del proveedor"
+    }
+  ],
+  "batch_validation_notes": []
+}

@@ -1,0 +1,41 @@
+{
+  "batch_id": "batch_049",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_054",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que no dispone de APIs o no proporciona la información solicitada.",
+      "decision_reason": "La respuesta es negativa y no aporta la configuración ni el método de publicación de las APIs, incumpliendo el requisito de seguridad de la plataforma.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_054",
+          "chunk_id": "RAG-Q_054",
+          "traceability": "Excel: Análisis SaaS, fila 54",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "NO",
+      "provider_details": "Especificar APIs"
+    }
+  ],
+  "batch_validation_notes": []
+}

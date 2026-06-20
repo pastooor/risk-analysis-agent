@@ -1,0 +1,12 @@
+{
+  "case_id": "Codigo_del_proyecto_NOFOLLOWUP_OK",
+  "status": "READY_FOR_REPORT",
+  "updated_at": "2026-06-10T13:21:09",
+  "followup_required": false,
+  "total_evaluations": 56,
+  "total_findings": 6,
+  "scoring_final_path": "/data/cases/Codigo_del_proyecto_NOFOLLOWUP_OK/03_analysis/scoring_final.json",
+  "risk_analysis_path": "/data/cases/Codigo_del_proyecto_NOFOLLOWUP_OK/03_analysis/risk_analysis.json",
+  "report_data_path": "/data/cases/Codigo_del_proyecto_NOFOLLOWUP_OK/03_analysis/report_data.json",
+  "warnings": []
+}

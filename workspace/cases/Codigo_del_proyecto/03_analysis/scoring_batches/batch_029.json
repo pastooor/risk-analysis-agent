@@ -1,0 +1,49 @@
+{
+  "batch_id": "batch_029",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_029",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor indica SSL, pero no especifica versiones TLS seguras ni configuración.",
+      "decision_reason": "Se requiere aclarar si se usa TLS 1.2 o superior y qué protocolos inseguros están deshabilitados.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿Podría confirmar si el cifrado en tránsito utiliza TLS 1.2 o una versión superior? Por favor, especifique la versión exacta utilizada."
+      ],
+      "requires_human_review": true,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "R_001",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_052"
+      ],
+      "incumplimiento_identificado": "No se cifran los datos en tránsito",
+      "controles_asociados": "Se deben cifrar los datos en tránsito con un algoritmo criptográfico robusto (cómo mínimo TLS 1.2)",
+      "amenazas": [
+        "Aprovechamiento de una debilidad criptográfica",
+        "Exposición indebida de información",
+        "Fuga de datos"
+      ],
+      "mitigation": "Se deben cifrar los datos en tránsito con un algoritmo de cifrado seguro, como mínimo TLS 1.2.",
+      "mitigation_guide": "",
+      "report_context_example": "El proveedor indica que no cifra los datos en tránsito",
+      "report_detail_example": "Debido a una vulnerabilidad o falta de encriptación y el uso de protocolos vulnerables, puede exponer los datos a accesos no autorizados, elevando considerablemente la probabilidad de fuga de información y violación de la privacidad. Además, esta carencia incrementa el riesgo de amenazas dentro de la plataforma y la posibilidad de alteraciones en la integridad de los datos que se manejan. Con ello, los datos que no son cifrados o están cifrados por protocolos inseguros pueden ser vulnerables a intercepción durante su almacenamiento, comprometiendo la confidencialidad de la información.",
+      "sources": [
+        {
+          "question_id": "Q_029",
+          "chunk_id": "RAG-Q_029",
+          "traceability": "Excel: Análisis SaaS, fila 30",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "SI",
+      "provider_details": "SSL"
+    }
+  ],
+  "batch_validation_notes": []
+}

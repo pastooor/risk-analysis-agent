@@ -1,0 +1,53 @@
+{
+  "batch_id": "batch_030",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_030",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor indica frecuencia diaria, pero no detalla el proceso técnico de backup ni el tiempo de recuperación (RTO) requerido por el control C_053.",
+      "decision_reason": "La respuesta es insuficiente. Se requiere describir el proceso técnico de backup y confirmar el cumplimiento del tiempo de recuperación (RTO) según el control C_053.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "Por favor, detalle el proceso técnico de realización de los backups (herramientas, almacenamiento, inmutabilidad) y confirme el tiempo de recuperación (RTO) garantizado."
+      ],
+      "generates_finding": true,
+      "requires_human_review": true,
+      "risk_id": "R_006",
+      "risk_name": "Pérdida de disponibilidad",
+      "control_ids": [
+        "C_053"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "Se debe realizar copia de respaldo de los datos con una frecuencia menor de 24 horas.",
+      "amenazas": [
+        "Incumplimiento normativo/regulatorio"
+      ],
+      "mitigation": "",
+      "mitigation_guide": "Se debe realizar copia de respaldo de los datos con una frecuencia menor de 24 horas.",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_030",
+          "chunk_id": "RAG-Q_030",
+          "traceability": "Excel: Análisis SaaS, fila 31",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "DIARIA"
+    }
+  ],
+  "batch_validation_notes": [
+    {
+      "type": "manual_review",
+      "description": "No se pudo determinar la severidad para Q_030. Revisar reglas del catálogo.",
+      "question_id": "Q_030",
+      "source": "post_ai_validation"
+    }
+  ]
+}

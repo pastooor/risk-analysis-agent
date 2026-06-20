@@ -1,0 +1,45 @@
+{
+  "batch_id": "batch_025",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_025",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no ha deshabilitado los algoritmos RC4.",
+      "decision_reason": "El uso de RC4 es una vulnerabilidad crítica de seguridad. La respuesta negativa del proveedor confirma el incumplimiento directo del control C_060.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_001",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_060"
+      ],
+      "incumplimiento_identificado": "Las comunicaciones pueden realizarse mediante protocolos y cifrados vulnerables",
+      "controles_asociados": "Se deben deshabilitar los algoritmos RC4 en HTTPS.",
+      "amenazas": [
+        "Denegación de Servicio",
+        "Intercepción de comunicaciones",
+        "Manipulación no autorizada de las comunicaciones"
+      ],
+      "mitigation": "Se debe tener deshabilitado el algoritmo RC4 debido a que es un algoritmo obselota e inseguro.",
+      "mitigation_guide": "Se debe deshabilitar el uso del cifrado RC4",
+      "report_context_example": "El proveedor indica la posibilidad de establecer comunicaciones HSTS con el algoritmo de cifrado RC4.",
+      "report_detail_example": "Es necesario deshabilitar el uso del algoritmo RC4 para asegurar una comunicación segura. Este algoritmo es vulnerable a ataques de intercepcción y Man-in-the-Middle, comprometiendo la seguridad de la conexión. Además, es más fácil para los atacantes descifrar la información transmitida a través de las conexiones cifradas utilizando el algoritmo RC4.\nEl uso del algoritmo RC4, plantea riesgos adicionales, como la susceptibilidad a ataques de flujo nulo y la posibilidad de recuperar partes de la clave original, lo que podría comprometer la confidencialidad de la información transmitida.",
+      "sources": [
+        {
+          "question_id": "Q_025",
+          "chunk_id": "RAG-Q_025",
+          "traceability": "Excel: Análisis SaaS, fila 26",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar comunicaciones"
+    }
+  ],
+  "batch_validation_notes": []
+}

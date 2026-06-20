@@ -1,0 +1,48 @@
+{
+  "batch_id": "batch_020",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_020",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no dispone de mecanismos de autenticación multifactor (MFA/2FA).",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_010"
+      ],
+      "incumplimiento_identificado": "No utiliza MFA",
+      "controles_asociados": "Se debe utilizar MFA en los procesos de autenticación, como por ejemplo PingID",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "En caso de no poder integrar, el sistema de federación contra el IDP de EMPRESA, la plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella.",
+      "mitigation_guide": "Se debe utilizar MFA en los procesos de autenticación, como por ejemplo PingID",
+      "report_context_example": "El proveedor menciona que no se utiliza un 2FA al acceder al servicio utilizado. La autenticación tiene que disponer de un segundo factor de autenticación.",
+      "report_detail_example": "No contar con autenticación mediante tecnologías de 2FA o MFA supone un riesgo debido a que, sin MFA, garantizar que el acceso a la información alojada en el entorno de un tercero es realizado por un usuario de confianza, es más complicado. Por ejemplo, si no se cuenta con MFA, no nos permite garantizar la confidencialidad y disponibilidad de la información en un proveedor externo, debido a la correcta realización de la gestión del ciclo de vida de la identidad.",
+      "sources": [
+        {
+          "question_id": "Q_020",
+          "chunk_id": "RAG-Q_020",
+          "traceability": "Excel: Análisis SaaS, fila 21",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar mecanismos de autenticación multifactor"
+    }
+  ],
+  "batch_validation_notes": []
+}

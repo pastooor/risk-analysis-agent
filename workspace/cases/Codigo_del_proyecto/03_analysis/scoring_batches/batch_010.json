@@ -1,0 +1,48 @@
+{
+  "batch_id": "batch_010",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_010",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no soporta federación de usuarios.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_012"
+      ],
+      "incumplimiento_identificado": "No se soporta la federación contra el IdP de EMPRESA, PingOne",
+      "controles_asociados": "Se debe soportar la federación de usuarios contra el IdP corporativo, PingOne, mediante el uso de protocolos como SAML u OAuth.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe disponer de un sistema de federación de identidades contra el IDP de EMPRESA, para ello deberá poder soportar o tener capacidad de utilizar el protocolo seguro SAML v2 u Oauth",
+      "mitigation_guide": "Se debe soportar la federación de usuarios contra el IdP corporativo, PingOne, mediante el uso de protocolos como SAML u OAuth.",
+      "report_context_example": "En el cuestionario el proveedor menciona que aunque soporta tecnologías de federación mediante SAML v2, esta tecnología no se utiliza actualmente, de tal manera que la gestión de los usuarios no recaiga en el proveedor y se utilicen las identidades del AD de EMPRESA para el acceso a la plataforma.",
+      "report_detail_example": "No contar con autenticación mediante federación de identidades supone un riesgo debido a que, sin federación, garantizar que el acceso a la información alojada en el entorno de un tercero es realizado por un usuario de confianza, es más complicado. Por ejemplo, si no se cuenta con federación, en el caso de que un empleado de la empresa salga de ésta, es más difícil detectar que esa persona se ha ido y eliminar su usuario, dando pie a que durante un tiempo ese usuario pueda seguir activo a pesar de que la persona no se encuentre en la empresa. Esto puede llevar a que se realicen accesos no autorizados a la plataforma. // Cuando se trata de ENTRA ID: A pesar de que la plataforma soporta la federación contra EntraID, dicho acceso federado no está alineado con los estándares de seguridad vigentes en EMPRESA, por ello, se debe regularizar el acceso federado a la plataforma a través de Ping Federate, como IdP corporativo.",
+      "sources": [
+        {
+          "question_id": "Q_010",
+          "chunk_id": "RAG-Q_010",
+          "traceability": "Excel: Análisis SaaS, fila 11",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar tecnologías de federación"
+    }
+  ],
+  "batch_validation_notes": []
+}

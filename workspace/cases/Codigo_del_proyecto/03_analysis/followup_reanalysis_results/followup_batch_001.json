@@ -1,0 +1,29 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_001",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_007",
+      "final_score": 3,
+      "final_score_type": "compliant",
+      "answer_summary": "El proveedor confirma el uso de identificadores únicos (ID interno y correo electrónico) y prohíbe explícitamente el uso de cuentas compartidas.",
+      "decision_reason": "La respuesta aclara el mecanismo técnico de unicidad y confirma la ausencia de cuentas compartidas, cumpliendo con el requisito de identificación unívoca.",
+      "resolved_by_provider": true
+    }
+  ],
+  "batch_validation_notes": [],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_001\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_007\",\"final_score\":3,\"final_score_type\":\"compliant\",\"answer_summary\":\"El proveedor confirma el uso de identificadores únicos (ID interno y correo electrónico) y prohíbe explícitamente el uso de cuentas compartidas.\",\"decision_reason\":\"La respuesta aclara el mecanismo técnico de unicidad y confirma la ausencia de cuentas compartidas, cumpliendo con el requisito de identifi",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_007"
+    ],
+    "normalized_question_ids": [
+      "Q_007"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

@@ -1,0 +1,225 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "status": "WAITING_PROVIDER_FOLLOWUP",
+  "followup_round": 1,
+  "created_at": "2026-06-18T13:21:05",
+  "followup_count": 18,
+  "questions": [
+    {
+      "question_id": "Q_007",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es genérica. Se requiere confirmar si el sistema utiliza identificadores únicos (como email o ID interno) y cómo se garantiza la unicidad en el registro.",
+      "question_to_provider": "¿Qué campo o atributo técnico se utiliza como identificador único para cada usuario en la plataforma y cómo se garantiza que no existan duplicados?",
+      "all_questions_to_provider": [
+        "¿Qué campo o atributo técnico se utiliza como identificador único para cada usuario en la plataforma y cómo se garantiza que no existan duplicados?"
+      ],
+      "required": true,
+      "source_batch": "batch_007.json"
+    },
+    {
+      "question_id": "Q_008",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es insuficiente. Se requiere evidencia técnica o procedimental que confirme la capacidad de identificar unívocamente a los usuarios con privilegios de administración.",
+      "question_to_provider": "Por favor, proporcione evidencia o detalle el procedimiento utilizado para identificar y auditar a los usuarios que poseen roles de administración en la plataforma.",
+      "all_questions_to_provider": [
+        "Por favor, proporcione evidencia o detalle el procedimiento utilizado para identificar y auditar a los usuarios que poseen roles de administración en la plataforma."
+      ],
+      "required": true,
+      "source_batch": "batch_008.json"
+    },
+    {
+      "question_id": "Q_011",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta no confirma si el repositorio es centralizado para la gestión de identidades, ni si evita la gestión de usuarios locales, conforme al control C_009.",
+      "question_to_provider": "¿El repositorio SQL mencionado actúa como un sistema centralizado de gestión de identidades (IAM) para toda la plataforma o es una base de datos local de la aplicación? ¿Permite la gestión centralizada de usuarios evitando la creación de cuentas locales dispersas?",
+      "all_questions_to_provider": [
+        "¿El repositorio SQL mencionado actúa como un sistema centralizado de gestión de identidades (IAM) para toda la plataforma o es una base de datos local de la aplicación? ¿Permite la gestión centralizada de usuarios evitando la creación de cuentas locales dispersas?"
+      ],
+      "required": true,
+      "source_batch": "batch_011.json"
+    },
+    {
+      "question_id": "Q_012",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es insuficiente. Se requiere confirmar la existencia de un procedimiento documentado de Alta, Baja y Modificación (ABM) para cumplir con el control C_005.",
+      "question_to_provider": "¿Podría proporcionar el documento o la descripción detallada del procedimiento de Alta, Baja y Modificación de usuarios en el servicio?",
+      "all_questions_to_provider": [
+        "¿Podría proporcionar el documento o la descripción detallada del procedimiento de Alta, Baja y Modificación de usuarios en el servicio?"
+      ],
+      "required": true,
+      "source_batch": "batch_012.json"
+    },
+    {
+      "question_id": "Q_013",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es ambigua. Se requiere confirmar si la gestión de usuarios permite asignar roles o perfiles específicos para cumplir con el principio de mínimo privilegio.",
+      "question_to_provider": "¿La gestión de usuarios permite la asignación de roles o perfiles específicos para restringir el acceso según el principio de mínimo privilegio? Por favor, describa cómo se configuran.",
+      "all_questions_to_provider": [
+        "¿La gestión de usuarios permite la asignación de roles o perfiles específicos para restringir el acceso según el principio de mínimo privilegio? Por favor, describa cómo se configuran."
+      ],
+      "required": true,
+      "source_batch": "batch_013.json"
+    },
+    {
+      "question_id": "Q_015",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es ambigua respecto a si existen reglas de complejidad aplicables a usuarios, ya que se refiere a una gestión técnica interna del proveedor.",
+      "question_to_provider": "¿Existe una política de contraseñas definida para los usuarios que acceden a la plataforma? Por favor, detalle los requisitos de complejidad (longitud, caracteres, rotación).",
+      "all_questions_to_provider": [
+        "¿Existe una política de contraseñas definida para los usuarios que acceden a la plataforma? Por favor, detalle los requisitos de complejidad (longitud, caracteres, rotación)."
+      ],
+      "required": true,
+      "source_batch": "batch_015.json"
+    },
+    {
+      "question_id": "Q_019",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es afirmativa, pero falta detalle técnico sobre el algoritmo o mecanismo de protección de contraseñas.",
+      "question_to_provider": "¿Qué algoritmo de cifrado o función de hash con salt se utiliza para almacenar las contraseñas de los usuarios?",
+      "all_questions_to_provider": [
+        "¿Qué algoritmo de cifrado o función de hash con salt se utiliza para almacenar las contraseñas de los usuarios?"
+      ],
+      "required": true,
+      "source_batch": "batch_019.json"
+    },
+    {
+      "question_id": "Q_021",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "Aunque se confirma la existencia de timeout, 60 minutos es un tiempo elevado que requiere validación según la política de seguridad interna del cliente.",
+      "question_to_provider": "¿Es posible configurar un tiempo de inactividad menor a 60 minutos para cumplir con estándares de seguridad más estrictos?",
+      "all_questions_to_provider": [
+        "¿Es posible configurar un tiempo de inactividad menor a 60 minutos para cumplir con estándares de seguridad más estrictos?"
+      ],
+      "required": true,
+      "source_batch": "batch_021.json"
+    },
+    {
+      "question_id": "Q_023",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "Se requiere confirmar si únicamente se soporta TLS 1.2 o superior y si TLS 1.0/1.1/SSL están deshabilitados.",
+      "question_to_provider": "¿Qué versiones de TLS están habilitadas en sus servicios? Por favor, confirme que solo se soportan TLS 1.2 y superiores.",
+      "all_questions_to_provider": [
+        "¿Qué versiones de TLS están habilitadas en sus servicios? Por favor, confirme que solo se soportan TLS 1.2 y superiores."
+      ],
+      "required": true,
+      "source_batch": "batch_023.json"
+    },
+    {
+      "question_id": "Q_028",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "Se requiere confirmar el algoritmo utilizado y su configuración.",
+      "question_to_provider": "¿Podría confirmar si el algoritmo de cifrado utilizado en los backups es AES-256 o superior?",
+      "all_questions_to_provider": [
+        "¿Podría confirmar si el algoritmo de cifrado utilizado en los backups es AES-256 o superior?"
+      ],
+      "required": true,
+      "source_batch": "batch_028.json"
+    },
+    {
+      "question_id": "Q_029",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "Se requiere aclarar si se usa TLS 1.2 o superior y qué protocolos inseguros están deshabilitados.",
+      "question_to_provider": "¿Podría confirmar si el cifrado en tránsito utiliza TLS 1.2 o una versión superior? Por favor, especifique la versión exacta utilizada.",
+      "all_questions_to_provider": [
+        "¿Podría confirmar si el cifrado en tránsito utiliza TLS 1.2 o una versión superior? Por favor, especifique la versión exacta utilizada."
+      ],
+      "required": true,
+      "source_batch": "batch_029.json"
+    },
+    {
+      "question_id": "Q_030",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es insuficiente. Se requiere describir el proceso técnico de backup y confirmar el cumplimiento del tiempo de recuperación (RTO) según el control C_053.",
+      "question_to_provider": "Por favor, detalle el proceso técnico de realización de los backups (herramientas, almacenamiento, inmutabilidad) y confirme el tiempo de recuperación (RTO) garantizado.",
+      "all_questions_to_provider": [
+        "Por favor, detalle el proceso técnico de realización de los backups (herramientas, almacenamiento, inmutabilidad) y confirme el tiempo de recuperación (RTO) garantizado."
+      ],
+      "required": true,
+      "source_batch": "batch_030.json"
+    },
+    {
+      "question_id": "Q_031",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es ambigua y no proporciona los valores técnicos requeridos para evaluar el cumplimiento del control C_054.",
+      "question_to_provider": "Por favor, proporcione los valores específicos de RTO (Objetivo de Tiempo de Recuperación) y RPO (Objetivo de Punto de Recuperación) definidos para este servicio.",
+      "all_questions_to_provider": [
+        "Por favor, proporcione los valores específicos de RTO (Objetivo de Tiempo de Recuperación) y RPO (Objetivo de Punto de Recuperación) definidos para este servicio."
+      ],
+      "required": true,
+      "source_batch": "batch_031.json"
+    },
+    {
+      "question_id": "Q_032",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "El proveedor indica que el tiempo está por establecer y no detalla los controles de seguridad ni los roles con acceso, incumpliendo el requisito de política documentada.",
+      "question_to_provider": "¿Podría proporcionar la política de retención de datos documentada que especifique el tiempo de retención, las medidas de seguridad aplicadas y los roles con acceso a los datos?",
+      "all_questions_to_provider": [
+        "¿Podría proporcionar la política de retención de datos documentada que especifique el tiempo de retención, las medidas de seguridad aplicadas y los roles con acceso a los datos?"
+      ],
+      "required": true,
+      "source_batch": "batch_032.json"
+    },
+    {
+      "question_id": "Q_034",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta indica que está a consultar o depende de terceros, por lo que requiere aclaración.",
+      "question_to_provider": "¿Dispone el proveedor de un proceso estandarizado y documentado para la finalización y baja de servicio, independientemente de las directrices del cliente?",
+      "all_questions_to_provider": [
+        "¿Dispone el proveedor de un proceso estandarizado y documentado para la finalización y baja de servicio, independientemente de las directrices del cliente?"
+      ],
+      "required": true,
+      "source_batch": "batch_034.json"
+    },
+    {
+      "question_id": "Q_036",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es insuficiente. Se requiere un proceso formal y documentado, no una mención genérica a la recuperación desde el hosting, para garantizar la portabilidad y disponibilidad.",
+      "question_to_provider": "¿Existe un procedimiento estandarizado y documentado para la devolución de datos y backups al finalizar el servicio? Por favor, adjunte o describa dicho proceso.",
+      "all_questions_to_provider": [
+        "¿Existe un procedimiento estandarizado y documentado para la devolución de datos y backups al finalizar el servicio? Por favor, adjunte o describa dicho proceso."
+      ],
+      "required": true,
+      "source_batch": "batch_036.json"
+    },
+    {
+      "question_id": "Q_045",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta no aclara si existen entornos diferenciados de desarrollo y pruebas, ni si están aislados del entorno de producción para evitar riesgos de disponibilidad.",
+      "question_to_provider": "¿Puede confirmar explícitamente si dispone de un entorno de desarrollo y un entorno de pruebas separados entre sí y del entorno de producción?",
+      "all_questions_to_provider": [
+        "¿Puede confirmar explícitamente si dispone de un entorno de desarrollo y un entorno de pruebas separados entre sí y del entorno de producción?"
+      ],
+      "required": true,
+      "source_batch": "batch_041.json"
+    },
+    {
+      "question_id": "Q_057",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "reason": "La respuesta es insuficiente al indicar 'Por especificar'. Se requiere evidencia documental o descripción detallada del procedimiento de escalado para validar el cumplimiento del control.",
+      "question_to_provider": "Por favor, proporcione el procedimiento formalizado de comunicación y escalado de incidentes de seguridad o un resumen detallado que incluya los canales y tiempos de respuesta.",
+      "all_questions_to_provider": [
+        "Por favor, proporcione el procedimiento formalizado de comunicación y escalado de incidentes de seguridad o un resumen detallado que incluya los canales y tiempos de respuesta."
+      ],
+      "required": true,
+      "source_batch": "batch_052.json"
+    }
+  ]
+}

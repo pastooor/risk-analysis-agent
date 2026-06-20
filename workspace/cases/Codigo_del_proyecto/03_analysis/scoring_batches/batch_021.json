@@ -1,0 +1,49 @@
+{
+  "batch_id": "batch_021",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_021",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor confirma caducidad de sesión de 60 minutos.",
+      "decision_reason": "Aunque se confirma la existencia de timeout, 60 minutos es un tiempo elevado que requiere validación según la política de seguridad interna del cliente.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿Es posible configurar un tiempo de inactividad menor a 60 minutos para cumplir con estándares de seguridad más estrictos?"
+      ],
+      "generates_finding": true,
+      "requires_human_review": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_016"
+      ],
+      "incumplimiento_identificado": "Tiempo de inactividad no implementado\nTiempo de inactividad elevado",
+      "controles_asociados": "Se debe implementar un tiempo de caducidad de la sesión.\nSe debe implementar un tiempo de caducidad de la sesión menor.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe tener un tiempo para la caducidad de la sesión a la plataforma que encaje en los estándares seguro de ello.",
+      "mitigation_guide": "Se debe disponer de un timeout por inactividad no superior a 1 hora.",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_021",
+          "chunk_id": "RAG-Q_021",
+          "traceability": "Excel: Análisis SaaS, fila 22",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "SI",
+      "provider_details": "Una duracion de 60 minutos"
+    }
+  ],
+  "batch_validation_notes": []
+}

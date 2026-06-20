@@ -1,0 +1,1451 @@
+{
+  "name": "GROQ copy",
+  "nodes": [
+    {
+      "parameters": {
+        "command": "=/usr/bin/python3 /data/scripts/build_question_rag_context_v2.py \\\n  --case-dir \"/data/cases/{{$json.case_id}}\" \\\n  --collection tfm_rag_manual \\\n  --qdrant-url http://qdrant:6333 \\\n  --catalog-json /data/rag_manual/catalog_questions_v2.json \\\n  --batch-size 1"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        288,
+        0
+      ],
+      "id": "46473050-f204-475c-a4c3-0fb45005b99a",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear stdout del build_question_rag_context.py: \" + stdout);\n}\n\nif (!parsed.batches || !Array.isArray(parsed.batches)) {\n  throw new Error(\"No se encontraron batches en la salida: \" + stdout);\n}\n\nreturn parsed.batches.map(batch => ({\n  json: {\n    case_id: parsed.case_id,\n    batch_id: batch.batch_id,\n    batch_path: batch.path,\n    question_count: batch.question_count,\n    unit_count: batch.unit_count\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        0
+      ],
+      "id": "482175f5-0ceb-4798-88e9-106bc3e03396",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=cat \"{{$json.batch_path}}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        704,
+        0
+      ],
+      "id": "76705706-4a59-40f9-94a5-5305bb289b36",
+      "name": "Execute Command2"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\nlet batchData;\n\ntry {\n  batchData = JSON.parse(stdout);\n} catch (e) {\n  batchData = $json;\n}\n\nif (!batchData || !batchData.batch_id) {\n  throw new Error(\"No se recibió un batch válido para el agente RAG.\");\n}\n\n/*\n  IMPORTANTE:\n  Este nombre debe coincidir EXACTAMENTE con el nombre de la tool en n8n.\n  Si renombraras el nodo/tool, cambia este valor.\n*/\nconst RAG_TOOL_NAME = \"risk_catalog_search\";\nconst RAG_COLLECTION_EXPECTED = \"tfm_rag_manual_agent\";\n\nfunction firstNonEmpty(...values) {\n  for (const value of values) {\n    if (value === null || value === undefined) continue;\n\n    const text = String(value).trim();\n\n    if (text && text !== \"undefined\" && text !== \"null\" && text !== \"#N/A\") {\n      return text;\n    }\n  }\n\n  return \"\";\n}\n\nfunction getNested(obj, path) {\n  try {\n    return path.split(\".\").reduce((acc, key) => acc?.[key], obj);\n  } catch (e) {\n    return \"\";\n  }\n}\n\nfunction normalizeKey(value) {\n  return String(value || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\")\n    .trim();\n}\n\nfunction normalizeQid(value) {\n  const text = String(value || \"\").toUpperCase().trim();\n  const match = text.match(/Q[\\s_\\-]?(\\d{1,3})/i) || text.match(/(\\d{1,3})/);\n\n  if (!match) return \"\";\n\n  const num = match[1] || match[0];\n\n  return `Q_${String(Number(num)).padStart(3, \"0\")}`;\n}\n\nfunction findDeepValue(obj, keyCandidates) {\n  if (!obj || typeof obj !== \"object\") return \"\";\n\n  const normalizedCandidates = keyCandidates.map(normalizeKey);\n  const stack = [obj];\n\n  while (stack.length) {\n    const current = stack.pop();\n\n    if (!current || typeof current !== \"object\") continue;\n\n    for (const [key, value] of Object.entries(current)) {\n      const normalizedKey = normalizeKey(key);\n\n      if (normalizedCandidates.includes(normalizedKey)) {\n        const text = firstNonEmpty(value);\n        if (text) return text;\n      }\n\n      if (value && typeof value === \"object\") {\n        stack.push(value);\n      }\n    }\n  }\n\n  return \"\";\n}\n\nfunction extractProviderAnswer(q) {\n  return firstNonEmpty(\n    q.provider_answer,\n    q.answer,\n    q.response,\n    q.respuesta,\n    q.valor,\n    q.value,\n    q.selected_answer,\n    q.selectedOption,\n    q.raw_answer,\n    q.rawResponse,\n    q[\"Respuesta\"],\n    q[\"respuesta\"],\n    getNested(q, \"provider.answer\"),\n    getNested(q, \"provider.response\"),\n    getNested(q, \"answer.value\"),\n    getNested(q, \"answer.response\"),\n    findDeepValue(q, [\n      \"provider_answer\",\n      \"answer\",\n      \"respuesta\",\n      \"response\",\n      \"valor\",\n      \"value\",\n      \"selected_answer\",\n      \"raw_answer\"\n    ])\n  );\n}\n\nfunction extractProviderDetails(q) {\n  return firstNonEmpty(\n    q.provider_details,\n    q.provider_explanation,\n    q.answer_explanation,\n    q.response_explanation,\n    q.explanation,\n    q.explicacion,\n    q.detalle,\n    q.details,\n    q.comment,\n    q.comments,\n    q.observations,\n    q.observaciones,\n    q.justification,\n    q.justificacion,\n    q.evidence,\n    q.evidencia,\n    q.additional_info,\n    q.additional_information,\n    q.informacion_adicional,\n    q[\"Explicación\"],\n    q[\"Explicacion\"],\n    q[\"explicación\"],\n    q[\"explicacion\"],\n    q[\"Observaciones\"],\n    q[\"observaciones\"],\n    q[\"Comentarios\"],\n    q[\"comentarios\"],\n    getNested(q, \"provider.details\"),\n    getNested(q, \"provider.explanation\"),\n    getNested(q, \"provider.observations\"),\n    getNested(q, \"answer.explanation\"),\n    getNested(q, \"answer.details\"),\n    getNested(q, \"raw.explanation\"),\n    getNested(q, \"raw.details\"),\n    getNested(q, \"raw.observations\"),\n    findDeepValue(q, [\n      \"provider_details\",\n      \"provider_explanation\",\n      \"answer_explanation\",\n      \"response_explanation\",\n      \"explanation\",\n      \"explicacion\",\n      \"detalle\",\n      \"details\",\n      \"comment\",\n      \"comments\",\n      \"observations\",\n      \"observaciones\",\n      \"justification\",\n      \"justificacion\",\n      \"evidence\",\n      \"evidencia\",\n      \"additional_info\",\n      \"additional_information\",\n      \"informacion_adicional\"\n    ])\n  );\n}\n\nfunction getQuestionsFromBatchData(batchData) {\n  const questions = [];\n\n  const units =\n    batchData.evaluation_units ||\n    batchData.units ||\n    batchData.evaluationGroups ||\n    [];\n\n  for (const unit of units) {\n    const unitQuestions =\n      unit.questions ||\n      unit.items ||\n      unit.evaluation_questions ||\n      [];\n\n    for (const q of unitQuestions) {\n      questions.push(q);\n    }\n  }\n\n  const rootQuestions =\n    batchData.questions ||\n    batchData.question_items ||\n    batchData.questions_to_analyze ||\n    [];\n\n  for (const q of rootQuestions) {\n    questions.push(q);\n  }\n\n  return questions;\n}\n\nfunction extractQuestionText(q) {\n  return firstNonEmpty(\n    q.question_text,\n    q.question,\n    q.text,\n    q.title,\n    q.requisito,\n    q.catalog_entry?.question_text,\n    q.catalog_entry?.question,\n    q.catalog_entry?.text,\n    q.catalog_entry?.requisito,\n    q.catalog?.question_text,\n    q.catalog?.question,\n    q.catalog?.text,\n    q.payload?.question_text,\n    q.payload?.question,\n    findDeepValue(q, [\n      \"question_text\",\n      \"question\",\n      \"texto_pregunta\",\n      \"pregunta\",\n      \"requisito\"\n    ])\n  );\n}\n\nconst batchQuestions = getQuestionsFromBatchData(batchData);\n\nconst questionsMap = new Map();\n\nfor (const q of batchQuestions) {\n  const rawQid = firstNonEmpty(\n    q.question_id,\n    q.id,\n    q.code,\n    q.question_code,\n    q.logical_id,\n    q.catalog_entry?.question_id,\n    q.payload?.question_id\n  );\n\n  const qid = normalizeQid(rawQid);\n\n  if (!qid) continue;\n\n  // Evitamos duplicados como Q_001 repetida dos veces.\n  if (questionsMap.has(qid)) {\n    continue;\n  }\n\n  const providerAnswer = extractProviderAnswer(q);\n  const providerDetails = extractProviderDetails(q);\n  const questionText = extractQuestionText(q);\n\n  const exactToken = `EXACT_QUESTION_ID_${qid}`;\n\n  /*\n    La query empieza SIEMPRE por el token exacto y el question_id.\n    Esto ayuda a que Qdrant recupere la ficha correcta.\n  */\n  const ragSearchQuery = `${exactToken} ${qid} ${questionText}`.trim();\n\n  questionsMap.set(qid, {\n    question_id: qid,\n    exact_rag_token: exactToken,\n\n    /*\n      Este es el valor que el agente debe pasar literalmente a la tool.\n    */\n    tool_input: ragSearchQuery,\n    rag_search_query: ragSearchQuery,\n\n    question_text: questionText,\n    provider_answer: providerAnswer,\n    provider_explanation: providerDetails,\n    provider_combined_response: [\n      providerAnswer ? `Respuesta: ${providerAnswer}` : \"\",\n      providerDetails ? `Explicación: ${providerDetails}` : \"\"\n    ].filter(Boolean).join(\"\\n\"),\n\n    /*\n      Campos explícitos para reforzar al agente.\n    */\n    tool_required: true,\n    required_tool_name: RAG_TOOL_NAME,\n    tool_call_instruction: `Llama a ${RAG_TOOL_NAME} con este input exacto antes de evaluar: ${ragSearchQuery}`\n  });\n}\n\nconst questionsForAgent = Array.from(questionsMap.values());\n\nif (questionsForAgent.length === 0) {\n  throw new Error(\n    \"No se encontraron preguntas dentro del batch para construir el prompt RAG TOOL. Batch recibido: \" +\n    JSON.stringify(batchData).slice(0, 2000)\n  );\n}\n\nconst requiredToolCalls = questionsForAgent.map((q, index) => ({\n  order: index + 1,\n  question_id: q.question_id,\n  tool_name: RAG_TOOL_NAME,\n  input: q.tool_input\n}));\n\nconst toolCallPlanText = requiredToolCalls\n  .map(call => `${call.order}. ${call.tool_name} con input: \"${call.input}\"`)\n  .join(\"\\n\");\n\nconst systemPrompt = `\nINSTRUCCIÓN PRIORITARIA ABSOLUTA:\nEsta es una tarea TOOL-FIRST.\n\nTu primera acción obligatoria NO es responder.\nTu primera acción obligatoria es llamar a la herramienta ${RAG_TOOL_NAME}.\n\nNo puedes evaluar ninguna pregunta antes de usar la herramienta ${RAG_TOOL_NAME}.\nNo puedes devolver el JSON final antes de haber usado la herramienta ${RAG_TOOL_NAME}.\nNo puedes responder usando conocimiento general, memoria o inferencias sin RAG.\n\nSi tienes una pregunta, debes hacer exactamente este ciclo:\n1. Llamar a ${RAG_TOOL_NAME}.\n2. Leer la ficha recuperada.\n3. Comprobar que metadata.question_id coincide con question_id.\n4. Evaluar la respuesta del proveedor.\n5. Devolver JSON final.\n\nEres un agente experto en análisis de riesgos técnicos de ciberseguridad para soluciones SaaS.\n\nHERRAMIENTA DISPONIBLE:\nNombre exacto de la herramienta:\n${RAG_TOOL_NAME}\n\nUso de la herramienta:\n- La herramienta recupera la ficha oficial del catálogo de riesgos.\n- La herramienta debe usarse antes de evaluar cada pregunta.\n- La herramienta recibe un único input textual.\n- Ese input debe ser exactamente el valor tool_input de la pregunta.\n- No cambies, resumas ni reformules tool_input.\n- No llames a la herramienta con otro texto diferente.\n\nCONTRATO DE USO RAG:\n- Debes realizar una llamada independiente a ${RAG_TOOL_NAME} por cada question_id.\n- Si hay 1 pregunta, debes hacer 1 llamada.\n- Si hay 3 preguntas, debes hacer 3 llamadas.\n- Si no usas la herramienta para una pregunta, la evaluación de esa pregunta es inválida.\n- Si la herramienta no devuelve ficha válida, score = 2 y requires_provider_followup = true.\n- Si metadata.question_id no coincide exactamente con question_id, descarta la ficha y usa score = 2.\n- No uses documentos de otra pregunta.\n- No inventes reglas que no estén en la ficha recuperada.\n\nQUÉ CONTIENE LA FICHA RAG:\n- reglas de scoring\n- controles asociados\n- incumplimientos\n- condiciones de cumplimiento\n- condiciones de ambigüedad\n- reglas condicionales\n- severidad\n- mitigación\n\nSCORES:\n- score = 1: incumplimiento claro.\n- score = 2: respuesta parcial, ambigua, contradictoria o evidencia insuficiente.\n- score = 3: cumplimiento claro.\n\nCRITERIOS DE DECISIÓN:\n- Si la respuesta del proveedor confirma claramente el control y aporta detalle suficiente, score = 3.\n- Si la respuesta del proveedor es negativa o evidencia incumplimiento claro, score = 1.\n- Si falta evidencia, detalle técnico, alcance, configuración, periodicidad, cobertura, valores concretos o confirmación suficiente, score = 2.\n- Si la respuesta es contradictoria, score = 2.\n- Si la respuesta está vacía, score = 2.\n- Si la ficha RAG no coincide con el question_id, score = 2.\n- Nunca uses score = 0.\n\nFOLLOW-UP:\n- Si score = 2, requires_provider_followup = true.\n- Si score = 1 o score = 3, requires_provider_followup = false.\n- followup_questions debe ser siempre un array de strings.\n- Si score = 2, incluye una pregunta breve y concreta para el proveedor.\n\nNO RELLENAR:\nNo rellenes estos campos:\n- risk_id\n- risk_name\n- control_ids\n- amenazas\n- mitigaciones\n- level\n- sources\n- generates_finding\n\nEl sistema posterior rellenará esos campos de forma determinista usando el catálogo.\n\nFORMATO DE RESPUESTA FINAL:\nDespués de usar la herramienta, devuelve únicamente JSON válido.\nNo uses Markdown.\nNo uses bloques de código.\nNo escribas explicación fuera del JSON.\nEl primer carácter de la respuesta final debe ser {.\nEl último carácter de la respuesta final debe ser }.\n\nCONCISIÓN:\n- answer_summary máximo 25 palabras.\n- decision_reason máximo 40 palabras.\n- No copies párrafos largos de la ficha RAG.\n- Resume la decisión de forma breve.\n`;\n\nconst userPrompt = `\nANTES DE RESPONDER, DEBES USAR LA HERRAMIENTA.\n\nPLAN OBLIGATORIO DE LLAMADAS A TOOL:\n${toolCallPlanText}\n\nREGLA CRÍTICA:\nNo generes la respuesta JSON final hasta haber ejecutado todas las llamadas anteriores.\n\nAnaliza SOLO las preguntas incluidas en este batch.\n\nCASE_ID:\n${batchData.case_id}\n\nBATCH_ID:\n${batchData.batch_id}\n\nAUTH_CONTEXT:\n${JSON.stringify(batchData.auth_context || {}, null, 2)}\n\nPREGUNTAS:\n${JSON.stringify(questionsForAgent, null, 2)}\n\nPROCEDIMIENTO OBLIGATORIO POR CADA PREGUNTA:\n1. Lee question_id.\n2. Lee tool_input.\n3. Llama a ${RAG_TOOL_NAME} usando exactamente el valor de tool_input.\n4. Comprueba que la ficha recuperada tiene metadata.question_id igual al question_id.\n5. Evalúa provider_answer y provider_explanation conjuntamente.\n6. Devuelve una evaluación para esa pregunta.\n\nESTRUCTURA OBLIGATORIA DE RESPUESTA FINAL:\n{\n  \"batch_id\": \"${batchData.batch_id}\",\n  \"case_id\": \"${batchData.case_id}\",\n  \"question_evaluations\": [\n    {\n      \"question_id\": \"\",\n      \"score\": 1,\n      \"score_type\": \"non_compliance|partial_compliance|insufficient_evidence|ambiguous_answer|compliant\",\n      \"answer_summary\": \"\",\n      \"decision_reason\": \"\",\n      \"requires_provider_followup\": false,\n      \"followup_questions\": []\n    }\n  ],\n  \"batch_validation_notes\": []\n}\n\nREGLAS FINALES:\n- Devuelve una evaluación por cada pregunta de PREGUNTAS.\n- No devuelvas preguntas que no estén en PREGUNTAS.\n- No repitas question_id.\n- No uses score = 0.\n- Si la ficha recuperada tiene metadata.question_id distinto del question_id evaluado, score = 2.\n- No rellenes risk_id, risk_name, control_ids, amenazas, mitigaciones, level, sources ni generates_finding.\n- followup_questions debe ser array de strings.\n- Devuelve solo JSON válido.\n`;\n\nconst batchDataB64 = Buffer.from(\n  JSON.stringify(batchData),\n  \"utf8\"\n).toString(\"base64\");\n\nreturn {\n  json: {\n    batch_id: batchData.batch_id,\n    case_id: batchData.case_id,\n\n    batch_data: batchData,\n    batch_data_b64: batchDataB64,\n\n    questions_for_agent: questionsForAgent,\n    required_tool_calls: requiredToolCalls,\n\n    case_meta: batchData.case_meta || {},\n    auth_context: batchData.auth_context || {},\n\n    system_prompt: systemPrompt,\n    user_prompt: userPrompt,\n\n    rag_mode: \"agent_tool_qdrant_vector_store\",\n    rag_tool_name: RAG_TOOL_NAME,\n    rag_collection_expected: RAG_COLLECTION_EXPECTED,\n\n    /*\n      Campos útiles para validar después del AI Agent.\n      Activa Return Intermediate Steps en el AI Agent y revisa si se han ejecutado.\n    */\n    expected_tool_call_count: requiredToolCalls.length,\n    expected_tool_names: [RAG_TOOL_NAME],\n\n    debug_questions_found: questionsForAgent.map(q => q.question_id),\n    debug_rag_queries: questionsForAgent.map(q => q.tool_input),\n    debug_required_tool_calls: requiredToolCalls,\n    debug_deduplicated_question_count: questionsForAgent.length\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        0
+      ],
+      "id": "d2338a8a-bae3-4ac4-9392-0a25293fd352",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function getRawModelOutput(itemJson) {\n  let raw =\n    itemJson.output ||\n    itemJson.text ||\n    itemJson.response ||\n    itemJson.result ||\n    itemJson.message ||\n    \"\";\n\n  if (typeof raw !== \"string\") {\n    raw = JSON.stringify(raw);\n  }\n\n  return raw.trim();\n}\n\nfunction extractJsonObject(raw) {\n  raw = raw\n    .replace(/^```json/i, \"\")\n    .replace(/^```/i, \"\")\n    .replace(/```$/i, \"\")\n    .trim();\n\n  try {\n    return JSON.parse(raw);\n  } catch (e) {}\n\n  const firstBrace = raw.indexOf(\"{\");\n  const lastBrace = raw.lastIndexOf(\"}\");\n\n  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {\n    throw new Error(\"No se encontró ningún objeto JSON en la respuesta del modelo. Respuesta: \" + raw);\n  }\n\n  const candidate = raw.slice(firstBrace, lastBrace + 1).trim();\n\n  try {\n    return JSON.parse(candidate);\n  } catch (e) {\n    throw new Error(\"Se encontró un bloque JSON, pero no era JSON válido. Bloque: \" + candidate);\n  }\n}\n\nfunction normalizeText(value) {\n  return String(value || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\")\n    .trim();\n}\n\nfunction safeArray(value) {\n  if (Array.isArray(value)) return value;\n  if (!value) return [];\n\n  if (typeof value === \"string\") {\n    return value\n      .split(/[,;\\n]+/)\n      .map(x => x.trim())\n      .filter(Boolean);\n  }\n\n  return [];\n}\n\nfunction isPositiveAnswer(value) {\n  const v = normalizeText(value);\n\n  return (\n    v === \"si\" ||\n    v === \"sí\" ||\n    v === \"yes\" ||\n    v === \"true\" ||\n    v.startsWith(\"si \") ||\n    v.startsWith(\"sí \") ||\n    v.includes(\"si,\") ||\n    v.includes(\"sí,\") ||\n    v.includes(\"se soporta\") ||\n    v.includes(\"soporta\") ||\n    v.includes(\"existe\") ||\n    v.includes(\"dispone\") ||\n    v.includes(\"implementado\") ||\n    v.includes(\"implantado\") ||\n    v.includes(\"habilitado\") ||\n    v.includes(\"dentro de la ue\") ||\n    v.includes(\"dentro de la union europea\") ||\n    v.includes(\"pertenecen a la union europea\")\n  );\n}\n\nfunction isNegativeAnswer(value) {\n  const v = normalizeText(value);\n\n  return (\n    v === \"no\" ||\n    v === \"false\" ||\n    v.startsWith(\"no \") ||\n    v.includes(\"no dispone\") ||\n    v.includes(\"no existe\") ||\n    v.includes(\"no soporta\") ||\n    v.includes(\"no se soporta\") ||\n    v.includes(\"no se utiliza\") ||\n    v.includes(\"no implementa\") ||\n    v.includes(\"no se accede\") ||\n    v.includes(\"no accede\") ||\n    v.includes(\"no hay acceso\") ||\n    v.includes(\"no esta habilitado\") ||\n    v.includes(\"no está habilitado\")\n  );\n}\n\nfunction classifyInfoLevel(value) {\n  const v = normalizeText(value);\n\n  if (v.includes(\"altamente confidencial\")) return \"ALTAMENTE_CONFIDENCIAL\";\n  if (v.includes(\"confidencial\")) return \"CONFIDENCIAL\";\n  if (v.includes(\"uso interno\") || v.includes(\"interna\") || v.includes(\"interno\")) return \"USO_INTERNO\";\n  if (v.includes(\"public\")) return \"PUBLICA\";\n\n  return \"DESCONOCIDA\";\n}\n\nfunction mitigationTime(level) {\n  if (level === \"ALTO\") return \"3 meses\";\n  if (level === \"MEDIO\") return \"12 meses\";\n  if (level === \"BAJO\") return \"Pte.\";\n  return \"\";\n}\n\nfunction resolveSeverityByTier(catalog, tier) {\n  const t = String(tier || \"\").replace(\"TIER\", \"\").trim();\n\n  const sev =\n    catalog?.severity_by_tier?.[`TIER ${t}`] ||\n    catalog?.severity_by_tier?.[`Tier ${t}`] ||\n    catalog?.severity_by_tier?.[t] ||\n    \"\";\n\n  const normalized = String(sev || \"\").toUpperCase();\n\n  if (!normalized || [\"NO DEFINIDO\", \"N/A\", \"#N/A\", \"INFO\", \"NINGUNO\", \"SIN RIESGO\"].includes(normalized)) {\n    return \"\";\n  }\n\n  return normalized;\n}\n\nfunction objectText(obj) {\n  try {\n    return normalizeText(JSON.stringify(obj || {}));\n  } catch (e) {\n    return \"\";\n  }\n}\n\nfunction caseHasPersonalData(batchData, caseMeta) {\n  const text = objectText({ batchData, caseMeta });\n\n  const signals = [\n    \"datos personales\",\n    \"dato personal\",\n    \"personal data\",\n    \"gdpr\",\n    \"rgpd\",\n    \"reglamento general de proteccion de datos\",\n    \"tratamiento de datos personales\"\n  ];\n\n  return signals.some(signal => text.includes(normalizeText(signal)));\n}\n\nfunction answerDoesNotGuaranteeGdpr(ev, qInput) {\n  const rawAnswer = normalizeText(qInput?.provider_answer || \"\");\n\n  if (rawAnswer === \"no\") return true;\n  if (!rawAnswer) return true;\n\n  const text = normalizeText([\n    qInput?.provider_answer,\n    qInput?.provider_details,\n    qInput?.provider_combined_response,\n    ev.answer_summary,\n    ev.decision_reason\n  ].join(\" \"));\n\n  const negativeSignals = [\n    \"no\",\n    \"no cumple\",\n    \"no se garantiza\",\n    \"no garantiza\",\n    \"no existen\",\n    \"no dispone\",\n    \"sin evidencia\",\n    \"no aporta evidencia\"\n  ];\n\n  const positiveSignals = [\n    \"si\",\n    \"sí\",\n    \"cumple\",\n    \"garantiza\",\n    \"garantizan\",\n    \"controles internos\",\n    \"auditorias internas\",\n    \"auditoría interna\",\n    \"gdpr\",\n    \"rgpd\"\n  ];\n\n  const hasNegative = negativeSignals.some(signal => text.includes(normalizeText(signal)));\n  const hasPositive = positiveSignals.some(signal => text.includes(normalizeText(signal)));\n\n  return hasNegative && !hasPositive;\n}\n\nfunction resolveConditionalSeverity(ev, payload, batchData, caseMeta, qInput) {\n  const qid = ev.question_id;\n\n  if (qid === \"Q_001\") {\n    const hasPersonalData = caseHasPersonalData(batchData, caseMeta);\n    const notGdprGuaranteed = answerDoesNotGuaranteeGdpr(ev, qInput);\n\n    if (hasPersonalData && notGdprGuaranteed && (ev.score === 1 || ev.score === 2)) {\n      ev.decision_reason = \"Se aplica la observación del catálogo: al existir datos personales y no garantizarse el cumplimiento GDPR, el riesgo se eleva automáticamente a ALTO.\";\n      ev.validation_warning = \"Severidad ajustada por observación del catálogo Q_001: datos personales + GDPR no garantizado = ALTO.\";\n      return \"ALTO\";\n    }\n\n    if (!hasPersonalData && notGdprGuaranteed && (ev.score === 1 || ev.score === 2)) {\n      ev.requires_human_review = true;\n      ev.validation_warning = \"Q_001 contiene regla condicional GDPR, pero no se ha podido confirmar automáticamente si hay datos personales.\";\n    }\n  }\n\n  return \"\";\n}\n\nfunction resolveAuthSeverity(ev, catalog, authContext) {\n  if (ev.score === 3) return \"SIN RIESGO\";\n\n  const qid = ev.question_id;\n\n  const empresaUsersAccess = isPositiveAnswer(authContext?.empresa_users_access_answer);\n  const federationAnswer = authContext?.federation_supported_or_used_answer || \"\";\n  const federationEnabled = isPositiveAnswer(federationAnswer) && !isNegativeAnswer(federationAnswer);\n  const infoLevel = classifyInfoLevel(authContext?.information_classification);\n\n  if (!empresaUsersAccess) {\n    return \"SIN RIESGO\";\n  }\n\n  if (qid === \"Q_010\") {\n    if (ev.score === 3) return \"SIN RIESGO\";\n    return \"MEDIO\";\n  }\n\n  if (federationEnabled) {\n    return \"SIN RIESGO\";\n  }\n\n  if (qid === \"Q_020\") {\n    if (infoLevel === \"PUBLICA\") return \"MEDIO\";\n    if ([\"USO_INTERNO\", \"CONFIDENCIAL\", \"ALTAMENTE_CONFIDENCIAL\"].includes(infoLevel)) return \"ALTO\";\n    return \"ALTO\";\n  }\n\n  if ([\"Q_011\", \"Q_012\", \"Q_013\", \"Q_014\", \"Q_015\", \"Q_016\", \"Q_017\", \"Q_018\", \"Q_019\"].includes(qid)) {\n    if ([\"CONFIDENCIAL\", \"ALTAMENTE_CONFIDENCIAL\"].includes(infoLevel)) return \"ALTO\";\n    return \"MEDIO\";\n  }\n\n  if (qid === \"Q_021\") {\n    return \"MEDIO\";\n  }\n\n  return \"\";\n}\n\nfunction resolveLoggingSeverity(ev, batchData) {\n  if (ev.score === 3) return \"SIN RIESGO\";\n  return \"MEDIO\";\n}\n\nfunction resolveQ001Score(ev, qInput) {\n  if (ev.question_id !== \"Q_001\") {\n    return { apply: false };\n  }\n\n  const answer = normalizeText(qInput?.provider_answer || \"\");\n\n  if (answer === \"no\" || answer.startsWith(\"no \")) {\n    return {\n      apply: true,\n      score: 1,\n      score_type: \"non_compliance\",\n      answer_summary: \"El proveedor indica que no existen planes de auditoría y controles internos de seguridad alineados con las normativas legales de tratamiento de datos.\",\n      decision_reason: \"La respuesta del proveedor para Q_001 es NO. Por tanto, no se garantiza la existencia de planes de auditoría y controles internos de seguridad alineados con GDPR u otras normativas aplicables.\",\n      requires_provider_followup: false,\n      requires_human_review: false\n    };\n  }\n\n  if (answer === \"si\" || answer === \"sí\" || answer.startsWith(\"si \") || answer.startsWith(\"sí \")) {\n    return {\n      apply: true,\n      score: 3,\n      score_type: \"compliant\",\n      answer_summary: \"El proveedor indica que existen planes de auditoría y controles internos de seguridad alineados con las normativas legales aplicables.\",\n      decision_reason: \"La respuesta del proveedor para Q_001 es afirmativa, por lo que se considera que el requisito está cubierto.\",\n      requires_provider_followup: false,\n      requires_human_review: false\n    };\n  }\n\n  return {\n    apply: true,\n    score: 2,\n    score_type: \"insufficient_evidence\",\n    answer_summary: \"La respuesta del proveedor no permite confirmar si existen planes de auditoría y controles internos de seguridad alineados con GDPR u otras normativas aplicables.\",\n    decision_reason: \"La respuesta para Q_001 es ambigua o insuficiente. Se requiere aclaración adicional.\",\n    requires_provider_followup: true,\n    requires_human_review: true\n  };\n}\n\nfunction resolveLegalScore(ev, qInput) {\n  const qid = ev.question_id;\n  const answer = normalizeText([\n    qInput?.provider_answer,\n    qInput?.provider_details,\n    qInput?.provider_combined_response,\n    ev.answer_summary\n  ].join(\" \"));\n\n  if (qid === \"Q_002\") {\n    if (\n      answer.includes(\"si\") ||\n      answer.includes(\"sí\") ||\n      answer.includes(\"union europea\") ||\n      answer.includes(\"ue\") ||\n      answer.includes(\"europa\")\n    ) {\n      return {\n        apply: true,\n        score: 3,\n        answer_summary: \"El proveedor indica que los CPDs principales y de respaldo se encuentran dentro de la Unión Europea.\",\n        reason: \"Los CPDs se encuentran dentro de la Unión Europea o la respuesta indica cumplimiento del requisito.\"\n      };\n    }\n\n    if (\n      answer.includes(\"fuera\") ||\n      answer.includes(\"no\") ||\n      answer.includes(\"tercer pais\") ||\n      answer.includes(\"terceros paises\")\n    ) {\n      return {\n        apply: true,\n        score: 2,\n        answer_summary: \"La respuesta indica que los CPDs podrían estar fuera de la Unión Europea o no permite confirmar suficientemente su ubicación.\",\n        reason: \"La respuesta puede implicar ubicación fuera de la UE o falta de garantías suficientes. Requiere aclaración o revisión.\"\n      };\n    }\n  }\n\n  if (qid === \"Q_003\") {\n    if (\n      answer.includes(\"no se accede\") ||\n      answer.includes(\"no accede\") ||\n      answer.includes(\"no hay acceso\") ||\n      answer === \"no\"\n    ) {\n      return {\n        apply: true,\n        score: 3,\n        answer_summary: \"El proveedor indica que no se accede a los datos desde países fuera de la Unión Europea.\",\n        reason: \"El proveedor indica que no se accede a los datos desde países fuera de la Unión Europea.\"\n      };\n    }\n\n    if (\n      answer.includes(\"si\") ||\n      answer.includes(\"sí\") ||\n      answer.includes(\"fuera\") ||\n      answer.includes(\"tercer pais\") ||\n      answer.includes(\"terceros paises\")\n    ) {\n      return {\n        apply: true,\n        score: 2,\n        answer_summary: \"La respuesta indica que existe o podría existir acceso a datos desde países fuera de la Unión Europea.\",\n        reason: \"Existe o podría existir acceso desde fuera de la UE. Requiere validar garantías GDPR, países y condiciones.\"\n      };\n    }\n  }\n\n  return { apply: false };\n}\n\nfunction resolveAuthScore(ev, qInput, authContext) {\n  const qid = ev.question_id;\n\n  if (!/^Q_0(1[0-9]|20|21)$/.test(qid)) {\n    return { apply: false };\n  }\n\n  const answerText = normalizeText([\n    qInput?.provider_answer,\n    qInput?.provider_details,\n    qInput?.provider_combined_response\n  ].join(\" \"));\n\n  const empresaUsersAccess = isPositiveAnswer(authContext?.empresa_users_access_answer);\n  const federationAnswer = authContext?.federation_supported_or_used_answer || \"\";\n  const federationEnabled = isPositiveAnswer(federationAnswer) && !isNegativeAnswer(federationAnswer);\n\n  if (!empresaUsersAccess) {\n    return {\n      apply: true,\n      score: 3,\n      score_type: \"compliant\",\n      answer_summary: ev.answer_summary || \"No hay acceso de usuarios de EMPRESA, por lo que el control de autenticación no genera riesgo.\",\n      decision_reason: \"Según auth_context, no hay acceso de usuarios de EMPRESA. No se levanta riesgo de autenticación.\",\n      requires_provider_followup: false,\n      requires_human_review: false\n    };\n  }\n\n  if (federationEnabled && qid !== \"Q_010\") {\n    return {\n      apply: true,\n      score: 3,\n      score_type: \"compliant\",\n      answer_summary: ev.answer_summary || \"Existe federación corporativa, por lo que este control alternativo no genera riesgo según contexto.\",\n      decision_reason: \"Según auth_context, existe federación corporativa suficiente. El control alternativo no genera riesgo.\",\n      requires_provider_followup: false,\n      requires_human_review: false\n    };\n  }\n\n  if (!answerText) {\n    return {\n      apply: true,\n      score: 2,\n      score_type: \"insufficient_evidence\",\n      answer_summary: \"No hay respuesta suficiente para evaluar el control de autenticación.\",\n      decision_reason: \"Falta respuesta o explicación del proveedor sobre el control de autenticación.\",\n      requires_provider_followup: true,\n      requires_human_review: true\n    };\n  }\n\n  if (qid === \"Q_019\") {\n    if (isNegativeAnswer(answerText)) {\n      return {\n        apply: true,\n        score: 1,\n        score_type: \"non_compliance\",\n        answer_summary: \"El proveedor indica que no se almacenan las contraseñas cifradas con un algoritmo seguro.\",\n        decision_reason: \"No se cumple el requisito de almacenamiento seguro de contraseñas.\",\n        requires_provider_followup: false,\n        requires_human_review: false\n      };\n    }\n\n    const hasCryptoDetail =\n      answerText.includes(\"aes\") ||\n      answerText.includes(\"sha\") ||\n      answerText.includes(\"bcrypt\") ||\n      answerText.includes(\"argon2\") ||\n      answerText.includes(\"pbkdf2\") ||\n      answerText.includes(\"hash\") ||\n      answerText.includes(\"cifrad\");\n\n    if (isPositiveAnswer(answerText) && !hasCryptoDetail) {\n      return {\n        apply: true,\n        score: 2,\n        score_type: \"insufficient_evidence\",\n        answer_summary: \"El proveedor indica que las contraseñas se almacenan cifradas, pero no aporta algoritmo, configuración o evidencia suficiente.\",\n        decision_reason: \"La respuesta es afirmativa, pero falta detalle técnico sobre el algoritmo o mecanismo de protección de contraseñas.\",\n        requires_provider_followup: true,\n        requires_human_review: true\n      };\n    }\n\n    if (isPositiveAnswer(answerText) && hasCryptoDetail) {\n      return {\n        apply: true,\n        score: 3,\n        score_type: \"compliant\",\n        answer_summary: \"El proveedor indica almacenamiento seguro de contraseñas y aporta detalle técnico suficiente.\",\n        decision_reason: \"La respuesta permite confirmar el cumplimiento del requisito.\",\n        requires_provider_followup: false,\n        requires_human_review: false\n      };\n    }\n  }\n\n  const negativeControls = [\"Q_010\", \"Q_014\", \"Q_015\", \"Q_016\", \"Q_017\", \"Q_018\", \"Q_020\", \"Q_021\"];\n\n  if (negativeControls.includes(qid) && isNegativeAnswer(answerText)) {\n    return {\n      apply: true,\n      score: 1,\n      score_type: \"non_compliance\",\n      answer_summary: ev.answer_summary || \"La respuesta del proveedor indica que el control no está implantado.\",\n      decision_reason: \"Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.\",\n      requires_provider_followup: false,\n      requires_human_review: false\n    };\n  }\n\n  if ([\"Q_011\", \"Q_012\", \"Q_013\"].includes(qid) && isNegativeAnswer(answerText)) {\n    return {\n      apply: true,\n      score: 1,\n      score_type: \"non_compliance\",\n      answer_summary: ev.answer_summary || \"La respuesta del proveedor indica que el control no está implantado.\",\n      decision_reason: \"Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.\",\n      requires_provider_followup: false,\n      requires_human_review: false\n    };\n  }\n\n  return { apply: false };\n}\n\nfunction isPlaceholderOrWeakDetail(value) {\n  const v = normalizeText(value);\n\n  if (!v) return true;\n\n  const weakSignals = [\n    \"detallar\",\n    \"por especificar\",\n    \"pendiente\",\n    \"a consultar\",\n    \"consultar con cliente\",\n    \"depende\",\n    \"otros\",\n    \"definido por el proveedor\",\n    \"lo gestiona el proveedor\",\n    \"gestionado por el proveedor\",\n    \"se puede generar\",\n    \"por establecer\"\n  ];\n\n  return weakSignals.some(signal => v.includes(normalizeText(signal)));\n}\n\nfunction answerIsNever(value) {\n  const v = normalizeText(value);\n  return v === \"nunca\" || v.includes(\"nunca\");\n}\n\nfunction answerIsNo(value) {\n  return isNegativeAnswer(value);\n}\n\nfunction resolveSpecificScore(ev, qInput) {\n  const qid = ev.question_id;\n\n  const answerText = normalizeText([\n    qInput?.provider_answer,\n    qInput?.provider_details,\n    qInput?.provider_combined_response\n  ].join(\" \"));\n\n  if (qid === \"Q_005\") {\n    if (answerIsNever(qInput?.provider_answer) || answerIsNo(qInput?.provider_answer)) {\n      return {\n        apply: true,\n        score: 1,\n        score_type: \"non_compliance\",\n        answer_summary: \"El proveedor indica que nunca se realizan ejercicios de seguridad sobre el servicio.\",\n        decision_reason: \"La respuesta 'Nunca' implica incumplimiento del requisito de realizar ejercicios o revisiones de seguridad con periodicidad.\",\n        requires_provider_followup: false,\n        requires_human_review: false\n      };\n    }\n\n    if (isPlaceholderOrWeakDetail(qInput?.provider_details)) {\n      return {\n        apply: true,\n        score: 2,\n        score_type: \"insufficient_evidence\",\n        answer_summary: \"No se aporta suficiente detalle sobre el proceso, alcance o periodicidad de los ejercicios de seguridad.\",\n        decision_reason: \"La respuesta requiere aclarar proceso, alcance y periodicidad.\",\n        requires_provider_followup: true,\n        requires_human_review: true\n      };\n    }\n  }\n\n  if (qid === \"Q_006\") {\n    if (answerIsNever(qInput?.provider_answer) || answerIsNo(qInput?.provider_answer)) {\n      return {\n        apply: true,\n        score: 1,\n        score_type: \"non_compliance\",\n        answer_summary: \"El proveedor indica que nunca se realizan tests de intrusión.\",\n        decision_reason: \"La respuesta 'Nunca' implica incumplimiento del requisito de realizar pruebas de intrusión o validaciones de seguridad.\",\n        requires_provider_followup: false,\n        requires_human_review: false\n      };\n    }\n\n    if (isPlaceholderOrWeakDetail(qInput?.provider_details)) {\n      return {\n        apply: true,\n        score: 2,\n        score_type: \"insufficient_evidence\",\n        answer_summary: \"No se aporta suficiente detalle sobre proceso, alcance o periodicidad de los tests de intrusión.\",\n        decision_reason: \"La respuesta requiere aclarar proceso, alcance y periodicidad.\",\n        requires_provider_followup: true,\n        requires_human_review: true\n      };\n    }\n  }\n\n  if (qid === \"Q_022\") {\n    if (\n      answerText.includes(\"no se soporta ninguno\") ||\n      answerText.includes(\"no soporta ninguno\") ||\n      answerText.includes(\"no se soportan versiones ssl\") ||\n      answerText.includes(\"no se soporta ssl\") ||\n      answerText === \"no\"\n    ) {\n      return {\n        apply: true,\n        score: 3,\n        score_type: \"compliant\",\n        answer_summary: \"El proveedor indica que no se soportan versiones SSL v3 o inferiores.\",\n        decision_reason: \"Si no se soportan versiones SSL v3 o inferiores, el requisito se considera cumplido.\",\n        requires_provider_followup: false,\n        requires_human_review: false\n      };\n    }\n  }\n\n  if (qid === \"Q_023\") {\n    const hasTls12OrHigher =\n      answerText.includes(\"tls 1.2\") ||\n      answerText.includes(\"tls1.2\") ||\n      answerText.includes(\"tls 1.3\") ||\n      answerText.includes(\"tls1.3\");\n\n    const hasOldTls =\n      answerText.includes(\"tls 1.0\") ||\n      answerText.includes(\"tls1.0\") ||\n      answerText.includes(\"tls 1.1\") ||\n      answerText.includes(\"tls1.1\") ||\n      answerText.includes(\"ssl\");\n\n    if (hasOldTls && !hasTls12OrHigher) {\n      return {\n        apply: true,\n        score: 1,\n        score_type: \"non_compliance\",\n        answer_summary: \"La respuesta no permite confirmar que solo se soporten versiones TLS 1.2 o superiores.\",\n        decision_reason: \"Se menciona SSL o no se concreta una versión TLS segura, por lo que existe riesgo de uso de protocolos inseguros.\",\n        requires_provider_followup: false,\n        requires_human_review: false\n      };\n    }\n\n    if (hasTls12OrHigher && !hasOldTls) {\n      return {\n        apply: true,\n        score: 3,\n        score_type: \"compliant\",\n        answer_summary: \"El proveedor indica soporte de TLS 1.2 o superior.\",\n        decision_reason: \"La respuesta permite confirmar que se utilizan versiones TLS seguras.\",\n        requires_provider_followup: false,\n        requires_human_review: false\n      };\n    }\n\n    return {\n      apply: true,\n      score: 2,\n      score_type: \"insufficient_evidence\",\n      answer_summary: \"No se especifican claramente las versiones TLS soportadas.\",\n      decision_reason: \"Se requiere confirmar si únicamente se soporta TLS 1.2 o superior y si TLS 1.0/1.1/SSL están deshabilitados.\",\n      requires_provider_followup: true,\n      requires_human_review: true\n    };\n  }\n\n  if (qid === \"Q_028\") {\n    const hasAlgorithm =\n      answerText.includes(\"aes\") ||\n      answerText.includes(\"rsa\") ||\n      answerText.includes(\"sha\") ||\n      answerText.includes(\"tls\") ||\n      answerText.includes(\"chacha\") ||\n      answerText.includes(\"argon\") ||\n      answerText.includes(\"bcrypt\");\n\n    if (isPositiveAnswer(answerText) && !hasAlgorithm) {\n      return {\n        apply: true,\n        score: 2,\n        score_type: \"insufficient_evidence\",\n        answer_summary: \"El proveedor indica que existe cifrado, pero no especifica algoritmo o configuración suficiente.\",\n        decision_reason: \"Se requiere confirmar el algoritmo utilizado y su configuración.\",\n        requires_provider_followup: true,\n        requires_human_review: true\n      };\n    }\n  }\n\n  if (qid === \"Q_029\") {\n    if (answerText === \"ssl\" || answerText.includes(\" ssl\")) {\n      return {\n        apply: true,\n        score: 2,\n        score_type: \"insufficient_evidence\",\n        answer_summary: \"El proveedor indica SSL, pero no especifica versiones TLS seguras ni configuración.\",\n        decision_reason: \"Se requiere aclarar si se usa TLS 1.2 o superior y qué protocolos inseguros están deshabilitados.\",\n        requires_provider_followup: true,\n        requires_human_review: true\n      };\n    }\n  }\n\n  if (qid === \"Q_034\") {\n    if (isPlaceholderOrWeakDetail(answerText)) {\n      return {\n        apply: true,\n        score: 2,\n        score_type: \"insufficient_evidence\",\n        answer_summary: \"La respuesta no permite confirmar el cumplimiento del control.\",\n        decision_reason: \"La respuesta indica que está a consultar o depende de terceros, por lo que requiere aclaración.\",\n        requires_provider_followup: true,\n        requires_human_review: true\n      };\n    }\n  }\n\n  if (qid === \"Q_047\") {\n    if (isPositiveAnswer(answerText)) {\n      return {\n        apply: true,\n        score: 3,\n        score_type: \"compliant\",\n        answer_summary: \"El proveedor indica que el servicio se despliega siguiendo una arquitectura de red por capas.\",\n        decision_reason: \"La respuesta afirmativa indica cumplimiento del requisito de arquitectura por capas.\",\n        requires_provider_followup: false,\n        requires_human_review: false\n      };\n    }\n  }\n\n  if (qid === \"Q_055\") {\n    if (answerIsNo(qInput?.provider_answer)) {\n      return {\n        apply: true,\n        score: 1,\n        score_type: \"non_compliance\",\n        answer_summary: \"El proveedor indica que no existen procedimientos documentados o mecanismos suficientes para la recuperación/extracción de datos desde la nube.\",\n        decision_reason: \"La ausencia de procedimientos documentados o mecanismos de recuperación/extracción supone incumplimiento del requisito.\",\n        requires_provider_followup: false,\n        requires_human_review: false\n      };\n    }\n\n    if (isPlaceholderOrWeakDetail(answerText)) {\n      return {\n        apply: true,\n        score: 2,\n        score_type: \"insufficient_evidence\",\n        answer_summary: \"No se aporta suficiente detalle sobre los mecanismos de recuperación o extracción de datos.\",\n        decision_reason: \"Se requiere confirmar procedimientos, APIs, mecanismos disponibles y alcance.\",\n        requires_provider_followup: true,\n        requires_human_review: true\n      };\n    }\n  }\n\n  return { apply: false };\n}\n\nfunction isInformationalCatalog(payload, qid) {\n  const informationalIds = new Set([\n    \"Q_004\",\n    \"Q_009\",\n    \"Q_026\",\n    \"Q_041\",\n    \"Q_042\",\n    \"Q_043\",\n    \"Q_046\",\n    \"Q_049\",\n    \"Q_050\",\n    \"Q_051\",\n    \"Q_052\",\n    \"Q_054\",\n    \"Q_056\"\n  ]);\n\n  if (informationalIds.has(qid)) {\n    return true;\n  }\n\n  const observations = normalizeText([\n    payload.raw_observations,\n    ...(Array.isArray(payload.conditional_rules) ? payload.conditional_rules : [])\n  ].join(\" \"));\n\n  if (observations.includes(\"no aplica para saas\")) return true;\n  if (observations.includes(\"no aplica a saas\")) return true;\n  if (observations.includes(\"solo para soluciones internas\")) return true;\n\n  return false;\n}\n\nfunction shouldCorrectFalseInformational(ev, qInput, payload) {\n  const qid = ev.question_id;\n\n  if (isInformationalCatalog(payload, qid)) {\n    return false;\n  }\n\n  if (ev.score !== 3) {\n    return false;\n  }\n\n  const answerText = normalizeText([\n    qInput?.provider_answer,\n    qInput?.provider_details,\n    qInput?.provider_combined_response\n  ].join(\" \"));\n\n  if (!answerText) {\n    return true;\n  }\n\n  if (answerIsNever(answerText)) {\n    return true;\n  }\n\n  if (\n    answerIsNo(answerText) &&\n    ![\"Q_003\", \"Q_022\"].includes(qid)\n  ) {\n    return true;\n  }\n\n  if (\n    normalizeText(ev.score_type) === \"informational\" &&\n    !isInformationalCatalog(payload, qid)\n  ) {\n    return true;\n  }\n\n  return false;\n}\n\nfunction shouldConvertPositiveWithLackDetailToScore2(ev, qInput) {\n  const answer = normalizeText([\n    qInput?.provider_answer,\n    qInput?.provider_details,\n    qInput?.provider_combined_response\n  ].join(\" \"));\n\n  const text = normalizeText([\n    ev.answer_summary,\n    ev.decision_reason\n  ].join(\" \"));\n\n  const positiveAnswer = isPositiveAnswer(answer);\n\n  const lackOfEvidence =\n    text.includes(\"falta informacion\") ||\n    text.includes(\"falta información\") ||\n    text.includes(\"falta evidencia\") ||\n    text.includes(\"no se proporcionan detalles\") ||\n    text.includes(\"no proporciona detalles\") ||\n    text.includes(\"no se aporta detalle\") ||\n    text.includes(\"no se detalla\") ||\n    text.includes(\"no detalla\") ||\n    text.includes(\"insuficiente\") ||\n    text.includes(\"requiere mas detalle\") ||\n    text.includes(\"requiere más detalle\") ||\n    text.includes(\"requiere aclaracion\") ||\n    text.includes(\"requiere aclaración\");\n\n  if (positiveAnswer && Number(ev.score) !== 2 && lackOfEvidence) {\n    return true;\n  }\n\n  return false;\n}\n\nfunction forceCatalogFields(ev, catalog) {\n  if (!catalog) return ev;\n\n  const payload = catalog.payload || catalog;\n\n  if (ev.score === 3) {\n    ev.generates_finding = false;\n    ev.requires_provider_followup = false;\n    ev.requires_human_review = false;\n    ev.level = \"SIN RIESGO\";\n    ev.risk_id = \"\";\n    ev.risk_name = \"\";\n    ev.control_ids = [];\n    ev.incumplimiento_identificado = \"\";\n    ev.controles_asociados = \"\";\n    ev.amenazas = [];\n    ev.mitigation = \"\";\n    ev.mitigation_guide = \"\";\n    ev.report_context_example = \"\";\n    ev.report_detail_example = \"\";\n    ev.tiempo_mitigacion = \"\";\n  } else {\n    ev.generates_finding = true;\n\n    ev.risk_id = payload.risk_id || \"\";\n    ev.risk_name = payload.risk_name || \"\";\n\n    ev.control_ids = payload.control_id\n      ? [payload.control_id]\n      : safeArray(payload.control_ids);\n\n    ev.incumplimiento_identificado = payload.incumplimiento_identificado || \"\";\n    ev.controles_asociados = payload.controles_asociados || \"\";\n    ev.amenazas = safeArray(payload.amenazas);\n\n    ev.mitigation = payload.mitigation || payload.medidas_mitigacion || \"\";\n    ev.mitigation_guide = payload.mitigation_guide || payload.guia_mitigacion || \"\";\n\n    ev.report_context_example = payload.report_context_example || \"\";\n    ev.report_detail_example = payload.report_detail_example || \"\";\n  }\n\n  ev.sources = [\n    {\n      question_id: ev.question_id,\n      chunk_id: payload.chunk_id || `RAG-${ev.question_id}`,\n      traceability: payload.traceability || \"\",\n      source: \"tfm_rag_manual\"\n    }\n  ];\n\n  return ev;\n}\n\nfunction getQuestionsFromBatchData(batchData) {\n  const questions = [];\n\n  const units =\n    batchData?.evaluation_units ||\n    batchData?.units ||\n    batchData?.evaluationGroups ||\n    [];\n\n  for (const unit of units) {\n    const unitQuestions =\n      unit.questions ||\n      unit.items ||\n      unit.evaluation_questions ||\n      [];\n\n    for (const q of unitQuestions) {\n      questions.push(q);\n    }\n  }\n\n  const rootQuestions =\n    batchData?.questions ||\n    batchData?.question_items ||\n    batchData?.questions_to_analyze ||\n    [];\n\n  for (const q of rootQuestions) {\n    questions.push(q);\n  }\n\n  return questions;\n}\n\nfunction buildCatalogMapFromBatchData(batchData) {\n  const map = {};\n  const questions = getQuestionsFromBatchData(batchData);\n\n  for (const q of questions) {\n    const qid = String(q.question_id || q.id || q.code || \"\").trim().toUpperCase();\n    if (!qid) continue;\n\n    const catalog =\n      q.catalog_entry ||\n      q.catalog ||\n      q.catalog_payload ||\n      q.rag_catalog_entry ||\n      null;\n\n    if (catalog) {\n      map[qid] = catalog;\n    }\n  }\n\n  return map;\n}\n\nfunction buildQuestionInputMapFromBatchData(batchData) {\n  const map = {};\n  const questions = getQuestionsFromBatchData(batchData);\n\n  for (const q of questions) {\n    const qid = String(q.question_id || q.id || q.code || \"\").trim().toUpperCase();\n    if (!qid) continue;\n\n    map[qid] = {\n      question_id: qid,\n      question_text: q.question_text || q.question || q.text || \"\",\n      provider_answer: q.provider_answer || q.answer || \"\",\n      provider_details:\n        q.provider_details ||\n        q.provider_explanation ||\n        q.answer_explanation ||\n        q.details ||\n        q.comment ||\n        q.comments ||\n        q.observations ||\n        q.observaciones ||\n        \"\",\n      provider_combined_response: [\n        q.provider_answer || q.answer ? `Respuesta: ${q.provider_answer || q.answer}` : \"\",\n        q.provider_details || q.provider_explanation || q.answer_explanation || q.details || q.observations\n          ? `Explicación: ${q.provider_details || q.provider_explanation || q.answer_explanation || q.details || q.observations}`\n          : \"\"\n      ].filter(Boolean).join(\"\\n\"),\n      catalog_entry: q.catalog_entry || q.catalog || q.catalog_payload || null\n    };\n  }\n\n  return map;\n}\n\nfunction getPreviousPromptItem(expectedBatchId) {\n  const possibleNames = [\n    \"Code - Construir prompt scoring batch\",\n    \"Code in JavaScript2\",\n    \"Code in JavaScript\",\n    \"Code\"\n  ];\n\n  const currentIndex = typeof $itemIndex !== \"undefined\" ? $itemIndex : 0;\n\n  for (const name of possibleNames) {\n    try {\n      const items = $items(name);\n\n      if (items && items[currentIndex] && items[currentIndex].json) {\n        const candidate = items[currentIndex].json;\n        const candidateBatchId =\n          candidate.batch_id ||\n          candidate.batch_data?.batch_id ||\n          \"\";\n\n        if (\n          (candidate.batch_data || candidate.catalog_entries_by_question) &&\n          (!expectedBatchId || candidateBatchId === expectedBatchId)\n        ) {\n          return candidate;\n        }\n      }\n\n      if (expectedBatchId && items && Array.isArray(items)) {\n        for (const item of items) {\n          const candidate = item.json || {};\n          const candidateBatchId =\n            candidate.batch_id ||\n            candidate.batch_data?.batch_id ||\n            \"\";\n\n          if (\n            candidateBatchId === expectedBatchId &&\n            (candidate.batch_data || candidate.catalog_entries_by_question)\n          ) {\n            return candidate;\n          }\n        }\n      }\n\n      if (items && items[0] && items[0].json) {\n        const fallback = items[0].json;\n\n        if (fallback.batch_data || fallback.catalog_entries_by_question) {\n          return fallback;\n        }\n      }\n    } catch (e) {}\n  }\n\n  return {};\n}\n\nfunction normalizeScoreType(scoreType, score) {\n  let st = String(scoreType || \"\").split(\"|\")[0].trim();\n\n  const allowed = [\n    \"non_compliance\",\n    \"partial_compliance\",\n    \"insufficient_evidence\",\n    \"ambiguous_answer\",\n    \"compliant\"\n  ];\n\n  if (!allowed.includes(st)) {\n    if (score === 1) st = \"non_compliance\";\n    else if (score === 2) st = \"insufficient_evidence\";\n    else if (score === 3) st = \"compliant\";\n    else st = \"insufficient_evidence\";\n  }\n\n  return st;\n}\n\nfunction createFallbackEvaluation(qid, qInput, reason) {\n  return {\n    question_id: qid,\n    score: 2,\n    score_type: \"insufficient_evidence\",\n    answer_summary: \"No se ha podido obtener una evaluación fiable del modelo para esta pregunta.\",\n    decision_reason: reason || \"El modelo no devolvió una evaluación válida para esta pregunta.\",\n    requires_provider_followup: true,\n    followup_questions: [\n      \"¿Podéis aportar evidencia o aclaración adicional que permita confirmar si el control está implantado y cuál es su alcance?\"\n    ],\n    requires_human_review: true,\n    provider_answer: qInput?.provider_answer || \"\",\n    provider_details: qInput?.provider_details || \"\"\n  };\n}\n\nconst raw = getRawModelOutput($json);\n\nlet promptNodeItem = getPreviousPromptItem(\"\");\n\nlet parsed;\nlet jsonParseError = null;\n\ntry {\n  parsed = extractJsonObject(raw);\n} catch (error) {\n  jsonParseError = error.message;\n\n  parsed = {\n    batch_id: promptNodeItem.batch_id || promptNodeItem.batch_data?.batch_id || \"\",\n    case_id: promptNodeItem.case_id || promptNodeItem.batch_data?.case_id || \"\",\n    question_evaluations: [],\n    batch_validation_notes: [\n      {\n        type: \"model_warning\",\n        description: \"El modelo no devolvió JSON válido. Se generará evaluación fallback para las preguntas del batch.\",\n        question_id: \"\",\n        source: \"normalizer_json_parse_fallback\"\n      }\n    ]\n  };\n}\n\nconst expectedBatchId =\n  parsed.batch_id ||\n  promptNodeItem.batch_id ||\n  promptNodeItem.batch_data?.batch_id ||\n  \"\";\n\nconst promptNodeItemByBatch = getPreviousPromptItem(expectedBatchId);\n\nif (\n  promptNodeItemByBatch &&\n  (promptNodeItemByBatch.batch_data || promptNodeItemByBatch.catalog_entries_by_question)\n) {\n  promptNodeItem = promptNodeItemByBatch;\n}\n\nconst batchData = promptNodeItem.batch_data || {};\nconst batchId = parsed.batch_id || promptNodeItem.batch_id || batchData.batch_id || \"\";\nconst caseId = parsed.case_id || promptNodeItem.case_id || batchData.case_id || \"\";\n\nlet catalogByQuestion = promptNodeItem.catalog_entries_by_question || {};\nlet questionInputById = promptNodeItem.question_inputs_by_id || {};\n\nif (!Object.keys(catalogByQuestion).length) {\n  catalogByQuestion = buildCatalogMapFromBatchData(batchData);\n}\n\nif (!Object.keys(questionInputById).length) {\n  questionInputById = buildQuestionInputMapFromBatchData(batchData);\n}\n\nconst caseMeta = promptNodeItem.case_meta || batchData.case_meta || {};\nconst authContext = promptNodeItem.auth_context || batchData.auth_context || {};\n\nif (!Array.isArray(parsed.question_evaluations)) {\n  parsed.question_evaluations = [];\n}\n\nif (!Array.isArray(parsed.batch_validation_notes)) {\n  parsed.batch_validation_notes = [];\n}\n\nconst expectedQuestionIds = new Set([\n  ...Object.keys(catalogByQuestion),\n  ...Object.keys(questionInputById)\n]);\n\nconst dedupedByQuestion = {};\n\nfor (const evRaw of parsed.question_evaluations) {\n  const qid = String(evRaw.question_id || \"\").trim().toUpperCase();\n\n  if (!qid) {\n    parsed.batch_validation_notes.push({\n      type: \"model_warning\",\n      description: \"El modelo devolvió una evaluación sin question_id. Se descarta.\",\n      question_id: \"\",\n      source: \"post_ai_validation\"\n    });\n    continue;\n  }\n\n  if (!expectedQuestionIds.has(qid)) {\n    parsed.batch_validation_notes.push({\n      type: \"model_warning\",\n      description: `El modelo devolvió ${qid}, pero esa pregunta no pertenece a este batch. Se descarta.`,\n      question_id: qid,\n      source: \"post_ai_validation\"\n    });\n    continue;\n  }\n\n  if (dedupedByQuestion[qid]) {\n    const previousScore = Number(dedupedByQuestion[qid].score);\n    const newScore = Number(evRaw.score);\n\n    if (previousScore !== newScore) {\n      dedupedByQuestion[qid] = {\n        question_id: qid,\n        score: 2,\n        score_type: \"ambiguous_answer\",\n        answer_summary: \"El modelo devolvió evaluaciones duplicadas y contradictorias para esta pregunta.\",\n        decision_reason: \"Se detectaron varios resultados para el mismo question_id con scores diferentes. Se marca como ambiguo para revisión.\",\n        requires_provider_followup: true,\n        followup_questions: [\n          \"¿Podéis aclarar la respuesta y aportar evidencia suficiente para confirmar si el control aplica y está implantado?\"\n        ],\n        requires_human_review: true\n      };\n    } else {\n      dedupedByQuestion[qid] = evRaw;\n    }\n\n    parsed.batch_validation_notes.push({\n      type: \"model_warning\",\n      description: `El modelo duplicó la pregunta ${qid}. Se conserva una única evaluación.`,\n      question_id: qid,\n      source: \"post_ai_validation\"\n    });\n\n    continue;\n  }\n\n  dedupedByQuestion[qid] = evRaw;\n}\n\nparsed.question_evaluations = Object.values(dedupedByQuestion);\n\nif (jsonParseError) {\n  parsed.batch_validation_notes.push({\n    type: \"model_warning\",\n    description: `Error parseando JSON del modelo: ${jsonParseError}`,\n    question_id: \"\",\n    source: \"normalizer_json_parse_fallback\"\n  });\n}\n\nfor (const ev of parsed.question_evaluations) {\n  ev.question_id = String(ev.question_id || \"\").trim().toUpperCase();\n\n  const qInput = questionInputById[ev.question_id];\n  const catalog = catalogByQuestion[ev.question_id];\n\n  let score = Number(ev.score);\n  ev.score_type = normalizeScoreType(ev.score_type, score);\n\n  if (score === 0) {\n    score = 1;\n    ev.validation_warning = \"El modelo devolvió score=0. Se corrige inicialmente a score=1.\";\n  }\n\n  const q001Score = resolveQ001Score(ev, qInput);\n\n  if (q001Score.apply) {\n    score = q001Score.score;\n    ev.score_type = q001Score.score_type;\n    ev.answer_summary = q001Score.answer_summary;\n    ev.decision_reason = q001Score.decision_reason;\n    ev.requires_provider_followup = q001Score.requires_provider_followup;\n    ev.requires_human_review = q001Score.requires_human_review;\n    ev.validation_warning = \"Score ajustado por regla determinista Q_001.\";\n  }\n\n  const legalScore = resolveLegalScore(ev, qInput);\n\n  if (legalScore.apply) {\n    score = legalScore.score;\n\n    if (legalScore.answer_summary) {\n      ev.answer_summary = legalScore.answer_summary;\n    }\n\n    ev.decision_reason = legalScore.reason;\n    ev.requires_provider_followup = score === 2;\n    ev.requires_human_review = score === 2;\n    ev.validation_warning = \"Score ajustado por regla determinista legal Q_002/Q_003.\";\n  }\n\n  const authScore = resolveAuthScore(ev, qInput, authContext);\n\n  if (authScore.apply) {\n    score = authScore.score;\n    ev.score_type = authScore.score_type;\n    ev.answer_summary = authScore.answer_summary;\n    ev.decision_reason = authScore.decision_reason;\n    ev.requires_provider_followup = authScore.requires_provider_followup;\n    ev.requires_human_review = authScore.requires_human_review;\n    ev.validation_warning = \"Score ajustado por regla determinista de autenticación.\";\n  }\n\n  const specificScore = resolveSpecificScore(ev, qInput);\n\n  if (specificScore.apply) {\n    score = specificScore.score;\n    ev.score_type = specificScore.score_type;\n    ev.answer_summary = specificScore.answer_summary;\n    ev.decision_reason = specificScore.decision_reason;\n    ev.requires_provider_followup = specificScore.requires_provider_followup;\n    ev.requires_human_review = specificScore.requires_human_review;\n    ev.validation_warning = \"Score ajustado por regla determinista específica.\";\n  }\n\n  ev.score = score;\n\n  if (shouldConvertPositiveWithLackDetailToScore2(ev, qInput)) {\n    score = 2;\n    ev.score = 2;\n    ev.score_type = \"insufficient_evidence\";\n    ev.requires_provider_followup = true;\n    ev.requires_human_review = true;\n    ev.followup_questions = [\n      \"¿Podéis aportar evidencia, configuración, alcance y documentación que permita confirmar que el control está implantado correctamente?\"\n    ];\n    ev.validation_warning = \"Score ajustado: respuesta afirmativa con falta de detalle/evidencia. Se cambia a score=2.\";\n  }\n\n  if (![1, 2, 3].includes(score)) {\n    score = 2;\n    ev.validation_error = \"Score inválido devuelto por el modelo. Se ajusta a score=2.\";\n  }\n\n  ev.score = score;\n  ev.score_type = normalizeScoreType(ev.score_type, score);\n\n  if (score === 1) {\n    ev.score_type = \"non_compliance\";\n    ev.generates_finding = true;\n    ev.requires_provider_followup = false;\n  }\n\n  if (score === 2) {\n    if (![\"partial_compliance\", \"insufficient_evidence\", \"ambiguous_answer\"].includes(ev.score_type)) {\n      ev.score_type = \"insufficient_evidence\";\n    }\n\n    ev.generates_finding = true;\n    ev.requires_provider_followup = true;\n    ev.requires_human_review = true;\n\n    if (!Array.isArray(ev.followup_questions) || ev.followup_questions.length === 0) {\n      ev.followup_questions = [\n        \"¿Podéis aportar evidencia o aclaración adicional que permita confirmar si el control está implantado y cuál es su alcance?\"\n      ];\n    }\n  }\n\n  if (score === 3) {\n    ev.score_type = \"compliant\";\n    ev.generates_finding = false;\n    ev.requires_provider_followup = false;\n    ev.requires_human_review = false;\n    ev.followup_questions = [];\n  }\n\n  if (!catalog) {\n    ev.requires_human_review = true;\n    ev.validation_error = `No se encontró catalog_entry para ${ev.question_id}.`;\n\n    parsed.batch_validation_notes.push({\n      type: \"manual_review\",\n      description: `No se encontró catalog_entry para ${ev.question_id}. Revisa que el nodo anterior exporte catalog_entries_by_question.`,\n      question_id: ev.question_id,\n      source: \"post_ai_validation\"\n    });\n\n    continue;\n  }\n\n  const payload = catalog.payload || catalog;\n\n  if (shouldCorrectFalseInformational(ev, qInput, payload)) {\n    if (answerIsNever(qInput?.provider_answer || qInput?.provider_combined_response)) {\n      ev.score = 1;\n      ev.score_type = \"non_compliance\";\n      ev.answer_summary = ev.answer_summary || \"La respuesta indica que la medida nunca se realiza.\";\n      ev.decision_reason = ev.decision_reason || \"La respuesta indica ausencia del control o de la actividad requerida.\";\n      ev.requires_provider_followup = false;\n      ev.requires_human_review = false;\n      ev.validation_warning = \"Score corregido: se evita tratar como informativa una pregunta no informativa con respuesta de incumplimiento.\";\n    } else if (answerIsNo(qInput?.provider_answer || qInput?.provider_combined_response)) {\n      ev.score = 1;\n      ev.score_type = \"non_compliance\";\n      ev.answer_summary = ev.answer_summary || \"La respuesta indica que el control no está implantado.\";\n      ev.decision_reason = ev.decision_reason || \"La respuesta negativa en una pregunta no informativa implica incumplimiento del control.\";\n      ev.requires_provider_followup = false;\n      ev.requires_human_review = false;\n      ev.validation_warning = \"Score corregido: respuesta negativa en pregunta no informativa.\";\n    } else {\n      ev.score = 2;\n      ev.score_type = \"insufficient_evidence\";\n      ev.requires_provider_followup = true;\n      ev.requires_human_review = true;\n      ev.followup_questions = [\n        \"¿Podéis aportar evidencia o aclaración adicional que permita confirmar si el control está implantado y cuál es su alcance?\"\n      ];\n      ev.validation_warning = \"Score corregido: se evita tratar como informativa una pregunta no informativa.\";\n    }\n  }\n\n  if (isInformationalCatalog(payload, ev.question_id)) {\n    ev.score = 3;\n    ev.score_type = \"informational\";\n    ev.generates_finding = false;\n    ev.requires_provider_followup = false;\n    ev.requires_human_review = false;\n    ev.followup_questions = [];\n    ev.level = \"SIN RIESGO\";\n\n    forceCatalogFields(ev, catalog);\n\n    ev.level = \"SIN RIESGO\";\n    ev.risk_id = \"\";\n    ev.risk_name = \"\";\n    ev.control_ids = [];\n    ev.incumplimiento_identificado = \"\";\n    ev.controles_asociados = \"\";\n    ev.amenazas = [];\n    ev.mitigation = \"\";\n    ev.mitigation_guide = \"\";\n    ev.report_context_example = \"\";\n    ev.report_detail_example = \"\";\n    ev.tiempo_mitigacion = \"\";\n    ev.validation_warning = \"Pregunta tratada como informativa/no aplicable según catálogo.\";\n  } else {\n    forceCatalogFields(ev, catalog);\n\n    const evaluationGroup = payload.evaluation_group || \"\";\n\n    if (ev.score === 3) {\n      ev.level = \"SIN RIESGO\";\n    } else {\n      const conditionalLevel = resolveConditionalSeverity(ev, payload, batchData, caseMeta, qInput);\n\n      if (conditionalLevel) {\n        ev.level = conditionalLevel;\n      }\n\n      if (!ev.level && evaluationGroup === \"AUTHENTICATION\") {\n        ev.level = resolveAuthSeverity(ev, payload, authContext);\n      }\n\n      if (!ev.level && evaluationGroup === \"LOGGING_MONITORING\") {\n        ev.level = resolveLoggingSeverity(ev, batchData);\n      }\n\n      if (!ev.level) {\n        ev.level = resolveSeverityByTier(payload, caseMeta.tier);\n      }\n    }\n\n    if (!ev.level && ev.score !== 3) {\n      ev.requires_human_review = true;\n      parsed.batch_validation_notes.push({\n        type: \"manual_review\",\n        description: `No se pudo determinar la severidad para ${ev.question_id}. Revisar reglas del catálogo.`,\n        question_id: ev.question_id,\n        source: \"post_ai_validation\"\n      });\n    }\n\n    ev.tiempo_mitigacion = mitigationTime(ev.level);\n  }\n\n  ev.provider_answer = qInput?.provider_answer || \"\";\n  ev.provider_details = qInput?.provider_details || \"\";\n}\n\nconst existingIds = new Set(parsed.question_evaluations.map(ev => ev.question_id));\n\nfor (const qid of Object.keys(catalogByQuestion)) {\n  if (existingIds.has(qid)) continue;\n\n  const qInput = questionInputById[qid];\n  const catalog = catalogByQuestion[qid];\n  const payload = catalog.payload || catalog;\n\n  let ev = createFallbackEvaluation(\n    qid,\n    qInput,\n    \"La pregunta estaba incluida en el batch, pero el modelo la omitió o no devolvió una evaluación válida.\"\n  );\n\n  const q001Score = resolveQ001Score(ev, qInput);\n\n  if (q001Score.apply) {\n    ev.score = q001Score.score;\n    ev.score_type = q001Score.score_type;\n    ev.answer_summary = q001Score.answer_summary;\n    ev.decision_reason = q001Score.decision_reason;\n    ev.requires_provider_followup = q001Score.requires_provider_followup;\n    ev.requires_human_review = q001Score.requires_human_review;\n    ev.validation_warning = \"Score ajustado por regla determinista Q_001 en evaluación omitida.\";\n  }\n\n  const legalScore = resolveLegalScore(ev, qInput);\n\n  if (legalScore.apply) {\n    ev.score = legalScore.score;\n    ev.score_type = ev.score === 3 ? \"compliant\" : \"insufficient_evidence\";\n    ev.answer_summary = legalScore.answer_summary;\n    ev.decision_reason = legalScore.reason;\n    ev.requires_provider_followup = ev.score === 2;\n    ev.requires_human_review = ev.score === 2;\n    ev.validation_warning = \"Score ajustado por regla determinista legal Q_002/Q_003 en evaluación omitida.\";\n  }\n\n  const authScore = resolveAuthScore(ev, qInput, authContext);\n\n  if (authScore.apply) {\n    ev.score = authScore.score;\n    ev.score_type = authScore.score_type;\n    ev.answer_summary = authScore.answer_summary;\n    ev.decision_reason = authScore.decision_reason;\n    ev.requires_provider_followup = authScore.requires_provider_followup;\n    ev.requires_human_review = authScore.requires_human_review;\n    ev.validation_warning = \"Score ajustado por regla determinista de autenticación en evaluación omitida.\";\n  }\n\n  const specificScore = resolveSpecificScore(ev, qInput);\n\n  if (specificScore.apply) {\n    ev.score = specificScore.score;\n    ev.score_type = specificScore.score_type;\n    ev.answer_summary = specificScore.answer_summary;\n    ev.decision_reason = specificScore.decision_reason;\n    ev.requires_provider_followup = specificScore.requires_provider_followup;\n    ev.requires_human_review = specificScore.requires_human_review;\n    ev.validation_warning = \"Score ajustado por regla determinista específica en evaluación omitida.\";\n  }\n\n  if (isInformationalCatalog(payload, qid)) {\n    ev.score = 3;\n    ev.score_type = \"informational\";\n    ev.generates_finding = false;\n    ev.requires_provider_followup = false;\n    ev.requires_human_review = false;\n    ev.followup_questions = [];\n    ev.level = \"SIN RIESGO\";\n\n    forceCatalogFields(ev, catalog);\n\n    ev.level = \"SIN RIESGO\";\n    ev.risk_id = \"\";\n    ev.risk_name = \"\";\n    ev.control_ids = [];\n    ev.incumplimiento_identificado = \"\";\n    ev.controles_asociados = \"\";\n    ev.amenazas = [];\n    ev.mitigation = \"\";\n    ev.mitigation_guide = \"\";\n    ev.report_context_example = \"\";\n    ev.report_detail_example = \"\";\n    ev.tiempo_mitigacion = \"\";\n    ev.validation_warning = \"Pregunta omitida por el modelo, tratada como informativa/no aplicable según catálogo.\";\n  } else {\n    forceCatalogFields(ev, catalog);\n\n    const evaluationGroup = payload.evaluation_group || \"\";\n\n    if (ev.score === 3) {\n      ev.level = \"SIN RIESGO\";\n    } else {\n      const conditionalLevel = resolveConditionalSeverity(ev, payload, batchData, caseMeta, qInput);\n\n      if (conditionalLevel) {\n        ev.level = conditionalLevel;\n      }\n\n      if (!ev.level && evaluationGroup === \"AUTHENTICATION\") {\n        ev.level = resolveAuthSeverity(ev, payload, authContext);\n      }\n\n      if (!ev.level && evaluationGroup === \"LOGGING_MONITORING\") {\n        ev.level = resolveLoggingSeverity(ev, batchData);\n      }\n\n      if (!ev.level) {\n        ev.level = resolveSeverityByTier(payload, caseMeta.tier);\n      }\n    }\n\n    ev.tiempo_mitigacion = mitigationTime(ev.level);\n  }\n\n  parsed.question_evaluations.push(ev);\n\n  parsed.batch_validation_notes.push({\n    type: \"manual_review\",\n    description: `El modelo omitió la evaluación de ${qid}; se ha creado evaluación automática con score=${ev.score}.`,\n    question_id: qid,\n    source: \"post_ai_validation\"\n  });\n}\n\nparsed.batch_id = batchId;\nparsed.case_id = caseId;\n\nconst scoringBatchB64 = Buffer.from(\n  JSON.stringify(parsed, null, 2),\n  \"utf8\"\n).toString(\"base64\");\n\nreturn {\n  json: {\n    case_id: caseId,\n    batch_id: batchId,\n    scoring_batch: parsed,\n    scoring_batch_b64: scoringBatchB64,\n    raw_model_output: raw,\n    json_parse_error: jsonParseError,\n    debug_catalog_questions_found: Object.keys(catalogByQuestion),\n    debug_question_inputs_found: Object.keys(questionInputById)\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        0
+      ],
+      "id": "b7daaf58-2fa9-4029-b993-b3510003dfea",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=mkdir -p \"/data/cases/{{$json.case_id}}/03_analysis/scoring_batches\" && printf '%s' '{{$json.scoring_batch_b64}}' | base64 -d > \"/data/cases/{{$json.case_id}}/03_analysis/scoring_batches/{{$json.batch_id}}.json\" && python - <<'PY'\nimport json\n\nprint(json.dumps({\n    \"case_id\": \"{{$json.case_id}}\",\n    \"batch_id\": \"{{$json.batch_id}}\",\n    \"saved_path\": \"/data/cases/{{$json.case_id}}/03_analysis/scoring_batches/{{$json.batch_id}}.json\"\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        96
+      ],
+      "id": "0d79ad65-7014-4ea9-a43b-83881f7afe6b",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "command": "=python - <<'PY'\nimport json\nimport base64\nfrom pathlib import Path\nfrom datetime import datetime\n\ndef discover_case_id():\n    root = Path(\"/data/cases\")\n    candidates = []\n\n    if not root.exists():\n        return \"\"\n\n    for case_dir in root.iterdir():\n        if not case_dir.is_dir():\n            continue\n\n        batches_dir = case_dir / \"03_analysis\" / \"scoring_batches\"\n        batch_files = list(batches_dir.glob(\"batch_*.json\"))\n\n        if not batch_files:\n            continue\n\n        latest_mtime = max(p.stat().st_mtime for p in batch_files)\n        candidates.append({\n            \"case_id\": case_dir.name,\n            \"batch_count\": len(batch_files),\n            \"latest_mtime\": latest_mtime\n        })\n\n    if not candidates:\n        return \"\"\n\n    candidates.sort(key=lambda x: (x[\"latest_mtime\"], x[\"batch_count\"]), reverse=True)\n    return candidates[0][\"case_id\"]\n\ncase_id = \"{{$json.case_id}}\".strip()\n\nif not case_id:\n    case_id = discover_case_id()\n\nif not case_id:\n    raise Exception(\"No se pudo determinar case_id. No se encontraron scoring_batches en /data/cases/*/03_analysis/scoring_batches.\")\n\nbase = Path(\"/data/cases\") / case_id\nanalysis_dir = base / \"03_analysis\"\nbatches_dir = analysis_dir / \"scoring_batches\"\n\nanalysis_dir.mkdir(parents=True, exist_ok=True)\n\nbatch_files = sorted(batches_dir.glob(\"batch_*.json\"))\n\nall_evaluations = []\nfollowups = []\nmonitoring_followups = []\n\nfor path in batch_files:\n    try:\n        data = json.loads(path.read_text(encoding=\"utf-8\"))\n    except Exception:\n        continue\n\n    for ev in data.get(\"question_evaluations\", []):\n        ev[\"_source_batch\"] = path.name\n        all_evaluations.append(ev)\n\n        try:\n            score = int(ev.get(\"score\"))\n        except Exception:\n            score = None\n\n        requires_followup = ev.get(\"requires_provider_followup\") is True\n\n        if score != 2 and not requires_followup:\n            continue\n\n        question_id = ev.get(\"question_id\", \"\")\n        score_type = ev.get(\"score_type\", \"insufficient_evidence\")\n\n        reason = (\n            ev.get(\"decision_reason\")\n            or ev.get(\"reason\")\n            or ev.get(\"analysis_reason\")\n            or ev.get(\"answer_summary\")\n            or \"La respuesta requiere aclaración o evidencia adicional.\"\n        )\n\n        questions = ev.get(\"followup_questions\") or []\n\n        if isinstance(questions, str):\n            questions = [questions]\n\n        if not questions:\n            if score_type == \"partial_compliance\":\n                questions = [\n                    \"¿Podéis confirmar el alcance de la medida, los componentes cubiertos y aportar evidencia/documentación que lo respalde?\"\n                ]\n            elif score_type == \"ambiguous_answer\":\n                questions = [\n                    \"¿Podéis aclarar si el control está actualmente implantado, en planificación o no aplica al servicio?\"\n                ]\n            else:\n                questions = [\n                    \"¿Podéis aportar evidencia o documentación que confirme la configuración indicada y su alcance?\"\n                ]\n\n        item = {\n            \"question_id\": question_id,\n            \"score\": score,\n            \"score_type\": score_type,\n            \"reason\": reason,\n            \"question_to_provider\": questions[0],\n            \"all_questions_to_provider\": questions,\n            \"required\": True,\n            \"source_batch\": ev.get(\"_source_batch\", \"\")\n        }\n\n        if question_id in {\"Q_037\", \"Q_038\", \"Q_039\", \"Q_040\"}:\n            monitoring_followups.append(item)\n        else:\n            followups.append(item)\n\n# Agrupación especial Q_037-Q_040: Monitorización / Logs / SIEM / Alertas\nif monitoring_followups:\n    involved_ids = sorted({f[\"question_id\"] for f in monitoring_followups})\n\n    reasons = []\n    for f in monitoring_followups:\n        reasons.append(f\"{f['question_id']}: {f['reason']}\")\n\n    followups.append({\n        \"question_id\": \"Q_037-Q_040\",\n        \"score\": 2,\n        \"score_type\": \"insufficient_evidence\",\n        \"reason\": (\n            \"Se requiere aclaración conjunta sobre la capacidad de monitorización, recogida de logs, \"\n            \"centralización en SIEM y generación de alertas. \"\n            + \" | \".join(reasons)\n        ),\n        \"question_to_provider\": (\n            \"Respecto a monitorización y gestión de eventos de seguridad: \"\n            \"¿podéis confirmar si se recogen logs de usuarios, administradores, servidores, bases de datos y dispositivos de red; \"\n            \"si dichos logs se centralizan en un SIEM propio o pueden enviarse al SIEM de EMPRESA; \"\n            \"y si existen alertas de seguridad configuradas para detectar incidentes? \"\n            \"Por favor, indicad alcance, herramientas utilizadas, tipos de logs incluidos, retención, periodicidad y evidencias disponibles.\"\n        ),\n        \"all_questions_to_provider\": [\n            \"¿Se recogen logs de operaciones y accesos realizados por usuarios finales y operadores del servicio?\",\n            \"¿Los logs se centralizan en un SIEM propio u otra herramienta equivalente?\",\n            \"¿Existe posibilidad de enviar los logs al SIEM de EMPRESA?\",\n            \"¿Existen alertas de seguridad configuradas para detectar y escalar posibles incidentes?\",\n            \"¿Podéis aportar evidencia de configuración, alcance, retención y ejemplos de alertas?\"\n        ],\n        \"required\": True,\n        \"source_batch\": \",\".join(sorted({f[\"source_batch\"] for f in monitoring_followups})),\n        \"grouped_questions\": involved_ids\n    })\n\nhas_followups = len(followups) > 0\n\nscoring_preliminary = {\n    \"case_id\": case_id,\n    \"status\": \"PRELIMINARY_SCORING_DONE\",\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"batch_files_found\": [p.name for p in batch_files],\n    \"total_batches\": len(batch_files),\n    \"total_evaluations\": len(all_evaluations),\n    \"question_evaluations\": all_evaluations\n}\n\nscoring_path = analysis_dir / \"scoring_preliminary.json\"\nscoring_path.write_text(\n    json.dumps(scoring_preliminary, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nfollowups_pending = {\n    \"case_id\": case_id,\n    \"status\": \"WAITING_PROVIDER_FOLLOWUP\" if has_followups else \"NO_FOLLOWUPS_REQUIRED\",\n    \"followup_round\": 1,\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"followup_count\": len(followups),\n    \"questions\": followups\n}\n\nfollowups_path = analysis_dir / \"followups_pending.json\"\nfollowups_path.write_text(\n    json.dumps(followups_pending, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nstatus = {\n    \"case_id\": case_id,\n    \"status\": \"WAITING_PROVIDER_FOLLOWUP\" if has_followups else \"READY_FOR_FINAL_ANALYSIS\",\n    \"updated_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"has_followups\": has_followups,\n    \"followup_count\": len(followups),\n    \"total_batches\": len(batch_files),\n    \"total_evaluations\": len(all_evaluations),\n    \"scoring_batches_dir\": str(batches_dir)\n}\n\ncase_status_path = analysis_dir / \"case_status.json\"\ncase_status_path.write_text(\n    json.dumps(status, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nemail_lines = [\n    \"Buenas,\",\n    \"\",\n    f\"Durante el análisis del cuestionario de seguridad del proyecto {case_id}, necesitamos aclarar algunos puntos para poder completar la evaluación.\",\n    \"\",\n    \"Por favor, responded manteniendo el identificador de cada pregunta.\",\n    \"\"\n]\n\nfor f in followups:\n    email_lines.append(f\"{f['question_id']} - Aclaración requerida\")\n    email_lines.append(f\"Motivo: {f['reason']}\")\n    email_lines.append(f\"Pregunta: {f['question_to_provider']}\")\n    email_lines.append(\"\")\n\nemail_lines.append(\"Gracias.\")\n\nemail_body = \"\\n\".join(email_lines)\nemail_body_b64 = base64.b64encode(email_body.encode(\"utf-8\")).decode(\"ascii\")\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"has_followups\": has_followups,\n    \"followup_count\": len(followups),\n    \"total_batches\": len(batch_files),\n    \"total_evaluations\": len(all_evaluations),\n    \"status\": status[\"status\"],\n    \"followups_pending_path\": str(followups_path),\n    \"scoring_preliminary_path\": str(scoring_path),\n    \"case_status_path\": str(case_status_path),\n    \"email_subject\": f\"[Follow-up] {case_id}\",\n    \"email_body\": email_body,\n    \"email_body_b64\": email_body_b64\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        -96
+      ],
+      "id": "1a5da466-74e8-4935-952f-48ab43cc1e3f",
+      "name": "Execute Command3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear detección de follow-ups: \" + stdout);\n}\n\nparsed.has_followups =\n  parsed.has_followups === true ||\n  parsed.has_followups === \"true\" ||\n  Number(parsed.followup_count || 0) > 0;\n\nparsed.followup_count = Number(parsed.followup_count || 0);\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        0
+      ],
+      "id": "358c177a-ce45-4e6f-8af8-d8fb4df6cf7f",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "abd42f21-14aa-48b0-88af-667661f15d9f",
+              "leftValue": "={{ $json.followup_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2288,
+        0
+      ],
+      "id": "1c2c18da-a04c-4645-a368-e084f1f300aa",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const emailBody = $json.email_body || \"\";\nconst emailSubject = $json.email_subject || `[Follow-up] ${$json.case_id}`;\n\nconst emailBodyB64 = Buffer.from(emailBody, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {\n    ...$json,\n    email_subject: emailSubject,\n    email_body: emailBody,\n    email_body_b64: emailBodyB64\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2496,
+        -96
+      ],
+      "id": "0d639e1f-6135-488c-9d07-102ee1efdc55",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "command": "=python - <<'PY'\nimport json\nimport base64\nfrom pathlib import Path\nfrom datetime import datetime\n\ncase_id = {{ JSON.stringify($json.case_id) }}\nemail_subject = {{ JSON.stringify($json.email_subject) }}\nemail_body_b64 = {{ JSON.stringify($json.email_body_b64) }}\nfollowup_count = int({{ JSON.stringify($json.followup_count) }})\n\nemail_body = base64.b64decode(email_body_b64.encode(\"ascii\")).decode(\"utf-8\")\n\nbase = Path(\"/data/cases\") / case_id\nanalysis_dir = base / \"03_analysis\"\nfollowup_dir = base / \"04_followups\" / \"round_001\"\n\nanalysis_dir.mkdir(parents=True, exist_ok=True)\nfollowup_dir.mkdir(parents=True, exist_ok=True)\n\nfollowup_email_file = followup_dir / \"followup_email_sent.txt\"\n\nfollowup_email_file.write_text(\n    email_body,\n    encoding=\"utf-8\"\n)\n\nstatus = {\n    \"case_id\": case_id,\n    \"status\": \"WAITING_PROVIDER_FOLLOWUP\",\n    \"followup_round\": 1,\n    \"followup_email_prepared_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"followup_count\": followup_count,\n    \"followup_email_file\": str(followup_email_file)\n}\n\n(analysis_dir / \"case_status.json\").write_text(\n    json.dumps(status, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"status\": \"WAITING_PROVIDER_FOLLOWUP\",\n    \"followup_round\": 1,\n    \"followup_count\": followup_count,\n    \"email_subject\": email_subject,\n    \"email_body\": email_body,\n    \"email_body_b64\": email_body_b64,\n    \"followup_email_file\": str(followup_email_file)\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2704,
+        -96
+      ],
+      "id": "976ef758-2c03-4113-b956-5bd3886502cb",
+      "name": "Execute Command4"
+    },
+    {
+      "parameters": {
+        "fromEmail": "arquitectura.seguridad.tfm@gmail.com",
+        "toEmail": "proveedor.tfm@outlook.es",
+        "subject": "={{$json.email_subject}}",
+        "emailFormat": "text",
+        "text": "={{$json.email_body}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3120,
+        -96
+      ],
+      "id": "3480a35d-94d8-4b65-a907-ab59236c8546",
+      "name": "Send an Email",
+      "webhookId": "506b19b5-974b-4c1b-a173-92ea2b610f19",
+      "credentials": {
+        "smtp": {
+          "id": "z5qnNeAzZ84z3ylo",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=python - <<'PY'\nimport json\nfrom pathlib import Path\nfrom datetime import datetime\nfrom collections import defaultdict\n\ncase_id = \"{{$json.case_id}}\"\nscoring_preliminary_path_from_input =\"{{$json.scoring_preliminary_path}}\"\n\nbase = Path(\"/data/cases\") / case_id\nanalysis_dir = base / \"03_analysis\"\n\nscoring_preliminary_path = Path(scoring_preliminary_path_from_input)\n\nif not scoring_preliminary_path.exists():\n    raise Exception(f\"No existe scoring_preliminary.json en: {scoring_preliminary_path}\")\n\npreliminary = json.loads(scoring_preliminary_path.read_text(encoding=\"utf-8\"))\n\nfinal_evaluations = []\nwarnings = []\n\nfor ev in preliminary.get(\"question_evaluations\", []):\n    final_ev = dict(ev)\n\n    try:\n        score = int(final_ev.get(\"score\"))\n    except Exception:\n        score = 2\n\n    if score == 2:\n        final_ev[\"score\"] = 1\n        final_ev[\"score_type\"] = \"non_compliance\"\n        final_ev[\"generates_finding\"] = True\n        final_ev[\"requires_provider_followup\"] = False\n        final_ev[\"requires_human_review\"] = True\n        final_ev[\"followup_questions\"] = []\n        final_ev[\"finalization_warning\"] = (\n            \"Esta pregunta seguía con score=2 en la rama sin follow-up. \"\n            \"Se convierte a score=1 para permitir la generación del informe final.\"\n        )\n\n        warnings.append({\n            \"type\": \"unexpected_score_2\",\n            \"question_id\": final_ev.get(\"question_id\", \"\"),\n            \"description\": \"Se encontró score=2 en la rama sin follow-up. Se convirtió a score=1.\"\n        })\n\n    elif score == 1:\n        final_ev[\"score\"] = 1\n        final_ev[\"score_type\"] = \"non_compliance\"\n        final_ev[\"generates_finding\"] = True\n        final_ev[\"requires_provider_followup\"] = False\n        final_ev[\"followup_questions\"] = []\n\n    elif score == 3:\n        final_ev[\"score\"] = 3\n        final_ev[\"generates_finding\"] = False\n        final_ev[\"requires_provider_followup\"] = False\n        final_ev[\"requires_human_review\"] = False\n        final_ev[\"followup_questions\"] = []\n\n        final_ev[\"level\"] = \"SIN RIESGO\"\n        final_ev[\"risk_id\"] = \"\"\n        final_ev[\"risk_name\"] = \"\"\n        final_ev[\"control_ids\"] = []\n        final_ev[\"incumplimiento_identificado\"] = \"\"\n        final_ev[\"controles_asociados\"] = \"\"\n        final_ev[\"amenazas\"] = []\n        final_ev[\"mitigation\"] = \"\"\n        final_ev[\"mitigation_guide\"] = \"\"\n        final_ev[\"report_context_example\"] = \"\"\n        final_ev[\"report_detail_example\"] = \"\"\n        final_ev[\"tiempo_mitigacion\"] = \"\"\n\n    else:\n        final_ev[\"score\"] = 1\n        final_ev[\"score_type\"] = \"non_compliance\"\n        final_ev[\"generates_finding\"] = True\n        final_ev[\"requires_provider_followup\"] = False\n        final_ev[\"requires_human_review\"] = True\n        final_ev[\"followup_questions\"] = []\n        final_ev[\"finalization_warning\"] = \"Score inválido convertido a score=1.\"\n\n        warnings.append({\n            \"type\": \"invalid_score\",\n            \"question_id\": final_ev.get(\"question_id\", \"\"),\n            \"description\": \"Score inválido convertido a score=1.\"\n        })\n\n    final_evaluations.append(final_ev)\n\nfindings = []\n\nfor ev in final_evaluations:\n    try:\n        score = int(ev.get(\"score\"))\n    except Exception:\n        score = None\n\n    if score == 1 or ev.get(\"generates_finding\") is True:\n        findings.append(ev)\n\nfindings_by_level = defaultdict(list)\n\nfor finding in findings:\n    level = finding.get(\"level\") or \"SIN NIVEL\"\n    findings_by_level[level].append(finding)\n\nsummary = {\n    \"total_evaluations\": len(final_evaluations),\n    \"total_findings\": len(findings),\n    \"alto\": len(findings_by_level.get(\"ALTO\", [])),\n    \"medio\": len(findings_by_level.get(\"MEDIO\", [])),\n    \"bajo\": len(findings_by_level.get(\"BAJO\", [])),\n    \"sin_nivel\": len(findings_by_level.get(\"SIN NIVEL\", [])),\n    \"sin_riesgo\": len([ev for ev in final_evaluations if ev.get(\"score\") == 3])\n}\n\nscoring_final = {\n    \"case_id\": case_id,\n    \"status\": \"FINAL_SCORING_DONE\",\n    \"finalization_type\": \"NO_FOLLOWUP_REQUIRED\",\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"total_evaluations\": len(final_evaluations),\n    \"total_findings\": len(findings),\n    \"warnings\": warnings,\n    \"question_evaluations\": final_evaluations\n}\n\nrisk_analysis = {\n    \"case_id\": case_id,\n    \"status\": \"RISK_ANALYSIS_READY\",\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"summary\": summary,\n    \"findings\": findings,\n    \"findings_by_level\": {\n        level: values for level, values in findings_by_level.items()\n    }\n}\n\nreport_data = {\n    \"case_id\": case_id,\n    \"status\": \"REPORT_DATA_READY\",\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"summary\": summary,\n    \"findings\": findings,\n    \"question_evaluations\": final_evaluations,\n    \"metadata\": {\n        \"source\": \"scoring_preliminary.json\",\n        \"followup_required\": False,\n        \"finalization_type\": \"NO_FOLLOWUP_REQUIRED\"\n    }\n}\n\nscoring_final_path = analysis_dir / \"scoring_final.json\"\nrisk_analysis_path = analysis_dir / \"risk_analysis.json\"\nreport_data_path = analysis_dir / \"report_data.json\"\ncase_status_path = analysis_dir / \"case_status.json\"\n\nscoring_final_path.write_text(\n    json.dumps(scoring_final, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nrisk_analysis_path.write_text(\n    json.dumps(risk_analysis, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nreport_data_path.write_text(\n    json.dumps(report_data, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\ncase_status = {\n    \"case_id\": case_id,\n    \"status\": \"READY_FOR_REPORT\",\n    \"updated_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"followup_required\": False,\n    \"total_evaluations\": len(final_evaluations),\n    \"total_findings\": len(findings),\n    \"scoring_final_path\": str(scoring_final_path),\n    \"risk_analysis_path\": str(risk_analysis_path),\n    \"report_data_path\": str(report_data_path),\n    \"warnings\": warnings\n}\n\ncase_status_path.write_text(\n    json.dumps(case_status, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"status\": \"READY_FOR_REPORT\",\n    \"followup_required\": False,\n    \"total_evaluations\": len(final_evaluations),\n    \"total_findings\": len(findings),\n    \"scoring_final_path\": str(scoring_final_path),\n    \"risk_analysis_path\": str(risk_analysis_path),\n    \"report_data_path\": str(report_data_path),\n    \"case_status_path\": str(case_status_path),\n    \"warnings_count\": len(warnings)\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2496,
+        112
+      ],
+      "id": "2b351377-d446-4344-b2aa-32dfb7dac575",
+      "name": "Execute Command5"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la salida de Execute Command4: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        -96
+      ],
+      "id": "b57593bb-f7f3-40fc-a175-7ca17b7bfcd7",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la salida de generación final sin follow-up: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        96
+      ],
+      "id": "a9194dea-66c2-43ef-8552-44cd3aa5aac5",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "command": "=python - <<'PY'\nimport json\nimport re\nfrom pathlib import Path\nfrom datetime import datetime\nfrom collections import defaultdict\n\ncase_id = \"{{$json.case_id}}\".strip()\n\nif not case_id or \"{{\" in case_id or \"}}\" in case_id or case_id.lower() in {\"undefined\", \"null\", \"none\"}:\n    case_id = \"\"\n\ndef load_json(path, default=None):\n    path = Path(path)\n\n    if not path.exists():\n        return default\n\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\ndef write_json(path, data):\n    path = Path(path)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(\n        json.dumps(data, ensure_ascii=False, indent=2),\n        encoding=\"utf-8\"\n    )\n\ndef discover_case_id():\n    root = Path(\"/data/cases\")\n    candidates = []\n\n    if not root.exists():\n        return \"\"\n\n    for case_dir in root.iterdir():\n        if not case_dir.is_dir():\n            continue\n\n        possible_files = [\n            case_dir / \"02_json\" / \"case_meta.json\",\n            case_dir / \"03_analysis\" / \"case_status.json\",\n            case_dir / \"03_analysis\" / \"report_data.json\",\n            case_dir / \"03_analysis\" / \"scoring_final.json\",\n            case_dir / \"04_report\" / \"report_pack.json\"\n        ]\n\n        existing = [p for p in possible_files if p.exists()]\n\n        if existing:\n            latest = max(p.stat().st_mtime for p in existing)\n            candidates.append((latest, case_dir.name))\n\n    if not candidates:\n        return \"\"\n\n    candidates.sort(reverse=True)\n    return candidates[0][1]\n\ndef norm(value):\n    return str(value or \"\").strip()\n\ndef clean_text(value):\n    text = norm(value)\n    text = re.sub(r\"\\s+\", \" \", text)\n    return text.strip()\n\ndef normalize_level(value):\n    v = norm(value).upper()\n\n    if \"ALTO\" in v:\n        return \"ALTO\"\n\n    if \"MEDIO\" in v:\n        return \"MEDIO\"\n\n    if \"BAJO\" in v:\n        return \"BAJO\"\n\n    return \"\"\n\nLEVEL_RANK = {\n    \"\": 0,\n    \"BAJO\": 1,\n    \"MEDIO\": 2,\n    \"ALTO\": 3\n}\n\ndef max_level(levels):\n    result = \"\"\n\n    for level in levels:\n        level = normalize_level(level)\n\n        if LEVEL_RANK.get(level, 0) > LEVEL_RANK.get(result, 0):\n            result = level\n\n    return result\n\ndef mitigation_time(level):\n    level = normalize_level(level)\n\n    if level == \"ALTO\":\n        return \"3 meses\"\n\n    if level == \"MEDIO\":\n        return \"12 meses\"\n\n    if level == \"BAJO\":\n        return \"Pte.\"\n\n    return \"\"\n\ndef risk_color(level):\n    level = normalize_level(level)\n\n    if level == \"ALTO\":\n        return \"red\"\n\n    if level == \"MEDIO\":\n        return \"orange\"\n\n    if level == \"BAJO\":\n        return \"yellow\"\n\n    return \"gray\"\n\ndef unique_keep_order(values):\n    out = []\n    seen = set()\n\n    for value in values:\n        if isinstance(value, list):\n            candidates = value\n        else:\n            candidates = [value]\n\n        for candidate in candidates:\n            text = clean_text(candidate)\n\n            if not text:\n                continue\n\n            key = text.lower()\n\n            if key not in seen:\n                seen.add(key)\n                out.append(text)\n\n    return out\n\ndef as_list(value):\n    if value is None:\n        return []\n\n    if isinstance(value, list):\n        return value\n\n    if isinstance(value, str):\n        parts = re.split(r\"[;\\n]+\", value)\n        return [p.strip() for p in parts if p.strip()]\n\n    return [str(value)]\n\ndef is_empty_or_pending(value):\n    text = str(value or \"\").strip().lower()\n\n    if not text:\n        return True\n\n    if text in {\n        \"n/a\",\n        \"#n/a\",\n        \"na\",\n        \"null\",\n        \"none\",\n        \"undefined\",\n        \"pendiente\",\n        \"pendiente de confirmar\"\n    }:\n        return True\n\n    return False\n\ndef first_value(*values, fallback=\"Pendiente de confirmar\"):\n    for value in values:\n        if isinstance(value, list):\n            value = \", \".join([str(v) for v in value if str(v).strip()])\n\n        text = str(value or \"\").strip()\n\n        if not is_empty_or_pending(text):\n            return text\n\n    return fallback\n\ndef normalize_tier(value):\n    if value is None or value == \"\":\n        return \"\"\n\n    if isinstance(value, int):\n        return f\"TIER {value}\"\n\n    text = str(value).strip().upper()\n\n    if not text:\n        return \"\"\n\n    match = re.search(r\"(\\d+)\", text)\n\n    if match:\n        return f\"TIER {match.group(1)}\"\n\n    if text.startswith(\"TIER\"):\n        return text\n\n    return text\n\ndef discover_questionnaire_file(base):\n    candidates = []\n\n    folders = [\n        base / \"01_originales\",\n        base / \"01_input\",\n        base / \"02_json\",\n        base\n    ]\n\n    valid_extensions = {\n        \".xlsx\",\n        \".xls\",\n        \".xlsm\"\n    }\n\n    for folder in folders:\n        if not folder.exists():\n            continue\n\n        for path in folder.iterdir():\n            if not path.is_file():\n                continue\n\n            if path.name.startswith(\"~$\"):\n                continue\n\n            name = path.name.lower()\n            suffix = path.suffix.lower()\n\n            if suffix in valid_extensions and any(token in name for token in [\"cuestionario\", \"questionnaire\"]):\n                candidates.append(path)\n\n    if candidates:\n        candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)\n        return str(candidates[0])\n\n    originales = base / \"01_originales\"\n\n    if originales.exists():\n        excel_files = [\n            p for p in originales.iterdir()\n            if p.is_file()\n            and not p.name.startswith(\"~$\")\n            and p.suffix.lower() in valid_extensions\n        ]\n\n        if excel_files:\n            excel_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)\n            return str(excel_files[0])\n\n    return \"\"\n\ndef question_text(ev):\n    parts = []\n\n    if ev.get(\"provider_answer\"):\n        parts.append(f\"Respuesta: {ev.get('provider_answer')}\")\n\n    if ev.get(\"provider_details\"):\n        parts.append(f\"Explicación: {ev.get('provider_details')}\")\n\n    if not parts and ev.get(\"answer_summary\"):\n        parts.append(ev.get(\"answer_summary\"))\n\n    return \"\\n\".join(parts).strip()\n\ndef build_question_map(evaluations):\n    qmap = {}\n\n    for ev in evaluations:\n        qid = norm(ev.get(\"question_id\")).upper()\n\n        if not qid:\n            continue\n\n        qmap[qid] = {\n            \"question_id\": qid,\n            \"provider_answer\": ev.get(\"provider_answer\", \"\"),\n            \"provider_details\": ev.get(\"provider_details\", \"\"),\n            \"answer_summary\": ev.get(\"answer_summary\", \"\"),\n            \"decision_reason\": ev.get(\"decision_reason\", \"\"),\n            \"score\": ev.get(\"score\"),\n            \"score_type\": ev.get(\"score_type\"),\n            \"text\": question_text(ev)\n        }\n\n    return qmap\n\nQUESTION_GROUPS = {\n    \"arquitectura\": [\n        \"Q_041\", \"Q_042\", \"Q_043\", \"Q_044\", \"Q_045\", \"Q_046\",\n        \"Q_049\", \"Q_050\", \"Q_051\", \"Q_052\", \"Q_054\", \"Q_055\", \"Q_056\"\n    ],\n    \"autenticacion\": [\n        \"Q_007\", \"Q_008\", \"Q_009\", \"Q_010\", \"Q_011\", \"Q_012\",\n        \"Q_013\", \"Q_014\", \"Q_015\", \"Q_016\", \"Q_017\", \"Q_018\",\n        \"Q_019\", \"Q_020\", \"Q_021\"\n    ],\n    \"monitorizacion\": [\n        \"Q_037\", \"Q_038\", \"Q_039\", \"Q_040\"\n    ],\n    \"seguridad_sistemas\": [\n        \"Q_005\", \"Q_006\", \"Q_022\", \"Q_023\", \"Q_024\", \"Q_025\",\n        \"Q_026\", \"Q_027\", \"Q_028\", \"Q_029\", \"Q_033\", \"Q_047\",\n        \"Q_048\", \"Q_057\"\n    ],\n    \"continuidad\": [\n        \"Q_030\", \"Q_031\", \"Q_032\", \"Q_034\", \"Q_035\", \"Q_036\"\n    ]\n}\n\ndef build_platform_inputs(qmap):\n    result = {}\n\n    for group_name, qids in QUESTION_GROUPS.items():\n        items = []\n\n        for qid in qids:\n            q = qmap.get(qid)\n\n            if q:\n                items.append(q)\n\n        result[group_name] = items\n\n    return result\n\ndef finding_score(ev):\n    try:\n        return int(ev.get(\"score\"))\n    except Exception:\n        return None\n\nif not case_id:\n    case_id = discover_case_id()\n\nif not case_id:\n    raise Exception(\"No se pudo determinar case_id para construir report_pack.\")\n\nbase = Path(\"/data/cases\") / case_id\njson_dir = base / \"02_json\"\nanalysis_dir = base / \"03_analysis\"\nreport_dir = base / \"04_report\"\nassets_dir = report_dir / \"assets\"\n\nreport_dir.mkdir(parents=True, exist_ok=True)\nassets_dir.mkdir(parents=True, exist_ok=True)\n\ntriaje_path = json_dir / \"triaje.json\"\nquestionnaire_path = json_dir / \"questionnaire.json\"\ncase_meta_path = json_dir / \"case_meta.json\"\nscoring_final_path = analysis_dir / \"scoring_final.json\"\nrisk_analysis_path = analysis_dir / \"risk_analysis.json\"\nreport_data_path = analysis_dir / \"report_data.json\"\n\ntriaje = load_json(triaje_path, {})\nquestionnaire = load_json(questionnaire_path, {})\ncase_meta = load_json(case_meta_path, {})\nscoring_final = load_json(scoring_final_path, {})\nrisk_analysis = load_json(risk_analysis_path, {})\nreport_data = load_json(report_data_path, {})\n\ncase_meta_summary = case_meta.get(\"summary\", {}) if isinstance(case_meta, dict) else {}\n\nevaluations = (\n    scoring_final.get(\"question_evaluations\")\n    or report_data.get(\"question_evaluations\")\n    or []\n)\n\nfindings = (\n    risk_analysis.get(\"findings\")\n    or report_data.get(\"findings\")\n    or [\n        ev for ev in evaluations\n        if finding_score(ev) == 1 or ev.get(\"generates_finding\") is True\n    ]\n)\n\nqmap = build_question_map(evaluations)\n\ncontract = triaje.get(\"contract\", {}) if isinstance(triaje, dict) else {}\nsolution = triaje.get(\"solution\", {}) if isinstance(triaje, dict) else {}\ninformation = triaje.get(\"information\", {}) if isinstance(triaje, dict) else {}\nprovider_interaction = triaje.get(\"provider_interaction\", {}) if isinstance(triaje, dict) else {}\nrisk_context = triaje.get(\"risk_context\", {}) if isinstance(triaje, dict) else {}\nderived_flags = triaje.get(\"derived_flags\", {}) if isinstance(triaje, dict) else {}\n\nmeta_tier_raw = case_meta.get(\"tier\", \"\")\ntier = normalize_tier(meta_tier_raw)\n\nif tier:\n    tier_source = \"case_meta.json\"\n    tier_reason = f\"TIER informado en case_meta.json con valor original: {meta_tier_raw}.\"\nelse:\n    tier = \"Pendiente de confirmar\"\n    tier_source = \"missing\"\n    tier_reason = \"No se ha encontrado TIER en case_meta.json.\"\n\ncase_meta_project_code = case_meta_summary.get(\"project_code\", \"\")\ncase_meta_business_line = case_meta_summary.get(\"business_line\", \"\")\ncase_meta_business_area = case_meta_summary.get(\"business_area\", \"\")\ncase_meta_provider = case_meta_summary.get(\"provider\", \"\")\ncase_meta_contract_name = case_meta_summary.get(\"contract_name\", \"\")\ncase_meta_solution_type = case_meta_summary.get(\"solution_type\", \"\")\ncase_meta_saas_name = case_meta_summary.get(\"saas_name\", \"\")\ncase_meta_classification = case_meta_summary.get(\"classification\", \"\")\ncase_meta_personal_data = case_meta_summary.get(\"personal_data\", \"\")\ncase_meta_personal_data_regime = case_meta_summary.get(\"personal_data_regime\", \"\")\n\nproject_name = first_value(\n    case_meta_project_code,\n    contract.get(\"project_code\"),\n    case_meta_saas_name,\n    solution.get(\"saas_name\"),\n    case_meta_contract_name,\n    contract.get(\"contract_name\"),\n    case_id,\n    fallback=case_id\n)\n\nproject_display_name = first_value(\n    case_meta_saas_name,\n    solution.get(\"saas_name\"),\n    case_meta_project_code,\n    contract.get(\"project_code\"),\n    case_meta_contract_name,\n    contract.get(\"contract_name\"),\n    case_id,\n    fallback=case_id\n)\n\nbusiness_line = first_value(\n    case_meta_business_line,\n    contract.get(\"business_line\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nbusiness_area = first_value(\n    case_meta_business_area,\n    contract.get(\"business_area\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nprovider = first_value(\n    case_meta_provider,\n    contract.get(\"providers\", []),\n    fallback=\"Pendiente de confirmar\"\n)\n\ncontract_name = first_value(\n    case_meta_contract_name,\n    contract.get(\"contract_name\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\ncontract_description = first_value(\n    contract.get(\"short_description\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nbusiness_activity = first_value(\n    contract.get(\"business_activity\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nprocurement_model = first_value(\n    contract.get(\"procurement_model\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\ncontract_duration = first_value(\n    contract.get(\"contract_duration\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\naward_date_expected = first_value(\n    contract.get(\"award_date_expected\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nsolution_type = first_value(\n    case_meta_solution_type,\n    solution.get(\"solution_type\"),\n    fallback=\"SaaS / Cloud\"\n)\n\nsaas_functionality = first_value(\n    solution.get(\"saas_functionality\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\ninformation_classification = first_value(\n    case_meta_classification,\n    information.get(\"classification\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\ninformation_detail = first_value(\n    information.get(\"classification_detail\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\npersonal_data = (\n    case_meta_personal_data\n    if case_meta_personal_data not in [\"\", None]\n    else information.get(\"personal_data\", \"\")\n)\n\npersonal_data_regime = first_value(\n    case_meta_personal_data_regime,\n    information.get(\"personal_data_regime\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\npersonal_data_types = information.get(\"personal_data_types\") or []\n\npersonal_data_volume = first_value(\n    information.get(\"personal_data_volume\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nprocessing_location = first_value(\n    information.get(\"processing_location\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nuser_types = solution.get(\"user_types\") or []\nconnection_with_company = solution.get(\"connection_with_company\", \"\")\n\nquestionnaire_file = discover_questionnaire_file(base)\n\nhuman_review = []\n\nfor field_name, field_value in [\n    (\"Proyecto\", project_name),\n    (\"Línea de negocio\", business_line),\n    (\"Clasificación de la información\", information_classification),\n    (\"Proveedor\", provider)\n]:\n    if is_empty_or_pending(field_value):\n        human_review.append({\n            \"field\": field_name,\n            \"reason\": \"Dato obligatorio ausente o no confirmado.\"\n        })\n\nif not tier or \"pendiente\" in tier.lower():\n    human_review.append({\n        \"field\": \"TIER\",\n        \"reason\": \"No se ha encontrado el TIER en case_meta.json.\"\n    })\n\nif not questionnaire_file:\n    human_review.append({\n        \"field\": \"Cuestionario original\",\n        \"reason\": \"No se ha encontrado el Excel original del cuestionario en 01_originales.\"\n    })\n\ngroups = defaultdict(list)\n\nfor ev in findings:\n    risk_name = clean_text(ev.get(\"risk_name\")) or \"Riesgo pendiente de clasificar\"\n    groups[risk_name].append(ev)\n\nrisk_groups = []\nrisk_totals = {\n    \"ALTO\": 0,\n    \"MEDIO\": 0,\n    \"BAJO\": 0\n}\n\nfor idx, (risk_name, items) in enumerate(groups.items(), start=1):\n    group_level = max_level([ev.get(\"level\") for ev in items])\n\n    if not group_level:\n        group_level = \"MEDIO\"\n        human_review.append({\n            \"field\": f\"Nivel de riesgo - {risk_name}\",\n            \"reason\": \"No se ha podido determinar nivel; se marca MEDIO para revisión.\"\n        })\n\n    if group_level in risk_totals:\n        risk_totals[group_level] += 1\n\n    control_ids = []\n    incumplimientos = []\n    controles_asociados = []\n    amenazas = []\n    contextos = []\n    detalles = []\n    medidas = []\n    source_questions = []\n\n    for ev in items:\n        source_questions.append(ev.get(\"question_id\", \"\"))\n\n        control_ids.extend(as_list(ev.get(\"control_ids\")))\n        control_ids.extend(as_list(ev.get(\"control_id\")))\n\n        incumplimientos.append(ev.get(\"incumplimiento_identificado\", \"\"))\n        controles_asociados.append(ev.get(\"controles_asociados\", \"\"))\n        amenazas.extend(as_list(ev.get(\"amenazas\")))\n\n        contextos.append(ev.get(\"report_context_example\", \"\"))\n        detalles.append(ev.get(\"report_detail_example\", \"\"))\n\n        mitigation_guide = ev.get(\"mitigation_guide\", \"\")\n        mitigation = ev.get(\"mitigation\", \"\")\n\n        medidas.append(mitigation_guide or mitigation)\n\n    risk_groups.append({\n        \"risk_key\": risk_name,\n        \"report_code\": f\"R_{idx:03d}\",\n        \"risk_name\": risk_name.upper(),\n        \"level\": group_level,\n        \"color\": risk_color(group_level),\n        \"mitigation_time\": mitigation_time(group_level),\n        \"area_afectacion\": \"Local al proyecto\",\n        \"source_questions\": unique_keep_order(source_questions),\n        \"control_ids\": unique_keep_order(control_ids),\n        \"incumplimientos\": unique_keep_order(incumplimientos),\n        \"controles_asociados\": unique_keep_order(controles_asociados),\n        \"amenazas\": unique_keep_order(amenazas),\n        \"contextos\": unique_keep_order(contextos),\n        \"detalles\": unique_keep_order(detalles),\n        \"medidas_mitigantes\": unique_keep_order(medidas),\n        \"findings\": items\n    })\n\nglobal_level = max_level([g[\"level\"] for g in risk_groups])\n\nif not global_level:\n    global_level = \"BAJO\"\n\ndeuda = []\n\nfor group in risk_groups:\n    for medida in group.get(\"medidas_mitigantes\", []):\n        deuda.append({\n            \"risk_group\": group[\"risk_key\"],\n            \"risk_code\": group[\"report_code\"],\n            \"medida_mitigante\": medida,\n            \"tiempo_maximo_mitigacion\": group[\"mitigation_time\"],\n            \"level\": group[\"level\"]\n        })\n\nreport_pack = {\n    \"case_id\": case_id,\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"sources\": {\n        \"case_meta_path\": str(case_meta_path),\n        \"triaje_path\": str(triaje_path),\n        \"questionnaire_json_path\": str(questionnaire_path),\n        \"questionnaire_file\": questionnaire_file,\n        \"scoring_final_path\": str(scoring_final_path),\n        \"risk_analysis_path\": str(risk_analysis_path),\n        \"report_data_path\": str(report_data_path)\n    },\n    \"cover\": {\n        \"proyecto\": project_name,\n        \"negocio\": business_line\n    },\n    \"control_versions\": {\n        \"version\": \"1.0\",\n        \"responsable\": \"Arquitectura de seguridad\",\n        \"fecha\": datetime.now().strftime(\"%d/%m/%Y\"),\n        \"descripcion\": \"Versión inicial\"\n    },\n    \"project_context_input\": {\n        \"linea_negocio\": business_line,\n        \"area_negocio\": business_area,\n        \"proyecto\": project_name,\n        \"nombre_solucion\": project_display_name,\n        \"case_id\": case_id,\n        \"tier\": tier,\n        \"tier_source\": tier_source,\n        \"tier_reason\": tier_reason,\n        \"tipo_informacion\": information_classification,\n        \"detalle_informacion\": information_detail,\n        \"datos_personales\": personal_data,\n        \"regimen_datos_personales\": personal_data_regime,\n        \"tipos_datos_personales\": personal_data_types,\n        \"volumen_datos_personales\": personal_data_volume,\n        \"ubicacion_tratamiento\": processing_location,\n        \"proveedor\": provider,\n        \"nombre_contratacion\": contract_name,\n        \"descripcion_contratacion\": contract_description,\n        \"actividad_negocio\": business_activity,\n        \"modelo_contratacion\": procurement_model,\n        \"duracion_contrato\": contract_duration,\n        \"fecha_prevista_adjudicacion\": award_date_expected,\n        \"saas_cloud\": solution_type,\n        \"funcionalidad_saas\": saas_functionality,\n        \"tipos_usuarios\": user_types,\n        \"conexion_empresa\": connection_with_company,\n        \"provider_interaction\": provider_interaction,\n        \"risk_context\": risk_context,\n        \"derived_flags\": derived_flags,\n        \"case_meta\": case_meta,\n        \"triaje\": triaje\n    },\n    \"global_risk\": {\n        \"level\": global_level,\n        \"label\": f\"RIESGO {global_level}\",\n        \"color\": risk_color(global_level),\n        \"mitigation_time\": mitigation_time(global_level)\n    },\n    \"executive_visual\": {\n        \"nombre_proyecto\": project_name,\n        \"clasificacion_informacion\": information_classification,\n        \"linea_negocio\": business_line,\n        \"nivel_afectacion\": \"Local al proyecto\",\n        \"riesgo_global\": global_level,\n        \"risk_totals\": risk_totals\n    },\n    \"question_map\": qmap,\n    \"platform_characteristics_input\": build_platform_inputs(qmap),\n    \"risk_groups\": risk_groups,\n    \"deuda_tecnologica\": deuda,\n    \"summary\": {\n        \"total_evaluations\": len(evaluations),\n        \"total_findings\": len(findings),\n        \"total_risk_groups\": len(risk_groups),\n        \"risk_totals\": risk_totals\n    },\n    \"human_review\": human_review\n}\n\nreport_pack_path = report_dir / \"report_pack.json\"\n\nwrite_json(report_pack_path, report_pack)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"status\": \"REPORT_PACK_READY\",\n    \"report_pack_path\": str(report_pack_path),\n    \"case_meta_path\": str(case_meta_path),\n    \"tier\": tier,\n    \"tier_source\": tier_source,\n    \"questionnaire_file\": questionnaire_file,\n    \"project_name\": project_name,\n    \"project_display_name\": project_display_name,\n    \"business_line\": business_line,\n    \"provider\": provider,\n    \"total_risk_groups\": len(risk_groups),\n    \"risk_totals\": risk_totals,\n    \"global_risk\": global_level,\n    \"human_review_count\": len(human_review)\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2960,
+        80
+      ],
+      "id": "8ade7d6a-eaa1-4e5a-925a-00aae5e07573",
+      "name": "Execute Command9"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=cat \"{{$json.report_pack_path}}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        3280,
+        96
+      ],
+      "id": "7f38dcc7-c9b9-46c8-819a-d1c3d960efad",
+      "name": "Execute Command10"
+    },
+    {
+      "parameters": {
+        "command": "=mkdir -p \"/data/cases/{{$json.case_id}}/04_report\" && printf '%s' '{{$json.report_narrative_b64}}' | base64 -d > \"/data/cases/{{$json.case_id}}/04_report/report_narrative_ai.json\" && python - <<'PY'\nimport json\nfrom pathlib import Path\nfrom datetime import datetime\n\ncase_id = \"{{$json.case_id}}\"\n\nbase = Path(\"/data/cases\") / case_id\nreport_dir = base / \"04_report\"\n\npack_path = report_dir / \"report_pack.json\"\nnarrative_path = report_dir / \"report_narrative_ai.json\"\nrender_path = report_dir / \"report_render_data.json\"\n\nif not pack_path.exists():\n    raise Exception(f\"No existe report_pack.json: {pack_path}\")\n\nif not narrative_path.exists():\n    raise Exception(f\"No existe report_narrative_ai.json: {narrative_path}\")\n\npack = json.loads(pack_path.read_text(encoding=\"utf-8\"))\nnarrative = json.loads(narrative_path.read_text(encoding=\"utf-8\"))\n\nrender_data = {\n    **pack,\n    \"narrative\": narrative,\n    \"render_created_at\": datetime.now().isoformat(timespec=\"seconds\")\n}\n\nrender_path.write_text(\n    json.dumps(render_data, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"status\": \"REPORT_RENDER_DATA_READY\",\n    \"report_render_data_path\": str(render_path),\n    \"report_pack_path\": str(pack_path),\n    \"report_narrative_path\": str(narrative_path)\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        4096,
+        64
+      ],
+      "id": "e80e426e-c90f-4a93-8e60-3c234fb44a66",
+      "name": "Execute Command11"
+    },
+    {
+      "parameters": {
+        "command": "=/usr/bin/python3 /data/scripts/generate_risk_report_docx.py --case_id \"{{$json.case_id}}\" --data_path \"{{$json.report_render_data_path}}\" --template_path \"/data/templates/NuevaPlantillaInforme_MARKERS.docx\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        4544,
+        80
+      ],
+      "id": "14faf480-2470-4fa2-803b-eaedf3c148c4",
+      "name": "Execute Command12"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la salida de Generate DOCX: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4736,
+        112
+      ],
+      "id": "a180946f-21bf-43c9-9c3a-8af2fbfc47a2",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la salida de Build report pack: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3104,
+        96
+      ],
+      "id": "6e76fccd-3027-498b-912f-08c600b7e55b",
+      "name": "Code in JavaScript8"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la salida de Merge report render data: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4304,
+        48
+      ],
+      "id": "7cfb21fd-c15f-41bf-b313-65e3d2d183c3",
+      "name": "Code in JavaScript9"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\nlet reportPack;\n\ntry {\n  reportPack = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear report_pack.json: \" + stdout);\n}\n\nfunction text(value) {\n  return String(value ?? \"\").replace(/\\s+/g, \" \").trim();\n}\n\nfunction yesNo(value) {\n  if (value === true) return \"sí\";\n  if (value === false) return \"no\";\n  return text(value) || \"no indicado\";\n}\n\nfunction arr(value) {\n  if (!value) return [];\n  if (Array.isArray(value)) return value.map(v => text(v)).filter(Boolean);\n  return [text(value)].filter(Boolean);\n}\n\nfunction truncate(value, maxLength = 900) {\n  const t = text(value);\n\n  if (t.length <= maxLength) return t;\n\n  return t.slice(0, maxLength).trim() + \"...\";\n}\n\nfunction getQuestionFacts(items, maxItems = 18) {\n  return (items || [])\n    .slice(0, maxItems)\n    .map(q => {\n      return {\n        question_id: q.question_id || \"\",\n        score: q.score,\n        score_type: q.score_type || \"\",\n        level: q.level || \"\",\n        provider_answer: truncate(q.provider_answer || \"\", 350),\n        provider_details: truncate(q.provider_details || \"\", 500),\n        answer_summary: truncate(q.answer_summary || \"\", 350),\n        decision_reason: truncate(q.decision_reason || \"\", 450),\n        risk_name: q.risk_name || \"\",\n        incumplimiento_identificado: truncate(q.incumplimiento_identificado || \"\", 500),\n        mitigation: truncate(q.mitigation || \"\", 500)\n      };\n    });\n}\n\nfunction getGroup(name) {\n  return reportPack.platform_characteristics_input?.[name] || [];\n}\n\nconst c = reportPack.project_context_input || {};\nconst ev = reportPack.executive_visual || {};\nconst globalRisk = reportPack.global_risk || {};\nconst summary = reportPack.summary || {};\nconst findings = reportPack.findings || [];\n\nconst compactContext = {\n  case_id: reportPack.case_id,\n  proyecto: c.proyecto || reportPack.case_id,\n  nombre_solucion: c.nombre_solucion || c.proyecto || reportPack.case_id,\n  linea_negocio: c.linea_negocio || \"Pendiente de confirmar\",\n  area_negocio: c.area_negocio || \"Pendiente de confirmar\",\n  proveedor: c.proveedor || \"Pendiente de confirmar\",\n  tier: c.tier || summary.tier || \"Pendiente de confirmar\",\n  tier_reason: c.tier_reason || \"\",\n  tipo_informacion: c.tipo_informacion || \"Pendiente de confirmar\",\n  detalle_informacion: c.detalle_informacion || \"\",\n  datos_personales: yesNo(c.datos_personales),\n  regimen_datos_personales: c.regimen_datos_personales || \"\",\n  tipos_datos_personales: arr(c.tipos_datos_personales).join(\", \"),\n  volumen_datos_personales: c.volumen_datos_personales || \"\",\n  ubicacion_tratamiento: c.ubicacion_tratamiento || \"\",\n  saas_cloud: c.saas_cloud || \"SaaS / Cloud\",\n  funcionalidad_saas: c.funcionalidad_saas || \"\",\n  tipos_usuarios: arr(c.tipos_usuarios).join(\", \"),\n  conexion_empresa: yesNo(c.conexion_empresa),\n  provider_access_detail: c.provider_interaction?.provider_access_detail || \"\",\n  service_is_critical: yesNo(c.risk_context?.service_is_critical),\n  riesgo_global: globalRisk.level || ev.riesgo_global || \"\",\n  total_alto: ev.risk_totals?.ALTO ?? summary.alto ?? 0,\n  total_medio: ev.risk_totals?.MEDIO ?? summary.medio ?? 0,\n  total_bajo: ev.risk_totals?.BAJO ?? summary.bajo ?? 0,\n  total_findings: summary.total_findings ?? findings.length ?? 0\n};\n\nconst sectionFacts = {\n  arquitectura: getQuestionFacts(getGroup(\"arquitectura\")),\n  autenticacion: getQuestionFacts(getGroup(\"autenticacion\")),\n  monitorizacion: getQuestionFacts(getGroup(\"monitorizacion\")),\n  seguridad_sistemas: getQuestionFacts(getGroup(\"seguridad_sistemas\")),\n  continuidad: getQuestionFacts(getGroup(\"continuidad\"))\n};\n\nconst topFindings = (findings || [])\n  .slice(0, 20)\n  .map(f => ({\n    question_id: f.question_id || \"\",\n    level: f.level || \"\",\n    risk_name: f.risk_name || \"\",\n    answer_summary: truncate(f.answer_summary || \"\", 350),\n    decision_reason: truncate(f.decision_reason || \"\", 450),\n    incumplimiento_identificado: truncate(f.incumplimiento_identificado || \"\", 500),\n    mitigation: truncate(f.mitigation || \"\", 500)\n  }));\n\nconst narrativeInput = {\n  contexto_proyecto: compactContext,\n  resumen_riesgo: {\n    riesgo_global: compactContext.riesgo_global,\n    total_findings: compactContext.total_findings,\n    total_alto: compactContext.total_alto,\n    total_medio: compactContext.total_medio,\n    total_bajo: compactContext.total_bajo\n  },\n  hechos_por_apartado: sectionFacts,\n  principales_hallazgos: topFindings\n};\n\nconst systemPrompt = `\nEres un redactor experto de informes técnicos de ciberseguridad para soluciones SaaS.\n\nTu tarea es redactar texto final para un informe profesional.\n\nNo estás evaluando riesgos.\nNo debes cambiar scores, niveles, controles, mitigaciones ni conclusiones técnicas.\nDebes redactar usando únicamente los datos recibidos.\n\nENFOQUE:\n- Redacta con libertad profesional.\n- No copies un borrador.\n- No devuelvas frases genéricas.\n- No inventes información.\n- Usa el triaje, el TIER, la clasificación de información, los datos personales, las respuestas del proveedor y los hallazgos detectados.\n- Si falta evidencia, dilo de forma profesional: \"no queda acreditado\", \"no se aporta evidencia suficiente\", \"no se confirma en la información analizada\".\n\nCAMPOS A REDACTAR:\n1. contexto_proyecto:\n   - Debe explicar el proyecto, solución, proveedor, línea/área de negocio, modelo SaaS/cloud, TIER, información tratada, datos personales, GDPR si aplica, ubicación del tratamiento y usuarios.\n   - Debe tener entre 100 y 190 palabras.\n\n2. caracteristicas_generales.arquitectura:\n   - Debe describir arquitectura, hosting, modelo cloud/SaaS, tecnologías, aislamiento, entornos, integraciones, APIs y extracción/devolución de información.\n   - Debe basarse en las respuestas y hallazgos del apartado arquitectura.\n\n3. caracteristicas_generales.autenticacion:\n   - Debe describir usuarios, roles, repositorio de usuarios, federación, contraseñas, MFA, gestión del ciclo de vida y timeout.\n   - No hables aquí de TLS, HSTS, AES, RC4, backups o SIEM.\n\n4. caracteristicas_generales.monitorizacion:\n   - Debe describir logs, SIEM, alertas, eventos de seguridad, trazabilidad y capacidad de detección.\n   - No hables aquí de backups, TLS, MFA, AES o HSTS.\n\n5. caracteristicas_generales.seguridad_sistemas:\n   - Debe describir pentesting, Red Team/Blue Team, TLS/HTTPS, HSTS, RC4, cifrado, antimalware, firewall, IDS/IPS e incidentes.\n   - No hables aquí de RTO/RPO o retención salvo que sea estrictamente necesario.\n\n6. caracteristicas_generales.continuidad:\n   - Debe describir backups, retención, RTO/RPO, restauración, baja del servicio, devolución y destrucción de datos.\n\nESTILO:\n- Español formal.\n- Tono de informe de ciberseguridad.\n- Redacción clara, natural y no repetitiva.\n- No uses listas dentro de los campos narrativos.\n- No uses markdown.\n- Cada campo debe ser un string redactado.\n- Cada característica general debe tener entre 70 y 150 palabras.\n- Puedes mencionar tanto fortalezas como carencias si aparecen en los datos.\n\nPROHIBIDO:\n- No inventes tecnologías, ubicaciones, certificaciones ni controles.\n- No cambies el nivel de riesgo.\n- No crees nuevos hallazgos.\n- No devuelvas campos vacíos.\n- No devuelvas objetos dentro de los campos narrativos.\n- No escribas \"borrador\", \"pendiente de redactar\" ni \"no indicado\" como única respuesta.\n- No incluyas explicaciones fuera del JSON.\n\nFORMATO:\nDevuelve únicamente JSON válido.\nNo uses Markdown.\nNo uses bloques de código.\nEl primer carácter debe ser {.\nEl último carácter debe ser }.\n`;\n\nconst userPrompt = `\nDATOS PARA REDACTAR:\n${JSON.stringify(narrativeInput, null, 2)}\n\nESTRUCTURA EXACTA OBLIGATORIA:\n{\n  \"case_id\": \"${reportPack.case_id}\",\n  \"contexto_proyecto\": \"\",\n  \"caracteristicas_generales\": {\n    \"arquitectura\": \"\",\n    \"autenticacion\": \"\",\n    \"monitorizacion\": \"\",\n    \"seguridad_sistemas\": \"\",\n    \"continuidad\": \"\"\n  },\n  \"observaciones_revision_humana\": []\n}\n\nVALIDACIÓN ANTES DE RESPONDER:\n- contexto_proyecto debe ser un texto final de informe.\n- arquitectura debe ser un texto final de informe.\n- autenticacion debe ser un texto final de informe.\n- monitorizacion debe ser un texto final de informe.\n- seguridad_sistemas debe ser un texto final de informe.\n- continuidad debe ser un texto final de informe.\n- Ningún campo narrativo puede estar vacío.\n- Ningún campo narrativo puede ser una palabra o frase aislada.\n- No uses información no presente en DATOS PARA REDACTAR.\n- Devuelve solo JSON válido.\n`;\n\nreturn {\n  json: {\n    case_id: reportPack.case_id,\n    report_pack: reportPack,\n    report_pack_b64: Buffer.from(JSON.stringify(reportPack), \"utf8\").toString(\"base64\"),\n    narrative_input: narrativeInput,\n    system_prompt: systemPrompt,\n    user_prompt: userPrompt,\n    narrative_model_recommended: \"Gemini 3.5 Flash\",\n    narrative_temperature_recommended: 0.25,\n    narrative_max_output_tokens_recommended: 3000\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3440,
+        96
+      ],
+      "id": "b469451d-8a25-4c88-92b0-e7608565951e",
+      "name": "Code - Construir prompt redacción informe"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function getRawModelOutput(itemJson) {\n  let raw =\n    itemJson.output ||\n    itemJson.text ||\n    itemJson.response ||\n    itemJson.result ||\n    itemJson.message ||\n    itemJson.data ||\n    \"\";\n\n  if (raw && typeof raw === \"object\") {\n    if (raw.output) raw = raw.output;\n    else if (raw.text) raw = raw.text;\n    else if (raw.response) raw = raw.response;\n    else if (raw.message) raw = raw.message;\n    else if (raw.content) raw = raw.content;\n    else raw = JSON.stringify(raw);\n  }\n\n  return String(raw || \"\").trim();\n}\n\nfunction extractJsonObject(raw) {\n  raw = String(raw || \"\")\n    .replace(/^```json/i, \"\")\n    .replace(/^```/i, \"\")\n    .replace(/```$/i, \"\")\n    .trim();\n\n  try {\n    return JSON.parse(raw);\n  } catch (e) {}\n\n  const first = raw.indexOf(\"{\");\n  const last = raw.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON en la respuesta del agente: \" + raw);\n  }\n\n  return JSON.parse(raw.slice(first, last + 1));\n}\n\nfunction decodeB64Json(value) {\n  if (!value) return null;\n\n  try {\n    return JSON.parse(Buffer.from(String(value), \"base64\").toString(\"utf8\"));\n  } catch (e) {\n    return null;\n  }\n}\n\nfunction getPreviousPromptItem() {\n  const currentIndex = typeof $itemIndex !== \"undefined\" ? $itemIndex : 0;\n\n  if ($json.report_pack) {\n    return $json;\n  }\n\n  if ($json.report_pack_b64) {\n    const decoded = decodeB64Json($json.report_pack_b64);\n    if (decoded) {\n      return {\n        ...$json,\n        report_pack: decoded\n      };\n    }\n  }\n\n  const possibleNames = [\n    \"Code - Construir prompt redacción informe\",\n    \"Code in JavaScript5\",\n    \"Code in JavaScript6\",\n    \"Code in JavaScript4\",\n    \"Code in JavaScript3\",\n    \"Code in JavaScript2\",\n    \"Code in JavaScript1\",\n    \"Code in JavaScript\",\n    \"Code\"\n  ];\n\n  for (const name of possibleNames) {\n    try {\n      const items = $items(name);\n\n      if (items?.[currentIndex]?.json?.report_pack) {\n        return items[currentIndex].json;\n      }\n\n      if (items?.[currentIndex]?.json?.report_pack_b64) {\n        const decoded = decodeB64Json(items[currentIndex].json.report_pack_b64);\n        if (decoded) {\n          return {\n            ...items[currentIndex].json,\n            report_pack: decoded\n          };\n        }\n      }\n\n      if (items) {\n        for (const item of items) {\n          if (item.json?.report_pack) return item.json;\n\n          if (item.json?.report_pack_b64) {\n            const decoded = decodeB64Json(item.json.report_pack_b64);\n            if (decoded) {\n              return {\n                ...item.json,\n                report_pack: decoded\n              };\n            }\n          }\n        }\n      }\n    } catch (e) {}\n  }\n\n  return {};\n}\n\nfunction normalizeText(value) {\n  if (value === null || value === undefined) return \"\";\n\n  if (typeof value === \"object\") {\n    if (Array.isArray(value)) {\n      return value\n        .map(v => normalizeText(v))\n        .filter(Boolean)\n        .join(\" \");\n    }\n\n    return Object.entries(value)\n      .map(([key, val]) => {\n        const cleanVal = normalizeText(val);\n        if (!cleanVal) return \"\";\n        const cleanKey = String(key || \"\")\n          .replace(/_/g, \" \")\n          .trim();\n        return `${cleanKey}: ${cleanVal}.`;\n      })\n      .filter(Boolean)\n      .join(\" \");\n  }\n\n  return String(value || \"\")\n    .replace(/\\s+/g, \" \")\n    .replace(/\\s+\\./g, \".\")\n    .replace(/\\.\\s*\\./g, \".\")\n    .trim();\n}\n\nfunction isWeakText(value) {\n  const text = normalizeText(value).toLowerCase();\n\n  if (!text) return true;\n\n  const weakExact = [\n    \"pendiente de confirmar\",\n    \"información no aportada\",\n    \"informacion no aportada\",\n    \"por especificar\",\n    \"detallar\",\n    \"diarios\",\n    \"diaria\",\n    \"nunca\",\n    \"no\",\n    \"si\",\n    \"sí\",\n    \"otros\"\n  ];\n\n  if (weakExact.includes(text)) return true;\n\n  if (text.length < 55) return true;\n\n  const wordCount = text.split(/\\s+/).filter(Boolean).length;\n  if (wordCount < 10) return true;\n\n  return false;\n}\n\nfunction isObjectLike(value) {\n  return value && typeof value === \"object\" && !Array.isArray(value);\n}\n\nfunction getCgRaw(parsed, key) {\n  const cg = parsed.caracteristicas_generales || {};\n\n  const aliases = {\n    arquitectura: [\n      \"arquitectura\",\n      \"Arquitectura\"\n    ],\n    autenticacion: [\n      \"autenticacion\",\n      \"autenticación\",\n      \"Autenticacion\",\n      \"Autenticación\"\n    ],\n    monitorizacion: [\n      \"monitorizacion\",\n      \"monitorización\",\n      \"Monitorizacion\",\n      \"Monitorización\"\n    ],\n    seguridad_sistemas: [\n      \"seguridad_sistemas\",\n      \"seguridad sistemas\",\n      \"seguridad de sistemas\",\n      \"SeguridadSistemas\",\n      \"Seguridad sistemas\",\n      \"Seguridad de sistemas\"\n    ],\n    continuidad: [\n      \"continuidad\",\n      \"Continuidad\"\n    ]\n  };\n\n  for (const alias of aliases[key] || [key]) {\n    if (cg[alias] !== undefined && cg[alias] !== null) {\n      return cg[alias];\n    }\n  }\n\n  return \"\";\n}\n\nfunction getCg(parsed, key) {\n  return normalizeText(getCgRaw(parsed, key));\n}\n\nfunction safeArray(value) {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  return [value];\n}\n\nfunction qidNumber(qid) {\n  const m = String(qid || \"\").match(/Q_(\\d+)/i);\n  return m ? Number(m[1]) : 999;\n}\n\nfunction getGroupItems(pack, groupName) {\n  const items = pack.platform_characteristics_input?.[groupName] || [];\n  return [...items].sort((a, b) => qidNumber(a.question_id) - qidNumber(b.question_id));\n}\n\nfunction findQ(pack, qid) {\n  return pack.question_map?.[qid] || null;\n}\n\nfunction questionBestText(q) {\n  if (!q) return \"\";\n\n  const parts = [];\n\n  if (q.answer_summary) parts.push(q.answer_summary);\n  if (q.provider_details) parts.push(q.provider_details);\n  if (q.provider_answer) parts.push(q.provider_answer);\n  if (q.decision_reason) parts.push(q.decision_reason);\n\n  return normalizeText(parts.join(\". \"));\n}\n\nfunction listAnswer(items, qid) {\n  const q = (items || []).find(x => x.question_id === qid);\n  return questionBestText(q);\n}\n\nfunction hasAny(textValue, words) {\n  const t = normalizeText(textValue).toLowerCase();\n  return words.some(w => t.includes(w));\n}\n\nfunction lacksAll(textValue, words) {\n  return !hasAny(textValue, words);\n}\n\nfunction hasCategoryMismatch(category, value) {\n  const t = normalizeText(value).toLowerCase();\n\n  if (!t) return true;\n\n  if (category === \"autenticacion\") {\n    const authWords = [\n      \"usuario\",\n      \"usuarios\",\n      \"roles\",\n      \"rol\",\n      \"contraseña\",\n      \"contraseñas\",\n      \"federación\",\n      \"federacion\",\n      \"mfa\",\n      \"multifactor\",\n      \"doble factor\",\n      \"2fa\",\n      \"timeout\",\n      \"sesión\",\n      \"sesion\",\n      \"identidad\",\n      \"idp\",\n      \"repositorio\",\n      \"alta\",\n      \"baja\"\n    ];\n\n    const wrongWords = [\n      \"tls\",\n      \"hsts\",\n      \"rc4\",\n      \"aes\",\n      \"https\",\n      \"siem\",\n      \"logs\",\n      \"backup\",\n      \"backups\",\n      \"rto\",\n      \"rpo\",\n      \"retención\",\n      \"retencion\"\n    ];\n\n    return hasAny(t, wrongWords) && lacksAll(t, authWords);\n  }\n\n  if (category === \"monitorizacion\") {\n    const monWords = [\n      \"log\",\n      \"logs\",\n      \"siem\",\n      \"alerta\",\n      \"alertas\",\n      \"monitorización\",\n      \"monitorizacion\",\n      \"evento\",\n      \"eventos\",\n      \"correlación\",\n      \"correlacion\",\n      \"detección\",\n      \"deteccion\",\n      \"escalado\",\n      \"incidente\",\n      \"incidentes\"\n    ];\n\n    const wrongWords = [\n      \"hsts\",\n      \"tls\",\n      \"rc4\",\n      \"aes\",\n      \"mfa\",\n      \"contraseña\",\n      \"contraseñas\",\n      \"backup\",\n      \"backups\",\n      \"rto\",\n      \"rpo\",\n      \"retención\",\n      \"retencion\"\n    ];\n\n    return hasAny(t, wrongWords) && lacksAll(t, monWords);\n  }\n\n  if (category === \"arquitectura\") {\n    const archWords = [\n      \"hosting\",\n      \"php\",\n      \"sql\",\n      \"arquitectura\",\n      \"cloud\",\n      \"saas\",\n      \"aislamiento\",\n      \"aislada\",\n      \"separada\",\n      \"entorno\",\n      \"entornos\",\n      \"api\",\n      \"apis\",\n      \"integración\",\n      \"integracion\",\n      \"datos\",\n      \"modelo\",\n      \"privado\",\n      \"multi-tenant\",\n      \"tenant\"\n    ];\n\n    return lacksAll(t, archWords);\n  }\n\n  if (category === \"seguridad_sistemas\") {\n    const secWords = [\n      \"tls\",\n      \"https\",\n      \"hsts\",\n      \"rc4\",\n      \"aes\",\n      \"cifrado\",\n      \"antivirus\",\n      \"antimalware\",\n      \"firewall\",\n      \"ids\",\n      \"ips\",\n      \"intrusión\",\n      \"intrusion\",\n      \"pentest\",\n      \"pentesting\",\n      \"red team\",\n      \"blue team\",\n      \"seguridad\",\n      \"incidentes\",\n      \"vulnerabilidades\"\n    ];\n\n    return lacksAll(t, secWords);\n  }\n\n  if (category === \"continuidad\") {\n    const contWords = [\n      \"backup\",\n      \"backups\",\n      \"copia\",\n      \"copias\",\n      \"rto\",\n      \"rpo\",\n      \"retención\",\n      \"retencion\",\n      \"baja\",\n      \"devolución\",\n      \"devolucion\",\n      \"destrucción\",\n      \"destruccion\",\n      \"recuperación\",\n      \"recuperacion\",\n      \"hosting\",\n      \"datos\"\n    ];\n\n    return lacksAll(t, contWords);\n  }\n\n  return false;\n}\n\nfunction buildFallbackContext(pack) {\n  const c = pack.project_context_input || {};\n\n  const solutionName =\n    c.nombre_solucion ||\n    c.proyecto ||\n    pack.case_id ||\n    \"la solución analizada\";\n\n  const businessLine = c.linea_negocio || \"la línea de negocio indicada en el triaje\";\n  const provider = c.proveedor || \"el proveedor indicado en el triaje\";\n  const tier = c.tier || \"TIER pendiente de confirmar\";\n  const tierReason = c.tier_reason || \"\";\n  const info = c.tipo_informacion || \"información pendiente de clasificar\";\n  const detail = c.detalle_informacion || \"\";\n  const personal =\n    c.datos_personales === true ? \"sí\" :\n    c.datos_personales === false ? \"no\" :\n    String(c.datos_personales || \"pendiente de confirmar\");\n\n  const regime = c.regimen_datos_personales || \"\";\n  const saas = c.saas_cloud || \"SaaS / Cloud\";\n  const functionality = c.funcionalidad_saas || \"dar soporte a la actividad indicada en el triaje\";\n  const processing = c.ubicacion_tratamiento || \"la infraestructura indicada por el proveedor\";\n  const users = safeArray(c.tipos_usuarios).join(\", \") || \"los usuarios indicados en el triaje\";\n  const connection = c.conexion_empresa === true ? \"sí\" : c.conexion_empresa === false ? \"no\" : String(c.conexion_empresa || \"no indicado\");\n\n  return normalizeText(\n    `El proyecto ${solutionName} se enmarca en la línea de negocio ${businessLine} y tiene como finalidad ${functionality}. ` +\n    `La solución se presta bajo un modelo ${saas} por ${provider}. ` +\n    `La información tratada se clasifica como ${info}${detail ? `, concretamente ${detail}` : \"\"}. ` +\n    `El triaje indica tratamiento de datos personales (${personal})${regime ? ` sujeto a ${regime}` : \"\"}, con tratamiento ubicado en ${processing}. ` +\n    `El caso está clasificado como ${tier}${tierReason ? `, según ${tierReason}` : \"\"}. ` +\n    `La plataforma está orientada a ${users} y la conexión directa con infraestructura de EMPRESA figura como ${connection}.`\n  );\n}\n\nfunction buildFallbackArquitectura(pack) {\n  const items = getGroupItems(pack, \"arquitectura\");\n\n  const q041 = listAnswer(items, \"Q_041\");\n  const q042 = listAnswer(items, \"Q_042\");\n  const q043 = listAnswer(items, \"Q_043\");\n  const q044 = listAnswer(items, \"Q_044\");\n  const q045 = listAnswer(items, \"Q_045\");\n  const q046 = listAnswer(items, \"Q_046\");\n  const q049 = listAnswer(items, \"Q_049\");\n  const q050 = listAnswer(items, \"Q_050\");\n  const q051 = listAnswer(items, \"Q_051\");\n  const q054 = listAnswer(items, \"Q_054\");\n  const q055 = listAnswer(items, \"Q_055\");\n  const q056 = listAnswer(items, \"Q_056\");\n\n  const sentences = [];\n\n  sentences.push(\"La plataforma se describe como una solución SaaS alojada en infraestructura de hosting del proveedor.\");\n\n  if (q041 || q042) {\n    sentences.push(`A nivel tecnológico, el proveedor indica ${normalizeText([q041, q042].filter(Boolean).join(\". \")).toLowerCase()}.`);\n  }\n\n  if (q044) {\n    sentences.push(`Respecto al aislamiento de datos, se indica ${q044.toLowerCase()}.`);\n  }\n\n  if (q045 || q046) {\n    sentences.push(`También se informa de entornos o mecanismos de aislamiento para pruebas y nuevas funcionalidades: ${normalizeText([q045, q046].filter(Boolean).join(\". \"))}.`);\n  }\n\n  if (q049) {\n    sentences.push(`El modelo cloud se describe como ${q049.toLowerCase()}.`);\n  }\n\n  const integrations = normalizeText([q050, q051, q054, q055, q056].filter(Boolean).join(\". \"));\n\n  if (integrations) {\n    sentences.push(`En cuanto a integraciones, APIs y mecanismos de extracción o recuperación de información, la información aportada es: ${integrations}.`);\n  } else {\n    sentences.push(\"No se aporta información suficiente sobre APIs, integraciones o mecanismos de extracción de datos desde la nube.\");\n  }\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction buildFallbackAutenticacion(pack) {\n  const items = getGroupItems(pack, \"autenticacion\");\n\n  const q007 = listAnswer(items, \"Q_007\");\n  const q008 = listAnswer(items, \"Q_008\");\n  const q009 = listAnswer(items, \"Q_009\");\n  const q010 = listAnswer(items, \"Q_010\");\n  const q011 = listAnswer(items, \"Q_011\");\n  const q012 = listAnswer(items, \"Q_012\");\n  const q013 = listAnswer(items, \"Q_013\");\n  const q014 = listAnswer(items, \"Q_014\");\n  const q015 = listAnswer(items, \"Q_015\");\n  const q016 = listAnswer(items, \"Q_016\");\n  const q017 = listAnswer(items, \"Q_017\");\n  const q018 = listAnswer(items, \"Q_018\");\n  const q019 = listAnswer(items, \"Q_019\");\n  const q020 = listAnswer(items, \"Q_020\");\n  const q021 = listAnswer(items, \"Q_021\");\n\n  const sentences = [];\n\n  sentences.push(\"En el bloque de autenticación, el proveedor indica que los usuarios se identifican mediante registro con roles y que existe gestión de usuarios por parte del proveedor.\");\n\n  if (q007 || q008 || q009) {\n    sentences.push(`Sobre identificación y perfiles de usuario, las respuestas indican: ${normalizeText([q007, q008, q009].filter(Boolean).join(\". \"))}.`);\n  }\n\n  if (q010) {\n    sentences.push(`Respecto a federación corporativa, se indica: ${q010}.`);\n  }\n\n  if (q011 || q012 || q013) {\n    sentences.push(`Sobre repositorio y ciclo de vida de usuarios, se aporta la siguiente información: ${normalizeText([q011, q012, q013].filter(Boolean).join(\". \"))}.`);\n  }\n\n  const pwdInfo = normalizeText([q014, q015, q016, q017, q018, q019].filter(Boolean).join(\". \"));\n\n  if (pwdInfo) {\n    sentences.push(`En relación con contraseñas, almacenamiento y política de robustez, se indica: ${pwdInfo}.`);\n  }\n\n  if (q020) {\n    sentences.push(`Respecto a MFA, la información disponible es: ${q020}.`);\n  }\n\n  if (q021) {\n    sentences.push(`Para el cierre o caducidad de sesión, se indica: ${q021}.`);\n  }\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction buildFallbackMonitorizacion(pack) {\n  const items = getGroupItems(pack, \"monitorizacion\");\n\n  const q037 = listAnswer(items, \"Q_037\");\n  const q038 = listAnswer(items, \"Q_038\");\n  const q039 = listAnswer(items, \"Q_039\");\n  const q040 = listAnswer(items, \"Q_040\");\n\n  const sentences = [];\n\n  sentences.push(\"En materia de monitorización, las respuestas del proveedor muestran carencias relevantes en la recogida, centralización y explotación de eventos de seguridad.\");\n\n  if (q037) {\n    sentences.push(`Sobre recogida de logs, se indica: ${q037}.`);\n  } else {\n    sentences.push(\"No queda acreditada una recogida completa de logs de usuarios, administradores, servidores, bases de datos y dispositivos de red.\");\n  }\n\n  if (q038) {\n    sentences.push(`Respecto a SIEM propio, se indica: ${q038}.`);\n  } else {\n    sentences.push(\"No se confirma centralización de logs en un SIEM propio.\");\n  }\n\n  if (q039) {\n    sentences.push(`Respecto a integración con SIEM externo o de EMPRESA, se indica: ${q039}.`);\n  } else {\n    sentences.push(\"No se confirma integración con un SIEM externo o con el SIEM de EMPRESA.\");\n  }\n\n  if (q040) {\n    sentences.push(`Respecto a alertas de seguridad, se indica: ${q040}.`);\n  } else {\n    sentences.push(\"No se evidencia generación de alertas de seguridad ni proceso de escalado asociado.\");\n  }\n\n  sentences.push(\"Por tanto, no queda acreditada una capacidad completa de detección, correlación, alerta y escalado de incidentes sobre la plataforma.\");\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction buildFallbackSeguridad(pack) {\n  const items = getGroupItems(pack, \"seguridad_sistemas\");\n\n  const q005 = listAnswer(items, \"Q_005\");\n  const q006 = listAnswer(items, \"Q_006\");\n  const q022 = listAnswer(items, \"Q_022\");\n  const q023 = listAnswer(items, \"Q_023\");\n  const q024 = listAnswer(items, \"Q_024\");\n  const q025 = listAnswer(items, \"Q_025\");\n  const q027 = listAnswer(items, \"Q_027\");\n  const q028 = listAnswer(items, \"Q_028\");\n  const q029 = listAnswer(items, \"Q_029\");\n  const q033 = listAnswer(items, \"Q_033\");\n  const q047 = listAnswer(items, \"Q_047\");\n  const q048 = listAnswer(items, \"Q_048\");\n  const q057 = listAnswer(items, \"Q_057\");\n\n  const sentences = [];\n\n  sentences.push(\"En seguridad de los sistemas, el proveedor confirma algunos controles técnicos, pero también se identifican carencias relevantes.\");\n\n  const testing = normalizeText([q005, q006].filter(Boolean).join(\". \"));\n  if (testing) {\n    sentences.push(`Respecto a ejercicios Red/Blue Team y pruebas de intrusión, se indica: ${testing}.`);\n  }\n\n  const comms = normalizeText([q022, q023, q024, q025, q029].filter(Boolean).join(\". \"));\n  if (comms) {\n    sentences.push(`En comunicaciones seguras, TLS/HTTPS, HSTS y algoritmos, se indica: ${comms}.`);\n  }\n\n  const crypto = normalizeText([q027, q028].filter(Boolean).join(\". \"));\n  if (crypto) {\n    sentences.push(`Para cifrado de datos en reposo, la información disponible indica: ${crypto}.`);\n  }\n\n  if (q033) {\n    sentences.push(`Respecto a antivirus o antimalware, se indica: ${q033}.`);\n  }\n\n  if (q047 || q048) {\n    sentences.push(`En arquitectura de red, filtrado y controles IDS/IPS o firewall de capa 7, se indica: ${normalizeText([q047, q048].filter(Boolean).join(\". \"))}.`);\n  }\n\n  if (q057) {\n    sentences.push(`Sobre comunicación y escalado de incidentes, se indica: ${q057}.`);\n  }\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction buildFallbackContinuidad(pack) {\n  const items = getGroupItems(pack, \"continuidad\");\n\n  const q030 = listAnswer(items, \"Q_030\");\n  const q031 = listAnswer(items, \"Q_031\");\n  const q032 = listAnswer(items, \"Q_032\");\n  const q034 = listAnswer(items, \"Q_034\");\n  const q035 = listAnswer(items, \"Q_035\");\n  const q036 = listAnswer(items, \"Q_036\");\n\n  const sentences = [];\n\n  sentences.push(\"En continuidad, el proveedor aporta información sobre copias de seguridad y recuperación de datos, aunque existen aspectos no formalizados.\");\n\n  if (q030) {\n    sentences.push(`Respecto a backups, se indica: ${q030}.`);\n  }\n\n  if (q031) {\n    sentences.push(`Sobre RTO/RPO, se indica: ${q031}.`);\n  } else {\n    sentences.push(\"No se aportan valores RTO/RPO formalizados.\");\n  }\n\n  if (q032) {\n    sentences.push(`Sobre retención de datos, se indica: ${q032}.`);\n  } else {\n    sentences.push(\"No queda acreditada una política de retención completamente documentada.\");\n  }\n\n  if (q034) {\n    sentences.push(`Respecto a finalización o baja del servicio, se indica: ${q034}.`);\n  }\n\n  if (q035) {\n    sentences.push(`Respecto a destrucción de datos, se indica: ${q035}.`);\n  }\n\n  if (q036) {\n    sentences.push(`Respecto a devolución o recuperación de datos, se indica: ${q036}.`);\n  }\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction normalizeObservations(value) {\n  const out = [];\n\n  for (const item of safeArray(value)) {\n    if (!item) continue;\n\n    if (typeof item === \"string\") {\n      if (item.trim()) out.push(item.trim());\n      continue;\n    }\n\n    if (typeof item === \"object\") {\n      const field = item.field || item.campo || \"\";\n      const reason = item.reason || item.motivo || item.description || \"\";\n      const text = normalizeText([field, reason].filter(Boolean).join(\": \"));\n      if (text) out.push(text);\n      continue;\n    }\n\n    out.push(String(item));\n  }\n\n  return out;\n}\n\nconst raw = getRawModelOutput($json);\nconst promptItem = getPreviousPromptItem();\nconst reportPack = promptItem.report_pack || {};\nconst narrativeInput = promptItem.narrative_input || {};\nconst draftBase = narrativeInput.borrador_base_obligatorio || {};\n\nlet parsed;\n\ntry {\n  parsed = extractJsonObject(raw);\n} catch (e) {\n  parsed = {\n    case_id: reportPack.case_id || \"\",\n    contexto_proyecto: \"\",\n    caracteristicas_generales: {},\n    observaciones_revision_humana: [\n      \"El agente no devolvió JSON válido. Se generó narrativa determinista de respaldo.\"\n    ]\n  };\n}\n\nlet contexto = normalizeText(parsed.contexto_proyecto);\nlet arquitectura = getCg(parsed, \"arquitectura\");\nlet autenticacion = getCg(parsed, \"autenticacion\");\nlet monitorizacion = getCg(parsed, \"monitorizacion\");\nlet seguridad = getCg(parsed, \"seguridad_sistemas\");\nlet continuidad = getCg(parsed, \"continuidad\");\n\nconst rawArquitectura = getCgRaw(parsed, \"arquitectura\");\nconst rawAutenticacion = getCgRaw(parsed, \"autenticacion\");\nconst rawMonitorizacion = getCgRaw(parsed, \"monitorizacion\");\nconst rawSeguridad = getCgRaw(parsed, \"seguridad_sistemas\");\nconst rawContinuidad = getCgRaw(parsed, \"continuidad\");\n\nconst observations = normalizeObservations(parsed.observaciones_revision_humana);\n\nif (isWeakText(contexto)) {\n  contexto = normalizeText(draftBase.contexto_proyecto) || buildFallbackContext(reportPack);\n  observations.push(\"Contexto generado por fallback determinista porque la salida del agente era vacía o insuficiente.\");\n}\n\nif (\n  isWeakText(arquitectura) ||\n  isObjectLike(rawArquitectura) ||\n  hasCategoryMismatch(\"arquitectura\", arquitectura)\n) {\n  arquitectura = normalizeText(draftBase.arquitectura) || buildFallbackArquitectura(reportPack);\n  observations.push(\"Arquitectura generada por fallback determinista.\");\n}\n\nif (\n  isWeakText(autenticacion) ||\n  isObjectLike(rawAutenticacion) ||\n  hasCategoryMismatch(\"autenticacion\", autenticacion)\n) {\n  autenticacion = normalizeText(draftBase.autenticacion) || buildFallbackAutenticacion(reportPack);\n  observations.push(\"Autenticación generada por fallback determinista.\");\n}\n\nif (\n  isWeakText(monitorizacion) ||\n  isObjectLike(rawMonitorizacion) ||\n  hasCategoryMismatch(\"monitorizacion\", monitorizacion)\n) {\n  monitorizacion = normalizeText(draftBase.monitorizacion) || buildFallbackMonitorizacion(reportPack);\n  observations.push(\"Monitorización generada por fallback determinista.\");\n}\n\nif (\n  isWeakText(seguridad) ||\n  isObjectLike(rawSeguridad) ||\n  hasCategoryMismatch(\"seguridad_sistemas\", seguridad)\n) {\n  seguridad = normalizeText(draftBase.seguridad_sistemas) || buildFallbackSeguridad(reportPack);\n  observations.push(\"Seguridad de sistemas generada por fallback determinista.\");\n}\n\nif (\n  isWeakText(continuidad) ||\n  isObjectLike(rawContinuidad) ||\n  hasCategoryMismatch(\"continuidad\", continuidad)\n) {\n  continuidad = normalizeText(draftBase.continuidad) || buildFallbackContinuidad(reportPack);\n  observations.push(\"Continuidad generada por fallback determinista.\");\n}\n\nconst normalized = {\n  case_id: reportPack.case_id || parsed.case_id || \"\",\n  contexto_proyecto: contexto,\n  caracteristicas_generales: {\n    arquitectura,\n    autenticacion,\n    monitorizacion,\n    seguridad_sistemas: seguridad,\n    continuidad\n  },\n  observaciones_revision_humana: [...new Set(observations)]\n};\n\nconst narrativeB64 = Buffer.from(\n  JSON.stringify(normalized, null, 2),\n  \"utf8\"\n).toString(\"base64\");\n\nreturn {\n  json: {\n    case_id: normalized.case_id,\n    report_pack_b64: promptItem.report_pack_b64 || Buffer.from(JSON.stringify(reportPack), \"utf8\").toString(\"base64\"),\n    report_narrative: normalized,\n    report_narrative_b64: narrativeB64,\n    raw_model_output: raw,\n    normalization_status: \"REPORT_NARRATIVE_NORMALIZED\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3968,
+        80
+      ],
+      "id": "835da017-d1cc-4a35-beea-93d883414180",
+      "name": "Code - Normalizar narrativa informe"
+    },
+    {
+      "parameters": {
+        "command": "=case_id=\"{{$json.case_id}}\"\ndocx_path=\"{{$json.docx_path}}\"\n\npython3 - <<'PY'\nimport json\nimport re\nfrom pathlib import Path\nfrom datetime import datetime\n\ncase_id = \"\"\"{{$json.case_id}}\"\"\".strip()\ndocx_path = \"\"\"{{$json.docx_path}}\"\"\".strip()\n\nif not case_id:\n    raise Exception(\"case_id vacío para preparar subida a Google Drive.\")\n\nbase = Path(\"/data/cases\") / case_id\nreport_dir = base / \"04_report\"\n\nreport_render_data_path = report_dir / \"report_render_data.json\"\nreport_pack_path = report_dir / \"report_pack.json\"\n\ndef load_json(path):\n    path = Path(path)\n    if not path.exists():\n        return {}\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\ndef clean_folder_name(value):\n    text = str(value or \"\").strip()\n\n    if not text:\n        text = case_id\n\n    text = re.sub(r'[\\\\/:*?\"<>|]+', \"_\", text)\n    text = re.sub(r\"\\s+\", \" \", text).strip()\n    text = text.rstrip(\". \")\n\n    if len(text) > 100:\n        text = text[:100].rstrip(\". \")\n\n    if not text:\n        text = case_id\n\n    return text\n\ndata = load_json(report_render_data_path)\npack = load_json(report_pack_path)\n\n# Nombre descriptivo del proyecto para metadatos.\nproject_name = (\n    data.get(\"cover\", {}).get(\"proyecto\")\n    or data.get(\"project_context_input\", {}).get(\"proyecto\")\n    or data.get(\"project_context\", {}).get(\"proyecto\")\n    or pack.get(\"cover\", {}).get(\"proyecto\")\n    or pack.get(\"project_context_input\", {}).get(\"proyecto\")\n    or case_id\n)\n\n# IMPORTANTE:\n# La carpeta de Google Drive se nombra con case_id para que sea única y no dependa\n# del texto anonimizado del triaje/informe.\ngoogle_project_folder = clean_folder_name(case_id)\n\nif not docx_path:\n    report_out_dir = base / \"05_report\"\n    candidates = sorted(\n        report_out_dir.glob(\"Informe_Ciberseguridad_*.docx\"),\n        key=lambda p: p.stat().st_mtime,\n        reverse=True\n    )\n    if candidates:\n        docx_path = str(candidates[0])\n\ndocx = Path(docx_path)\n\nif not docx.exists():\n    raise Exception(f\"No existe el informe DOCX: {docx}\")\n\nquestionnaire_file = (\n    data.get(\"sources\", {}).get(\"questionnaire_file\")\n    or pack.get(\"sources\", {}).get(\"questionnaire_file\")\n    or str(base / \"01_originales\" / \"cuestionario.xlsx\")\n)\n\nquestionnaire = Path(questionnaire_file)\n\nif not questionnaire.exists():\n    raise Exception(f\"No existe el cuestionario original: {questionnaire}\")\n\nupload_pack = {\n    \"case_id\": case_id,\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"google_drive_base_folder\": \"TFM\",\n    \"google_drive_project_folder\": google_project_folder,\n    \"google_drive_project_path\": f\"TFM/{google_project_folder}\",\n    \"project_name\": project_name,\n    \"folder_name_source\": \"case_id\",\n    \"files\": [\n        {\n            \"kind\": \"report\",\n            \"file_path\": str(docx),\n            \"file_name\": docx.name,\n            \"mime_type\": \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\"\n        },\n        {\n            \"kind\": \"questionnaire\",\n            \"file_path\": str(questionnaire),\n            \"file_name\": questionnaire.name,\n            \"mime_type\": \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\"\n        }\n    ]\n}\n\nout_path = report_dir / \"google_drive_upload_pack.json\"\nout_path.write_text(\n    json.dumps(upload_pack, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"status\": \"GOOGLE_DRIVE_UPLOAD_PACK_READY\",\n    \"google_drive_base_folder\": upload_pack[\"google_drive_base_folder\"],\n    \"google_drive_project_folder\": upload_pack[\"google_drive_project_folder\"],\n    \"google_drive_project_path\": upload_pack[\"google_drive_project_path\"],\n    \"project_name\": project_name,\n    \"folder_name_source\": \"case_id\",\n    \"docx_path\": str(docx),\n    \"questionnaire_path\": str(questionnaire),\n    \"upload_pack_path\": str(out_path),\n    \"files\": upload_pack[\"files\"]\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        4928,
+        128
+      ],
+      "id": "8d2281d9-5702-4aaf-ad0e-d7baf9e8e085",
+      "name": "Execute Command13"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = String($json.stdout || \"\").trim();\n\nfunction extractJson(text) {\n  try {\n    return JSON.parse(text);\n  } catch (e) {}\n\n  const first = text.indexOf(\"{\");\n  const last = text.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON válido en stdout: \" + text);\n  }\n\n  return JSON.parse(text.slice(first, last + 1));\n}\n\nconst parsed = extractJson(stdout);\n\nreturn {\n  json: {\n    ...$json,\n    ...parsed\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5104,
+        96
+      ],
+      "id": "daf6947e-4e7d-4a41-a665-1f7f45c4df6d",
+      "name": "Code in JavaScript12"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{$json.google_drive_project_folder}}",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{$json.google_drive_root_folder_id}}",
+            "mode": "id"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5472,
+        80
+      ],
+      "id": "93acf179-3833-481b-b43f-8b57531ccc2d",
+      "name": "Search files and folders",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "SJZ3er4SF6kUEheN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{$node[\"Code - Parse Google Drive upload pack\"].json.google_drive_project_folder}}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{$node[\"Code - Parse Google Drive upload pack\"].json.google_drive_root_folder_id}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5920,
+        208
+      ],
+      "id": "8453f4b9-76e6-4388-81de-bf5ffdc84dea",
+      "name": "Create folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "SJZ3er4SF6kUEheN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  json: {\n    ...$json,\n    google_drive_root_folder_id: \"1QsMLUBuF-5GhP1BJDR5AId_mh3ZQ3alt\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5264,
+        128
+      ],
+      "id": "2fe15e0c-8ab0-433e-bf58-3cc5246ffc79",
+      "name": "Code - Parse Google Drive upload pack"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pack = $items(\"Code - Parse Google Drive upload pack\")[0].json;\n\nlet folderId = \"\";\n\nif ($json.id) {\n  folderId = $json.id;\n} else if ($json.fileId) {\n  folderId = $json.fileId;\n}\n\nif (!folderId) {\n  throw new Error(\"No se pudo determinar el ID de la carpeta del proyecto en Google Drive.\");\n}\n\nreturn {\n  json: {\n    ...pack,\n    google_drive_project_folder_id: folderId\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6144,
+        192
+      ],
+      "id": "cd8576ef-9527-42ee-9a48-6cdf9fe3ba37",
+      "name": "Code in JavaScript13"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pack = $json;\n\nreturn pack.files.map(file => ({\n  json: {\n    case_id: pack.case_id,\n    project_name: pack.project_name,\n    google_drive_project_folder: pack.google_drive_project_folder,\n    google_drive_project_folder_id: pack.google_drive_project_folder_id,\n    file_kind: file.kind,\n    file_path: file.file_path,\n    file_name: file.file_name,\n    mime_type: file.mime_type\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6368,
+        176
+      ],
+      "id": "df698190-40bf-4b66-bb27-b87568c159d6",
+      "name": "Code in JavaScript14"
+    },
+    {
+      "parameters": {
+        "name": "={{$json.file_name}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{$json.google_drive_project_folder_id}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        7328,
+        176
+      ],
+      "id": "6a2522eb-60f9-450b-b704-6c7c20ea6ebf",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "SJZ3er4SF6kUEheN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=python3 - <<'PY'\nimport json\nimport shutil\nimport re\nfrom pathlib import Path\n\ncase_id = {{ JSON.stringify($json.case_id || \"\") }}\nproject_name = {{ JSON.stringify($json.project_name || \"\") }}\ngoogle_drive_project_folder = {{ JSON.stringify($json.google_drive_project_folder || \"\") }}\ngoogle_drive_project_folder_id = {{ JSON.stringify($json.google_drive_project_folder_id || \"\") }}\nfile_kind = {{ JSON.stringify($json.file_kind || \"\") }}\nfile_path = {{ JSON.stringify($json.file_path || \"\") }}\nfile_name = {{ JSON.stringify($json.file_name || \"\") }}\nmime_type = {{ JSON.stringify($json.mime_type || \"\") }}\n\nif not case_id:\n    raise Exception(\"case_id vacío\")\n\nif not file_path:\n    raise Exception(\"file_path vacío\")\n\nsrc = Path(file_path)\n\nif not src.exists():\n    raise Exception(f\"No existe el archivo origen: {src}\")\n\nif not file_name:\n    file_name = src.name\n\nsafe_case_id = re.sub(r\"[^A-Za-z0-9_.-]+\", \"_\", case_id).strip(\"_\")\nsafe_file_name = re.sub(r\"[^A-Za-z0-9_.-]+\", \"_\", file_name).strip(\"_\")\n\ntarget_dir = Path(\"/home/node/.n8n-files/google_drive_uploads\") / safe_case_id\ntarget_dir.mkdir(parents=True, exist_ok=True)\n\ntarget_path = target_dir / safe_file_name\n\nshutil.copy2(src, target_path)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"project_name\": project_name,\n    \"google_drive_project_folder\": google_drive_project_folder,\n    \"google_drive_project_folder_id\": google_drive_project_folder_id,\n    \"file_kind\": file_kind,\n    \"original_file_path\": str(src),\n    \"file_path\": str(target_path),\n    \"file_name\": file_name,\n    \"mime_type\": mime_type,\n    \"status\": \"FILE_COPIED_TO_N8N_FILES\"\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        6560,
+        176
+      ],
+      "id": "4eb5aa0b-6171-4e83-a754-8dd3d76fab99",
+      "name": "Execute Command14"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = String($json.stdout || \"\").trim();\n\nfunction extractJson(text) {\n  try {\n    return JSON.parse(text);\n  } catch (e) {}\n\n  const first = text.indexOf(\"{\");\n  const last = text.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON válido en stdout: \" + text);\n  }\n\n  return JSON.parse(text.slice(first, last + 1));\n}\n\nconst parsed = extractJson(stdout);\n\nif (!parsed.file_path) {\n  throw new Error(\"No se recibió file_path después de copiar archivo: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6720,
+        160
+      ],
+      "id": "c6e99f05-38df-4d2e-b286-2a1f7e5f91c4",
+      "name": "Code in JavaScript15"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{$json.file_path}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        6912,
+        160
+      ],
+      "id": "7af4933d-232b-4c86-9bc2-e0472d278f2f",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const originalItems = $items(\"Code in JavaScript14\");\n\nconst original = originalItems[$itemIndex]?.json || {};\n\nif (!original.google_drive_project_folder_id) {\n  throw new Error(\n    \"No se encontró google_drive_project_folder_id en Code in JavaScript14 para item \" + $itemIndex\n  );\n}\n\nconst binary = $input.item.binary || {};\n\nreturn {\n  json: {\n    ...original\n  },\n  binary\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7104,
+        176
+      ],
+      "id": "acd0df34-cd9a-484f-89e7-5b9f2a6fac5d",
+      "name": "Code in JavaScript16"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0a21676c-984b-4635-8b72-69729ca30a19",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5664,
+        176
+      ],
+      "id": "4a01a631-6135-483d-bc24-30b169a636b8",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractJsonObject(value) {\n  if (value && typeof value === \"object\") {\n    return value;\n  }\n\n  const raw = String(value || \"\").trim();\n\n  if (!raw) {\n    throw new Error(\"Respuesta vacía del AI Agent RAG.\");\n  }\n\n  let cleaned = raw\n    .replace(/^```json\\s*/i, \"\")\n    .replace(/^```\\s*/i, \"\")\n    .replace(/```$/i, \"\")\n    .trim();\n\n  try {\n    return JSON.parse(cleaned);\n  } catch (e) {\n    // seguimos\n  }\n\n  const first = cleaned.indexOf(\"{\");\n  const last = cleaned.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\n      \"No se encontró JSON en la salida del AI Agent RAG: \" +\n      cleaned.slice(0, 1500)\n    );\n  }\n\n  const candidate = cleaned.slice(first, last + 1);\n\n  try {\n    return JSON.parse(candidate);\n  } catch (e) {\n    throw new Error(\n      \"No se pudo parsear JSON del AI Agent RAG. Error: \" +\n      e.message +\n      \"\\nRespuesta parcial:\\n\" +\n      candidate.slice(0, 2500)\n    );\n  }\n}\n\nfunction getAgentOutput(json) {\n  return (\n    json.output ||\n    json.text ||\n    json.response ||\n    json.ai_response ||\n    json.result ||\n    json.message ||\n    json.data ||\n    \"\"\n  );\n}\n\nlet promptItem = {};\n\ntry {\n  const items = $items(\"Code - Construir prompt scoring RAG TOOL\");\n  promptItem = items[$itemIndex]?.json || {};\n} catch (e) {\n  promptItem = {};\n}\n\nif (!promptItem.case_id && $json.case_id) {\n  promptItem = $json;\n}\n\nconst agentOutput = getAgentOutput($json);\nconst parsed = extractJsonObject(agentOutput);\n\nreturn {\n  json: {\n    ...promptItem,\n\n    agent_raw_response: $json,\n    agent_output_raw: typeof agentOutput === \"string\" ? agentOutput : JSON.stringify(agentOutput),\n\n    output: JSON.stringify(parsed),\n    text: JSON.stringify(parsed),\n    response: JSON.stringify(parsed),\n    ai_response: JSON.stringify(parsed),\n\n    rag_mode: \"agent_tool_qdrant\",\n    parsed_agent_response: parsed\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        256
+      ],
+      "id": "96bade85-591a-47a5-a980-01da104cfa45",
+      "name": "Code in JavaScript10"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1056,
+        32
+      ],
+      "id": "a140fd52-27a4-4b23-ac7d-a3a87938a7f7",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        2304,
+        624
+      ],
+      "id": "88f200cf-0356-4ae2-b91d-a357633552d8"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        128
+      ],
+      "id": "97db61e9-53c7-4691-a069-3c5258e67be3",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me1",
+      "typeVersion": 1,
+      "position": [
+        2256,
+        352
+      ],
+      "id": "89d1787f-f4fb-4a1d-a308-8fa6e9b8a010"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.user_prompt}}",
+        "options": {
+          "systemMessage": "={{$json.system_prompt}}",
+          "maxIterations": 4,
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1216,
+        112
+      ],
+      "id": "b48e2d8e-80f1-4891-802c-9f6edf3b8abf",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        608
+      ],
+      "id": "f150631b-e01f-49fe-959c-c6b9622d383f",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "gksV5yLY0U1O95vr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "OBLIGATORIA. Recupera la ficha oficial del catálogo de riesgos para una pregunta concreta.\n\nDebe usarse antes de evaluar cualquier pregunta.\n\nEntrada esperada: string con formato:\nEXACT_QUESTION_ID_Q_XXX Q_XXX texto de la pregunta\n\nDevuelve la ficha oficial con metadata.question_id.",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "tfm_rag_manual_agent",
+          "mode": "list",
+          "cachedResultName": "tfm_rag_manual_agent"
+        },
+        "topK": 1,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        1248,
+        400
+      ],
+      "id": "3c46de4b-e5d3-41b9-b37f-689aa482d847",
+      "name": "risk_catalog_search",
+      "credentials": {
+        "qdrantApi": {
+          "id": "wYClCEZtf9ioZHsN",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {
+          "maxOutputTokens": 900,
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        320
+      ],
+      "id": "aecd069e-9cff-4642-8df5-56125d7c782e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QKx7rGtFyACfwb2Y",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {
+          "maxOutputTokens": 16000,
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3648,
+        320
+      ],
+      "id": "72b460aa-8045-4bdb-a6fc-fda786119487",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QKx7rGtFyACfwb2Y",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.user_prompt}}",
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "={{$json.system_prompt}}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        3648,
+        96
+      ],
+      "id": "21df6a1a-c378-44c3-ab37-d03d0a9293cc",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {
+          "maxOutputTokens": 16000,
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3536,
+        304
+      ],
+      "id": "3bf4191d-4c10-4aa3-85ba-b907f27c086a",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QKx7rGtFyACfwb2Y",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "case_id"
+            },
+            {
+              "name": "status"
+            },
+            {
+              "name": "tier"
+            },
+            {
+              "name": "case_meta_path"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        0
+      ],
+      "id": "96896902-99d9-4433-be91-5fa06e0571d9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1696,
+        112
+      ],
+      "id": "76c2c9f6-9db5-4322-a94b-746a49b22554",
+      "name": "Wait",
+      "webhookId": "b72d2dea-a7e0-4bb0-bd2d-63ed9475dbdd"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Execute Command2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Command5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Execute Command4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command9": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command10": {
+      "main": [
+        [
+          {
+            "node": "Code - Construir prompt redacción informe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command11": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command12": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "Execute Command13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript8": {
+      "main": [
+        [
+          {
+            "node": "Execute Command10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript9": {
+      "main": [
+        [
+          {
+            "node": "Execute Command12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Construir prompt redacción informe": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Normalizar narrativa informe": {
+      "main": [
+        [
+          {
+            "node": "Execute Command11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command13": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript12": {
+      "main": [
+        [
+          {
+            "node": "Code - Parse Google Drive upload pack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Parse Google Drive upload pack": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript13": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript14": {
+      "main": [
+        [
+          {
+            "node": "Execute Command14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command14": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript15",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript15": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript16",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript16": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Execute Command9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript10": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Execute Command3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "risk_catalog_search",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "risk_catalog_search": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code - Normalizar narrativa informe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e10e682a-2747-4e8a-b41e-4d8958820e98",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ab1e990902e95383f4a54076b8865c550cd63d72778d0fe5c251c70d680c4dce"
+  },
+  "id": "XFmNtVPA2OcXghXs",
+  "tags": []
+}

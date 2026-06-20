@@ -1,0 +1,151 @@
+{
+  "batch_id": "batch_053",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_037",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no recoge logs de operaciones ni accesos en las infraestructuras del servicio.",
+      "decision_reason": "El proveedor responde negativamente a la recogida de logs, incumpliendo el control C_030 y generando un riesgo de demora en la detección de incidentes.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_030"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se deben recoger Logs en las operaciones y/o accesos realizados por los usuarios finales y operadores del servicio en las distintas infraestructuras involucradas en el servicio (Servidores (web, aplicación, BBDDs), dispositivos de red, …).",
+      "mitigation_guide": "",
+      "report_context_example": "El proveedor indica que no genera logs en las operaciones y/o accesos realizados por los usuarios finales y operadores del servicio en las distintas infraestructuras involucradas en el servicio",
+      "report_detail_example": "No generar y recoger logs de las operaciones y/o accesos de los usuarios finales y los operadores del servicio de las infraestructuras involucradas, puede suponer un riesgo debido a la demora en la detección de incidentes.",
+      "sources": [
+        {
+          "question_id": "Q_037",
+          "chunk_id": "RAG-Q_037",
+          "traceability": "Excel: Análisis SaaS, fila 38",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar los campos de los registros de Logs y el periodo de tiempo de conservación de los mismos."
+    },
+    {
+      "question_id": "Q_038",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no dispone de un SIEM propio para el envío de logs.",
+      "decision_reason": "Al no recoger logs (Q_037) ni disponer de SIEM, se incumple el control C_031, aumentando el riesgo de falta de visibilidad y detección de incidentes.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_031"
+      ],
+      "incumplimiento_identificado": "El proveedor no dispone de un SIEM al que enviar los logs que recoge",
+      "controles_asociados": "Se debe disponer de su propio SIEM u ofrecer la posibilidad de enviar los logs al SIEM de EMPRESA",
+      "amenazas": [
+        "Manipulación no autorizada de la API de servicios",
+        "Recopilación de información"
+      ],
+      "mitigation": "Se deben enviar los logs a un sistema tipo SIEM o similar.",
+      "mitigation_guide": "Se debe disponer de una herramienta capaz de centralizar los logs.",
+      "report_context_example": "El proveedor indica que genera logs, pero, sin embargo, estos no son almacenados en un SIEM, o cuentan con la posibilidad de enviarlos al de EMPRESA, ni generan alertas de seguridad.",
+      "report_detail_example": "No disponer de una herramienta de análisis con la que poder centralizar los logs de los distintos sistemas involucrados y en la que establecer reglas y configurar alarmas en el caso de darse algún incidente de seguridad en los sistemas, además de no generar alertas mediante los logs, puede derivar en una detección tardía de una incidencia grave dentro del sistema al no haber un proceso que permita escalar dichos incidentes.",
+      "sources": [
+        {
+          "question_id": "Q_038",
+          "chunk_id": "RAG-Q_038",
+          "traceability": "Excel: Análisis SaaS, fila 39",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar el SIEM utilizado. Especificar el tiempo de conservación de los Logs recolectados."
+    },
+    {
+      "question_id": "Q_039",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no ofrece la posibilidad de integrar los logs con el SIEM de EMPRESA.",
+      "decision_reason": "La negativa a integrar logs con el SIEM de EMPRESA incumple el control C_032, impidiendo la centralización y monitorización de eventos de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_032"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "En caso de que el proveedor no sea capaz de provocar alertas sobre incidentes de seguridad, debe ser capaz de enviar los logs recogidos al SIEM de EMPRESA.",
+      "mitigation_guide": "Se deben exportar los logs al SIEM de EMPRESA",
+      "report_context_example": "El proveedor indica que genera logs, pero, sin embargo, no cuenta con la posibilidad de enviarlos al de EMPRESA, ni generan alertas de seguridad.",
+      "report_detail_example": "No disponer de una herramienta de análisis con la que poder centralizar los logs de los distintos sistemas involucrados y en la que establecer reglas y configurar alarmas en el caso de darse algún incidente de seguridad en los sistemas, además de no generar alertas mediante los logs, puede derivar en una detección tardía de una incidencia grave dentro del sistema al no haber un proceso que permita escalar dichos incidentes.",
+      "sources": [
+        {
+          "question_id": "Q_039",
+          "chunk_id": "RAG-Q_039",
+          "traceability": "Excel: Análisis SaaS, fila 40",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Indicar el mecanismo de integración con un SIEM externo."
+    },
+    {
+      "question_id": "Q_040",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no genera alertas de seguridad a partir de los logs.",
+      "decision_reason": "La ausencia de generación de alertas (C_033) junto con la falta de logs y SIEM, impide la detección temprana de incidentes de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_033"
+      ],
+      "incumplimiento_identificado": "El proveedor no genera alertas de seguridad",
+      "controles_asociados": "Se debe disponer de un sistema o solución que permita levantar alertas de seguridad para identificar posibles incidentes de seguridad (p.e. SIEM). Estas alertas deben poder ser puestas a disposición de EMPRESA para un posible análisis por parte del SOC.",
+      "amenazas": [
+        "Manipulación no autorizada de la API de servicios",
+        "Recopilación de información"
+      ],
+      "mitigation": "En caso de no poder enviar los logs al SIEM de EMPRESA, se debe tener la capacidad de provocar alertas generadas por el sistema de recogida de logs del proveedor.",
+      "mitigation_guide": "Se debe tener la capacidad de provocar alertas generadas por el sistema de recogida de logs del proveedor.",
+      "report_context_example": "",
+      "report_detail_example": "La ausencia de generación de alertas de seguridad en el SIEM del proveedor representa un riesgo de seguridad significativo para la capacidad de detección temprana de incidentes. Si no se levantan de forma automática alertas ante eventos relevantes, se pierde visibilidad sobre cualquier actividad anómala o maliciosa dentro de la infraestructura, hecho que impide realizar un seguimiento adecuado de posibles incidentes de seguridad. Esta falta de visibilidad puede derivar en una detección tardía de amenazas, comprometiendo la capacidad de respuesta oportuna y efectiva por parte del equipo de respuesta ante incidentes, así como provocar un aumento potencial del impacto, alcance y duración de una brecha de seguridad.",
+      "sources": [
+        {
+          "question_id": "Q_040",
+          "chunk_id": "RAG-Q_040",
+          "traceability": "Excel: Análisis SaaS, fila 41",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar el proceso de actuación sobre incidentes a raíz de una alerta generada por el SIEM"
+    }
+  ],
+  "batch_validation_notes": [
+    "Las preguntas Q_037, Q_038, Q_039 y Q_040 se han evaluado en conjunto según las reglas de la ficha RAG, confirmando un incumplimiento crítico en la trazabilidad y monitorización."
+  ]
+}

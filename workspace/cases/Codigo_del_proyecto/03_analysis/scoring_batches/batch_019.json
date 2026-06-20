@@ -1,0 +1,50 @@
+{
+  "batch_id": "batch_019",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_019",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor indica que las contraseñas se almacenan cifradas, pero no aporta algoritmo, configuración o evidencia suficiente.",
+      "decision_reason": "La respuesta es afirmativa, pero falta detalle técnico sobre el algoritmo o mecanismo de protección de contraseñas.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿Qué algoritmo de cifrado o función de hash con salt se utiliza para almacenar las contraseñas de los usuarios?"
+      ],
+      "requires_human_review": true,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Cifrados seguros de las contraseñas almacenadas (AES256, SHA256)+Y20",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_019",
+          "chunk_id": "RAG-Q_019",
+          "traceability": "Excel: Análisis SaaS, fila 20",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "SI",
+      "provider_details": "Detallar"
+    }
+  ],
+  "batch_validation_notes": []
+}

@@ -1,0 +1,1619 @@
+{
+  "name": "Intake correos AARR GROQ copy",
+  "nodes": [
+    {
+      "parameters": {
+        "format": "resolved",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        0
+      ],
+      "id": "a1a69ef9-38bb-4667-b206-f25e2ef8537e",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "JZAYNGp2XknyI5Ds",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function stripHtml(html) {\n  return String(html || \"\")\n    .replace(/<style[\\s\\S]*?<\\/style>/gi, \"\")\n    .replace(/<script[\\s\\S]*?<\\/script>/gi, \"\")\n    .replace(/<br\\s*\\/?>/gi, \"\\n\")\n    .replace(/<\\/p>/gi, \"\\n\")\n    .replace(/<\\/div>/gi, \"\\n\")\n    .replace(/<\\/li>/gi, \"\\n\")\n    .replace(/<li[^>]*>/gi, \"- \")\n    .replace(/<[^>]+>/g, \"\")\n    .replace(/&nbsp;/g, \" \")\n    .replace(/&amp;/g, \"&\")\n    .replace(/&lt;/g, \"<\")\n    .replace(/&gt;/g, \">\")\n    .replace(/&quot;/g, \"\\\"\")\n    .replace(/&#39;/g, \"'\")\n    .replace(/&apos;/g, \"'\")\n    .replace(/&#(\\d+);/g, (_, n) => {\n      try {\n        return String.fromCharCode(Number(n));\n      } catch (e) {\n        return \"\";\n      }\n    })\n    .replace(/\\r\\n/g, \"\\n\")\n    .replace(/\\r/g, \"\\n\")\n    .replace(/[ \\t]+\\n/g, \"\\n\")\n    .replace(/\\n{3,}/g, \"\\n\\n\")\n    .trim();\n}\n\nfunction firstNonEmpty(...values) {\n  for (const value of values) {\n    if (value === null || value === undefined) continue;\n\n    const text = String(value).trim();\n\n    if (text) return text;\n  }\n\n  return \"\";\n}\n\nfunction normalizeText(value) {\n  return String(value || \"\")\n    .replace(/\\r\\n/g, \"\\n\")\n    .replace(/\\r/g, \"\\n\")\n    .replace(/[ \\t]+/g, \" \")\n    .replace(/\\n{3,}/g, \"\\n\\n\")\n    .trim();\n}\n\nfunction normalizeSubject(value) {\n  return String(value || \"\")\n    .replace(/^\\s*(RE|RV|FW|FWD)\\s*:\\s*/gi, \"\")\n    .replace(/\\s+/g, \" \")\n    .trim();\n}\n\nfunction removeAccents(value) {\n  return String(value || \"\")\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n}\n\nfunction extractEmailAddress(value) {\n  if (!value) return \"\";\n\n  if (typeof value === \"string\") {\n    const match = value.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i);\n    return match ? match[0] : value.trim();\n  }\n\n  if (value.address) return value.address;\n  if (value.email) return value.email;\n  if (value.text) return extractEmailAddress(value.text);\n\n  if (Array.isArray(value.value) && value.value[0]?.address) {\n    return value.value[0].address;\n  }\n\n  if (Array.isArray(value) && value[0]) {\n    return extractEmailAddress(value[0]);\n  }\n\n  return \"\";\n}\n\nfunction sanitizeCaseId(value) {\n  let text = String(value || \"\").trim();\n\n  text = text\n    .replace(/[.,;:)\\]}]+$/g, \"\")\n    .replace(/^[([{]+/g, \"\")\n    .trim();\n\n  text = removeAccents(text);\n\n  text = text.replace(/[^\\w\\-]+/g, \"_\");\n  text = text.replace(/_+/g, \"_\");\n  text = text.replace(/^_+|_+$/g, \"\");\n\n  if (!text) return \"\";\n\n  // Evita capturas absurdas como \"C\", que ocurría con \"Código\".\n  if (text.length < 3) return \"\";\n\n  const badValues = [\n    \"proyecto\",\n    \"codigo\",\n    \"case_id\",\n    \"id\",\n    \"follow\",\n    \"followup\",\n    \"triaje\",\n    \"cuestionario\",\n    \"questionnaire\",\n    \"respuesta\",\n    \"correo\"\n  ];\n\n  if (badValues.includes(text.toLowerCase())) return \"\";\n\n  return text;\n}\n\nfunction extractCaseId(subject, body, attachmentNames = []) {\n  const s = String(subject || \"\");\n  const b = String(body || \"\");\n  const combined = `${s}\\n${b}\\n${attachmentNames.join(\"\\n\")}`;\n\n  const patterns = [\n    // Follow-up\n    /\\[Follow-up\\]\\s*([^\\n\\r\\]\\[]+)/i,\n    /\\[FOLLOWUP\\]\\s*([^\\n\\r\\]\\[]+)/i,\n    /\\[Followup\\]\\s*([^\\n\\r\\]\\[]+)/i,\n\n    // Triaje / Cuestionario en asunto\n    /\\[Triaje\\]\\s*([^\\n\\r]+)/i,\n    /\\[Cuestionario\\]\\s*([^\\n\\r]+)/i,\n    /\\[Questionnaire\\]\\s*([^\\n\\r]+)/i,\n\n    // Campos explícitos\n    /case[_\\s-]*id\\s*[:=\\-]\\s*([^\\n\\r]+)/i,\n    /CASE_ID\\s*[:=\\-]\\s*([^\\n\\r]+)/i,\n\n    /c[oó]digo\\s+del\\s+proyecto\\s*[:=\\-]\\s*([^\\n\\r]+)/i,\n    /codigo\\s+del\\s+proyecto\\s*[:=\\-]\\s*([^\\n\\r]+)/i,\n    /proyecto\\s*[:=\\-]\\s*([^\\n\\r]+)/i,\n\n    // Texto del correo de follow-up generado por el flujo\n    /durante\\s+el\\s+an[aá]lisis\\s+del\\s+cuestionario\\s+de\\s+seguridad\\s+del\\s+proyecto\\s+([A-Za-z0-9_\\-]+)/i,\n\n    // Fallbacks conocidos del caso anonimizado\n    /\\b(Codigo_del_proyecto[A-Za-z0-9_\\-]*)\\b/i,\n    /\\b(C[oó]digo_del_proyecto[A-Za-z0-9_\\-]*)\\b/i\n  ];\n\n  for (const pattern of patterns) {\n    const match = combined.match(pattern);\n\n    if (!match) continue;\n\n    const candidate = sanitizeCaseId(match[1]);\n\n    if (candidate) return candidate;\n  }\n\n  return \"\";\n}\n\nfunction getHeaderValue(headers, name) {\n  if (!headers) return \"\";\n\n  const target = name.toLowerCase();\n\n  if (Array.isArray(headers)) {\n    const found = headers.find(h =>\n      String(h.name || h.key || \"\").toLowerCase() === target\n    );\n\n    return found?.value || \"\";\n  }\n\n  if (typeof headers === \"object\") {\n    for (const [key, value] of Object.entries(headers)) {\n      if (String(key).toLowerCase() === target) {\n        return value;\n      }\n    }\n  }\n\n  return \"\";\n}\n\nfunction getSubject(json) {\n  return firstNonEmpty(\n    json.subject,\n    json.email_subject,\n    json.headers?.subject,\n    getHeaderValue(json.headers, \"subject\"),\n    json.envelope?.subject\n  );\n}\n\nfunction getHtml(json) {\n  return firstNonEmpty(\n    json.html,\n    json.htmlBody,\n    json.bodyHtml,\n    json.body?.html,\n    json.message?.html\n  );\n}\n\nfunction getBody(json, html) {\n  return normalizeText(firstNonEmpty(\n    json.text,\n    json.textPlain,\n    json.plainText,\n    json.bodyText,\n    json.body?.text,\n    json.body?.plain,\n    json.message?.text,\n    json.message?.plain,\n    json.body,\n    stripHtml(html)\n  ));\n}\n\nfunction getFromEmail(json) {\n  return extractEmailAddress(\n    json.from ||\n    json.sender ||\n    json.headers?.from ||\n    getHeaderValue(json.headers, \"from\") ||\n    json.envelope?.from\n  );\n}\n\nfunction filenameLooksExcel(filename) {\n  const name = String(filename || \"\").toLowerCase();\n\n  if (!name) return false;\n  if (name.startsWith(\"~$\")) return false;\n\n  return (\n    name.endsWith(\".xlsx\") ||\n    name.endsWith(\".xls\") ||\n    name.endsWith(\".xlsm\")\n  );\n}\n\nfunction mimeLooksExcel(mimeType) {\n  const mime = String(mimeType || \"\").toLowerCase();\n\n  return (\n    mime.includes(\"spreadsheet\") ||\n    mime.includes(\"excel\") ||\n    mime.includes(\"vnd.ms-excel\") ||\n    mime.includes(\"vnd.openxmlformats-officedocument.spreadsheetml.sheet\")\n  );\n}\n\nasync function extractExcelAttachmentB64() {\n  const item = $input.item;\n  const binary = item.binary || {};\n  const keys = Object.keys(binary);\n\n  const attachments = [];\n\n  for (const key of keys) {\n    const b = binary[key] || {};\n\n    const filename = firstNonEmpty(\n      b.fileName,\n      b.filename,\n      b.name,\n      key\n    );\n\n    const mimeType = firstNonEmpty(\n      b.mimeType,\n      b.mime,\n      b.contentType\n    );\n\n    const fileExtension = firstNonEmpty(\n      b.fileExtension,\n      filename.split(\".\").pop()\n    );\n\n    attachments.push({\n      key,\n      filename,\n      mimeType,\n      fileExtension,\n      is_excel:\n        filenameLooksExcel(filename) ||\n        mimeLooksExcel(mimeType) ||\n        [\"xlsx\", \"xls\", \"xlsm\"].includes(String(fileExtension || \"\").toLowerCase())\n    });\n  }\n\n  const excel = attachments.find(a => a.is_excel);\n\n  if (!excel) {\n    return {\n      attachment_b64: \"\",\n      attachment_filename: \"\",\n      attachment_binary_key: \"\",\n      attachments,\n      has_excel_attachment: false\n    };\n  }\n\n  let buffer;\n\n  try {\n    buffer = await this.helpers.getBinaryDataBuffer(0, excel.key);\n  } catch (e) {\n    throw new Error(\n      `Se detectó un adjunto Excel (${excel.filename}) pero no se pudo leer el binario '${excel.key}': ${e.message}`\n    );\n  }\n\n  return {\n    attachment_b64: buffer.toString(\"base64\"),\n    attachment_filename: excel.filename,\n    attachment_binary_key: excel.key,\n    attachments,\n    has_excel_attachment: true\n  };\n}\n\nfunction detectMailType(subject, body, hasExcelAttachment) {\n  const s = normalizeSubject(subject);\n  const combined = `${s}\\n${body}`.toLowerCase();\n\n  if (\n    /\\[follow-up\\]/i.test(s) ||\n    /\\[followup\\]/i.test(s) ||\n    combined.includes(\"aclaración requerida\") ||\n    combined.includes(\"aclaracion requerida\") ||\n    combined.includes(\"follow-up\") ||\n    combined.includes(\"followup_round\") ||\n    combined.includes(\"responded manteniendo el identificador de cada pregunta\")\n  ) {\n    return \"followup\";\n  }\n\n  if (\n    /cuestionario/i.test(s) ||\n    /questionnaire/i.test(s) ||\n    hasExcelAttachment\n  ) {\n    return \"cuestionario\";\n  }\n\n  if (\n    /triaje/i.test(s) ||\n    combined.includes(\"código del proyecto\") ||\n    combined.includes(\"codigo del proyecto\") ||\n    combined.includes(\"nombre de la contratación\") ||\n    combined.includes(\"nombre de la contratacion\") ||\n    combined.includes(\"línea de negocio\") ||\n    combined.includes(\"linea de negocio\") ||\n    combined.includes(\"tipo de información\") ||\n    combined.includes(\"tipo de informacion\")\n  ) {\n    return \"triaje\";\n  }\n\n  return \"unknown\";\n}\n\nfunction fallbackCaseId(mailType, subject, body, attachmentNames = []) {\n  const normalizedSubject = normalizeSubject(subject);\n\n  const possible = extractCaseId(normalizedSubject, body, attachmentNames);\n\n  if (possible) return possible;\n\n  return \"\";\n}\n\nconst json = $json || {};\n\nconst subject = getSubject(json);\nconst normalizedSubject = normalizeSubject(subject);\n\nconst html = getHtml(json);\nconst body = getBody(json, html);\nconst fromEmail = getFromEmail(json);\n\nconst attachmentInfo = await extractExcelAttachmentB64();\n\nlet caseId = extractCaseId(\n  normalizedSubject,\n  body,\n  attachmentInfo.attachments.map(a => a.filename)\n);\n\nlet mailType = detectMailType(\n  normalizedSubject,\n  body,\n  attachmentInfo.has_excel_attachment\n);\n\nif (!caseId) {\n  caseId = fallbackCaseId(\n    mailType,\n    normalizedSubject,\n    body,\n    attachmentInfo.attachments.map(a => a.filename)\n  );\n}\n\nconst bodyB64 = Buffer.from(body || \"\", \"utf8\").toString(\"base64\");\nconst subjectB64 = Buffer.from(normalizedSubject || \"\", \"utf8\").toString(\"base64\");\n\nconst warnings = [];\n\nif (!mailType || mailType === \"unknown\") {\n  warnings.push(\"No se ha podido clasificar el correo como triaje, cuestionario o follow-up.\");\n}\n\nif (!caseId) {\n  warnings.push(\"No se ha podido extraer case_id del asunto, cuerpo o nombre de adjunto.\");\n}\n\nif (mailType === \"cuestionario\" && !attachmentInfo.has_excel_attachment) {\n  warnings.push(\"El correo parece ser de cuestionario, pero no se ha encontrado adjunto Excel.\");\n}\n\nif (mailType === \"followup\" && !body) {\n  warnings.push(\"El correo parece ser follow-up, pero el cuerpo del mensaje está vacío.\");\n}\n\nreturn {\n  json: {\n    ...json,\n\n    mail_type: mailType,\n    case_id: caseId,\n\n    email_subject: normalizedSubject,\n    email_subject_original: subject,\n    email_subject_b64: subjectB64,\n\n    email_body: body,\n    email_body_b64: bodyB64,\n\n    from_email: fromEmail,\n    received_at: new Date().toISOString(),\n\n    attachment_b64: attachmentInfo.attachment_b64,\n    attachment_filename: attachmentInfo.attachment_filename,\n    attachment_binary_key: attachmentInfo.attachment_binary_key,\n    has_excel_attachment: attachmentInfo.has_excel_attachment,\n    attachments_detected: attachmentInfo.attachments,\n\n    intake_warnings: warnings\n  },\n  binary: $input.item.binary\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "af30a6b6-7852-4237-8087-2466c1048138",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.mail_type }}",
+                    "rightValue": "triaje",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "cc57b76d-1281-492c-bd76-a4a552f34a60"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Triaje"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "987d9d75-1985-43a3-b781-0366300c6ef2",
+                    "leftValue": "={{ $json.mail_type }}",
+                    "rightValue": "cuestionario",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cuestionario"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b8cb598e-3def-47d6-b2ee-0f1014624bd9",
+                    "leftValue": "={{ $json.mail_type }}",
+                    "rightValue": "followup",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Follow-up"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "881d3d36-d1c5-4892-8b2c-3f81ea21b683",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "command": "=mkdir -p \"/data/cases/{{$json.case_id}}/01_originales\" \"/data/cases/{{$json.case_id}}/02_json\" && printf '%s' \"{{$json.email_body_b64}}\" | base64 -d > \"/data/cases/{{$json.case_id}}/01_originales/triaje_email.txt\" && python /data/scripts/parse_ingesta_n8n.py parse-triaje --input \"/data/cases/{{$json.case_id}}/01_originales/triaje_email.txt\" --outdir \"/data/cases/{{$json.case_id}}/02_json\" --case-id \"{{$json.case_id}}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        608,
+        -160
+      ],
+      "id": "f55a5029-9f97-46e0-a9f4-bb363c4ae64d",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "command": "=if [ -z '{{$json.attachment_b64}}' ]; then echo \"ERROR: No se encontró adjunto Excel en el correo\"; exit 1; fi && mkdir -p \"/data/cases/{{$json.case_id}}/01_originales\" \"/data/cases/{{$json.case_id}}/02_json\" && printf '%s' '{{$json.attachment_b64}}' | base64 -d > \"/data/cases/{{$json.case_id}}/01_originales/cuestionario.xlsx\" && python /data/scripts/parse_ingesta_n8n.py parse-questionnaire --input \"/data/cases/{{$json.case_id}}/01_originales/cuestionario.xlsx\" --outdir \"/data/cases/{{$json.case_id}}/02_json\" --case-id \"{{$json.case_id}}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        656,
+        16
+      ],
+      "id": "1fe35021-5222-4165-a3cd-23a5d1455f40",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "command": "=case_id=\"{{$json.case_id}}\"\n\nif [ -z \"$case_id\" ] || [ \"$case_id\" = \"undefined\" ] || [ \"$case_id\" = \"null\" ]; then\n  printf '{\"case_id\":\"\",\"status\":\"ERROR\",\"error\":\"case_id vacío antes de comprobar triaje/cuestionario\",\"triaje_exists\":false,\"questionnaire_exists\":false}\\n'\n  exit 1\nfi\n\nbase=\"/data/cases/$case_id\"\nstate_dir=\"$base/00_state\"\n\nmkdir -p \"$state_dir\"\n\ntriaje=\"$base/02_json/triaje.json\"\nquestionnaire=\"$base/02_json/questionnaire.json\"\nlock=\"$state_dir/tier_started.lock\"\n\nif [ -f \"$triaje\" ] && [ -f \"$questionnaire\" ]; then\n  if [ -f \"$lock\" ]; then\n    status=\"ALREADY_STARTED\"\n  else\n    date -Iseconds > \"$lock\"\n    status=\"COMPLETE\"\n  fi\nelse\n  status=\"PENDING\"\nfi\n\nprintf '{\"case_id\":\"%s\",\"status\":\"%s\",\"triaje_exists\":%s,\"questionnaire_exists\":%s,\"triaje_path\":\"%s\",\"questionnaire_path\":\"%s\"}\\n' \\\n  \"$case_id\" \\\n  \"$status\" \\\n  \"$([ -f \"$triaje\" ] && echo true || echo false)\" \\\n  \"$([ -f \"$questionnaire\" ] && echo true || echo false)\" \\\n  \"$triaje\" \\\n  \"$questionnaire\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -160
+      ],
+      "id": "e2a2e37a-54e2-4507-a8e3-e39544e21d2c",
+      "name": "Execute Command2"
+    },
+    {
+      "parameters": {
+        "command": "=case_id=\"{{$json.case_id}}\"\n\nif [ -z \"$case_id\" ] || [ \"$case_id\" = \"undefined\" ] || [ \"$case_id\" = \"null\" ]; then\n  printf '{\"case_id\":\"\",\"status\":\"ERROR\",\"error\":\"case_id vacío antes de comprobar triaje/cuestionario\",\"triaje_exists\":false,\"questionnaire_exists\":false}\\n'\n  exit 1\nfi\n\nbase=\"/data/cases/$case_id\"\nstate_dir=\"$base/00_state\"\n\nmkdir -p \"$state_dir\"\n\ntriaje=\"$base/02_json/triaje.json\"\nquestionnaire=\"$base/02_json/questionnaire.json\"\nlock=\"$state_dir/tier_started.lock\"\n\nif [ -f \"$triaje\" ] && [ -f \"$questionnaire\" ]; then\n  if [ -f \"$lock\" ]; then\n    status=\"ALREADY_STARTED\"\n  else\n    date -Iseconds > \"$lock\"\n    status=\"COMPLETE\"\n  fi\nelse\n  status=\"PENDING\"\nfi\n\nprintf '{\"case_id\":\"%s\",\"status\":\"%s\",\"triaje_exists\":%s,\"questionnaire_exists\":%s,\"triaje_path\":\"%s\",\"questionnaire_path\":\"%s\"}\\n' \\\n  \"$case_id\" \\\n  \"$status\" \\\n  \"$([ -f \"$triaje\" ] && echo true || echo false)\" \\\n  \"$([ -f \"$questionnaire\" ] && echo true || echo false)\" \\\n  \"$triaje\" \\\n  \"$questionnaire\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        16
+      ],
+      "id": "fb3900ba-37a7-4383-941a-15ee19e313b5",
+      "name": "Execute Command3"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=/usr/bin/python3 - <<'PY'\nimport json\nimport base64\nimport re\nfrom pathlib import Path\nfrom datetime import datetime\n\ncase_id = {{ JSON.stringify($json.case_id) }}\nemail_subject_b64 = {{ JSON.stringify($json.email_subject_b64) }}\nemail_body_b64 = {{ JSON.stringify($json.email_body_b64) }}\nfrom_email = {{ JSON.stringify($json.from_email) }}\nreceived_at = {{ JSON.stringify($json.received_at) }}\n\nif not case_id:\n    raise Exception(\n        \"No se ha podido extraer case_id del asunto del correo. \"\n        \"El asunto debe contener [Follow-up] Codigo_del_proyecto.\"\n    )\n\nsubject = base64.b64decode(email_subject_b64.encode(\"ascii\")).decode(\"utf-8\")\nbody = base64.b64decode(email_body_b64.encode(\"ascii\")).decode(\"utf-8\")\n\n\ndef clean_provider_reply(text):\n    text = str(text or \"\")\n    text = text.replace(\"\\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\")\n\n    # Marcadores robustos del inicio del mensaje citado/original.\n    # IMPORTANTE: no usamos marcadores genéricos como \"\\nEl \" porque cortan respuestas tipo:\n    # \"El control está implantado...\"\n    marker_patterns = [\n        r\"(?im)^\\s*-{2,}\\s*Mensaje original\\s*-{2,}\\s*$\",\n        r\"(?im)^\\s*-{2,}\\s*Original Message\\s*-{2,}\\s*$\",\n        r\"(?im)^\\s*De:\\s+.+$\",\n        r\"(?im)^\\s*From:\\s+.+$\",\n        r\"(?im)^\\s*Enviado el:\\s+.+$\",\n        r\"(?im)^\\s*Sent:\\s+.+$\",\n        r\"(?im)^\\s*Para:\\s+.+$\",\n        r\"(?im)^\\s*To:\\s+.+$\",\n        r\"(?im)^\\s*Asunto:\\s+.+$\",\n        r\"(?im)^\\s*Subject:\\s+.+$\",\n        r\"(?im)^\\s*El .+ escribió:\\s*$\",\n        r\"(?im)^\\s*On .+ wrote:\\s*$\",\n        r\"(?im)^\\s*_{5,}\\s*$\",\n        r\"(?im)^\\s*---\\s*$\",\n        r\"(?im)^\\s*This email was sent automatically with n8n.*$\"\n    ]\n\n    cut_positions = []\n\n    for pattern in marker_patterns:\n        match = re.search(pattern, text)\n        if match and match.start() > 0:\n            cut_positions.append(match.start())\n\n    if cut_positions:\n        text = text[:min(cut_positions)]\n\n    # Quitamos líneas citadas típicas con \">\"\n    clean_lines = []\n\n    for line in text.split(\"\\n\"):\n        if re.match(r\"^\\s*>\", line):\n            continue\n\n        clean_lines.append(line.rstrip())\n\n    text = \"\\n\".join(clean_lines)\n\n    # Quitamos firmas típicas.\n    text = re.sub(r\"\\n--\\s*\\n.*$\", \"\", text, flags=re.S)\n    text = re.sub(r\"\\n-{2,}\\s*$\", \"\", text, flags=re.S)\n\n    # Normalizamos saltos.\n    text = re.sub(r\"\\n{3,}\", \"\\n\\n\", text)\n\n    return text.strip()\n\n\ndef normalize_qid(value):\n    raw = str(value or \"\").upper()\n    match = re.search(r\"\\d{1,3}\", raw)\n\n    if not match:\n        return \"\"\n\n    return f\"Q_{int(match.group(0)):03d}\"\n\n\ndef parse_answers_by_question(clean_text):\n    \"\"\"\n    Extrae bloques tipo:\n\n    Q_019\n    respuesta...\n\n    Q_023: respuesta...\n\n    También acepta:\n    Q019\n    Q-019\n    Q 019\n    \"\"\"\n\n    text = str(clean_text or \"\").replace(\"\\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\")\n\n    pattern = re.compile(\n        r\"^\\s*(Q[\\s_\\-]?\\d{1,3})\\s*[:\\-–—.]?\\s*(.*)$\",\n        re.IGNORECASE | re.MULTILINE\n    )\n\n    matches = []\n\n    for match in pattern.finditer(text):\n        qid = normalize_qid(match.group(1))\n        inline = (match.group(2) or \"\").strip()\n\n        if not qid:\n            continue\n\n        matches.append({\n            \"qid\": qid,\n            \"start\": match.start(),\n            \"end\": match.end(),\n            \"inline\": inline\n        })\n\n    answers = {}\n\n    if not matches:\n        return answers\n\n    for i, match in enumerate(matches):\n        qid = match[\"qid\"]\n        start = match[\"end\"]\n        end = matches[i + 1][\"start\"] if i + 1 < len(matches) else len(text)\n\n        block_parts = []\n\n        if match[\"inline\"]:\n            block_parts.append(match[\"inline\"])\n\n        remaining_block = text[start:end].strip()\n\n        if remaining_block:\n            block_parts.append(remaining_block)\n\n        block = \"\\n\".join(block_parts)\n        block = block.strip(\" \\n\\r\\t:-–—.\")\n\n        # Defensa extra por si se ha colado parte del correo original.\n        original_request_signals = [\n            \"Aclaración requerida\",\n            \"Aclaracion requerida\",\n            \"Motivo:\",\n            \"Pregunta:\",\n            \"Durante el análisis del cuestionario\",\n            \"Durante el analisis del cuestionario\",\n            \"Por favor, responded manteniendo\",\n            \"This email was sent automatically with n8n\"\n        ]\n\n        # Si el bloque parece ser únicamente el bloque original de solicitud, lo descartamos.\n        block_lower = block.lower()\n        has_original_signals = any(signal.lower() in block_lower for signal in original_request_signals)\n\n        provider_signals = [\n            \"confirmamos\",\n            \"se dispone\",\n            \"se almacenan\",\n            \"se cifra\",\n            \"se cifran\",\n            \"actualmente\",\n            \"no existe\",\n            \"no disponemos\",\n            \"está implantado\",\n            \"esta implantado\",\n            \"se realiza\",\n            \"se encuentran\",\n            \"únicamente\",\n            \"unicamente\",\n            \"tls\",\n            \"aes\",\n            \"bcrypt\",\n            \"rto\",\n            \"rpo\",\n            \"retención\",\n            \"retencion\",\n            \"backup\",\n            \"copias de seguridad\"\n        ]\n\n        has_provider_signals = any(signal.lower() in block_lower for signal in provider_signals)\n\n        if has_original_signals and not has_provider_signals:\n            continue\n\n        if block:\n            answers[qid] = block.strip()\n\n    return answers\n\n\nclean_body = clean_provider_reply(body)\nanswers = parse_answers_by_question(clean_body)\n\nbase = Path(\"/data/cases\") / case_id\nanalysis_dir = base / \"03_analysis\"\nfollowup_dir = base / \"04_followups\" / \"round_001\"\n\nanalysis_dir.mkdir(parents=True, exist_ok=True)\nfollowup_dir.mkdir(parents=True, exist_ok=True)\n\nraw_file = followup_dir / \"provider_response_raw.txt\"\nclean_file = followup_dir / \"provider_response_clean.txt\"\nparsed_file = followup_dir / \"provider_response_parsed.json\"\n\nraw_file.write_text(body, encoding=\"utf-8\")\nclean_file.write_text(clean_body, encoding=\"utf-8\")\n\nparsed = {\n    \"case_id\": case_id,\n    \"followup_round\": 1,\n    \"from_email\": from_email,\n    \"received_at\": received_at,\n    \"subject\": subject,\n    \"raw_response_file\": str(raw_file),\n    \"clean_response_file\": str(clean_file),\n    \"answers_by_question\": answers,\n    \"answers_detected\": list(answers.keys()),\n    \"answers_count\": len(answers),\n    \"full_clean_response\": clean_body,\n    \"full_raw_response\": body,\n    \"parse_warning\": \"\" if answers else \"No se detectaron respuestas por Q_XXX en la parte limpia del correo.\"\n}\n\nparsed_file.write_text(\n    json.dumps(parsed, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"followup_round\": 1,\n    \"provider_response_file\": str(raw_file),\n    \"provider_response_clean_file\": str(clean_file),\n    \"provider_response_parsed_file\": str(parsed_file),\n    \"answers_detected\": list(answers.keys()),\n    \"answers_count\": len(answers),\n    \"parse_warning\": parsed[\"parse_warning\"]\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        640,
+        224
+      ],
+      "id": "2ea13c33-91fa-45e5-9d36-ed76f984bd4f",
+      "name": "Execute Command4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la salida del guardado de respuesta proveedor: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        224
+      ],
+      "id": "a1285979-ea8c-4560-ae1b-1a2088338e7d",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "command": "=python - <<'PY'\nimport json\nfrom pathlib import Path\n\ncase_id = {{ JSON.stringify($json.case_id) }}\n\nbase = Path(\"/data/cases\") / case_id\nanalysis_dir = base / \"03_analysis\"\nfollowup_dir = base / \"04_followups\" / \"round_001\"\n\nscoring_preliminary_path = analysis_dir / \"scoring_preliminary.json\"\nfollowups_pending_path = analysis_dir / \"followups_pending.json\"\nprovider_response_path = followup_dir / \"provider_response_parsed.json\"\n\nif not scoring_preliminary_path.exists():\n    raise Exception(f\"No existe {scoring_preliminary_path}\")\n\nif not provider_response_path.exists():\n    raise Exception(f\"No existe {provider_response_path}\")\n\nscoring = json.loads(scoring_preliminary_path.read_text(encoding=\"utf-8\"))\nprovider_response = json.loads(provider_response_path.read_text(encoding=\"utf-8\"))\n\nanswers_by_question = provider_response.get(\"answers_by_question\", {})\nfull_clean_response = provider_response.get(\"full_clean_response\", \"\")\n\nevaluations = scoring.get(\"question_evaluations\", [])\n\npending_ids = set()\n\nif followups_pending_path.exists():\n    followups_pending = json.loads(followups_pending_path.read_text(encoding=\"utf-8\"))\n\n    for item in followups_pending.get(\"questions\", []):\n        qid = item.get(\"question_id\", \"\")\n\n        if qid == \"Q_037-Q_040\":\n            pending_ids.update([\"Q_037\", \"Q_038\", \"Q_039\", \"Q_040\"])\n        elif qid:\n            pending_ids.add(qid)\n\n# Fallback por si followups_pending está incompleto.\nfor ev in evaluations:\n    try:\n        score = int(ev.get(\"score\"))\n    except Exception:\n        score = None\n\n    if score == 2 or ev.get(\"requires_provider_followup\") is True:\n        pending_ids.add(ev.get(\"question_id\", \"\"))\n\npending_ids = {qid for qid in pending_ids if qid}\n\nitems = []\n\nhas_structured_answers = len(answers_by_question) > 0\n\nfor ev in evaluations:\n    qid = ev.get(\"question_id\", \"\")\n\n    if qid not in pending_ids:\n        continue\n\n    if has_structured_answers:\n        provider_answer_for_q = answers_by_question.get(qid, \"\")\n    else:\n        provider_answer_for_q = full_clean_response\n\n    items.append({\n        \"question_id\": qid,\n        \"previous_evaluation\": ev,\n        \"provider_followup_answer\": provider_answer_for_q,\n        \"provider_response_detected\": bool(provider_answer_for_q.strip()),\n        \"full_clean_provider_response\": full_clean_response\n    })\n\nbatch_size = 1\nout_dir = analysis_dir / \"followup_reanalysis_batches\"\nout_dir.mkdir(parents=True, exist_ok=True)\n\nfor old in out_dir.glob(\"batch_*.json\"):\n    old.unlink()\n\nbatches = []\n\nfor idx in range(0, len(items), batch_size):\n    chunk = items[idx:idx + batch_size]\n    batch_id = f\"followup_batch_{idx // batch_size + 1:03d}\"\n    path = out_dir / f\"{batch_id}.json\"\n\n    data = {\n        \"case_id\": case_id,\n        \"followup_round\": 1,\n        \"batch_id\": batch_id,\n        \"questions\": chunk,\n        \"rule\": \"Máximo 1 ronda automática. Si tras esta respuesta sigue sin quedar claro, el score final será 1.\"\n    }\n\n    path.write_text(\n        json.dumps(data, ensure_ascii=False, indent=2),\n        encoding=\"utf-8\"\n    )\n\n    batches.append({\n        \"batch_id\": batch_id,\n        \"path\": str(path),\n        \"question_count\": len(chunk)\n    })\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"followup_round\": 1,\n    \"pending_question_count\": len(items),\n    \"answers_detected\": list(answers_by_question.keys()),\n    \"answers_count\": len(answers_by_question),\n    \"batches\": batches\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        224
+      ],
+      "id": "7fb3effe-cb85-4e52-9942-6620d14c46fa",
+      "name": "Execute Command5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la creación de batches de follow-up: \" + stdout);\n}\n\nif (!Array.isArray(parsed.batches)) {\n  throw new Error(\"No se encontraron batches de follow-up en la salida: \" + stdout);\n}\n\nreturn parsed.batches.map(batch => ({\n  json: {\n    case_id: parsed.case_id,\n    followup_round: parsed.followup_round,\n    batch_id: batch.batch_id,\n    batch_path: batch.path,\n    question_count: batch.question_count\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        224
+      ],
+      "id": "53a06d32-6043-4c86-b23e-bebef88d35bb",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=cat \"{{$json.batch_path}}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        224
+      ],
+      "id": "34e494db-5450-4265-8360-5be0900d6240",
+      "name": "Execute Command6"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\nlet batchData;\n\ntry {\n  batchData = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear batch de follow-up: \" + stdout);\n}\n\n/*\n  IMPORTANTE:\n  Este nombre debe coincidir EXACTAMENTE con el nombre de la tool en n8n.\n*/\nconst RAG_TOOL_NAME = \"risk_catalog_search\";\nconst RAG_COLLECTION_EXPECTED = \"tfm_rag_manual_agent\";\n\nfunction truncateText(value, maxLength = 700) {\n  const text = String(value || \"\").trim();\n\n  if (text.length <= maxLength) return text;\n\n  return text.slice(0, maxLength).trim() + \"...\";\n}\n\nfunction normalizeText(value) {\n  return String(value || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\")\n    .trim();\n}\n\nfunction normalizeQid(value) {\n  const text = String(value || \"\").toUpperCase().trim();\n  const match = text.match(/Q[\\s_\\-]?(\\d{1,3})/i) || text.match(/(\\d{1,3})/);\n\n  if (!match) return \"\";\n\n  const num = match[1] || match[0];\n\n  return `Q_${String(Number(num)).padStart(3, \"0\")}`;\n}\n\nfunction isEmptyOrWeakAnswer(value) {\n  const text = normalizeText(value);\n\n  if (!text) return true;\n\n  const weakSignals = [\n    \"detallar\",\n    \"por especificar\",\n    \"pendiente\",\n    \"a consultar\",\n    \"consultar con cliente\",\n    \"depende\",\n    \"por establecer\",\n    \"se puede generar\",\n    \"no se aporta\",\n    \"sin evidencia\",\n    \"no disponemos todavia\",\n    \"no disponemos todavía\",\n    \"pendiente de validacion\",\n    \"pendiente de validación\",\n    \"en proceso\",\n    \"no aprobado\",\n    \"no documentado\",\n    \"por definir\",\n    \"se definira\",\n    \"se definirá\"\n  ];\n\n  return weakSignals.some(signal => text.includes(normalizeText(signal)));\n}\n\nfunction firstNonEmpty(...values) {\n  for (const value of values) {\n    if (value === null || value === undefined) continue;\n\n    const text = String(value).trim();\n\n    if (text && text !== \"undefined\" && text !== \"null\") {\n      return text;\n    }\n  }\n\n  return \"\";\n}\n\nfunction getQuestionText(q) {\n  const prev = q.previous_evaluation || {};\n\n  return firstNonEmpty(\n    q.question_text,\n    q.question,\n    q.text,\n    prev.question_text,\n    prev.question,\n    prev.requisito,\n    prev.control_text,\n    prev.incumplimiento_identificado\n  );\n}\n\nconst questionsMap = new Map();\n\nfor (const q of batchData.questions || []) {\n  const qid = normalizeQid(q.question_id);\n\n  if (!qid) continue;\n\n  if (questionsMap.has(qid)) {\n    continue;\n  }\n\n  const prev = q.previous_evaluation || {};\n  const providerFollowupAnswer = String(q.provider_followup_answer || \"\").trim();\n  const providerResponseDetected =\n    q.provider_response_detected === true &&\n    providerFollowupAnswer.length > 0;\n\n  const questionText = getQuestionText(q);\n  const exactToken = `EXACT_QUESTION_ID_${qid}`;\n\n  /*\n    Query RAG:\n    Empieza por token exacto + question_id.\n    Esto ayuda a que Qdrant recupere la ficha correcta.\n  */\n  const toolInput = `${exactToken} ${qid} ${questionText}`.trim();\n\n  questionsMap.set(qid, {\n    question_id: qid,\n    exact_rag_token: exactToken,\n\n    /*\n      Este es el valor que el agente debe pasar literalmente a la tool.\n    */\n    tool_input: toolInput,\n    rag_search_query: toolInput,\n\n    /*\n      Refuerzo explícito para el agente.\n    */\n    tool_required: true,\n    required_tool_name: RAG_TOOL_NAME,\n    tool_call_instruction: `Llama a ${RAG_TOOL_NAME} con este input exacto antes de reanalizar: ${toolInput}`,\n\n    previous_evaluation: {\n      previous_score: prev.score,\n      previous_score_type: prev.score_type,\n      previous_answer_summary: truncateText(prev.answer_summary || \"\", 350),\n      previous_decision_reason: truncateText(prev.decision_reason || \"\", 450),\n      previous_provider_answer: truncateText(prev.provider_answer || \"\", 300),\n      previous_provider_details: truncateText(prev.provider_details || \"\", 450)\n    },\n\n    provider_followup: {\n      provider_response_detected: providerResponseDetected,\n      provider_followup_answer: truncateText(providerFollowupAnswer, 1200),\n      provider_followup_answer_is_weak_or_empty: isEmptyOrWeakAnswer(providerFollowupAnswer)\n    },\n\n    risk_context_from_previous_evaluation: {\n      risk_name: prev.risk_name || \"\",\n      incumplimiento_identificado: truncateText(prev.incumplimiento_identificado || \"\", 400),\n      mitigation: truncateText(prev.mitigation || \"\", 450)\n    }\n  });\n}\n\nconst compactQuestions = Array.from(questionsMap.values());\n\nif (compactQuestions.length === 0) {\n  throw new Error(\n    \"No se encontraron preguntas válidas para reanalizar en follow-up. Batch recibido: \" +\n    JSON.stringify(batchData).slice(0, 2000)\n  );\n}\n\nconst requiredToolCalls = compactQuestions.map((q, index) => ({\n  order: index + 1,\n  question_id: q.question_id,\n  tool_name: RAG_TOOL_NAME,\n  input: q.tool_input\n}));\n\nconst toolCallPlanText = requiredToolCalls\n  .map(call => `${call.order}. ${call.tool_name} con input: \"${call.input}\"`)\n  .join(\"\\n\");\n\nconst systemPrompt = `\nINSTRUCCIÓN PRIORITARIA ABSOLUTA:\nEsta es una tarea TOOL-FIRST de reanálisis de follow-up.\n\nTu primera acción obligatoria NO es responder.\nTu primera acción obligatoria es llamar a la herramienta ${RAG_TOOL_NAME}.\n\nNo puedes reanalizar ninguna pregunta antes de usar la herramienta ${RAG_TOOL_NAME}.\nNo puedes devolver el JSON final antes de haber usado la herramienta ${RAG_TOOL_NAME}.\nNo puedes responder usando conocimiento general, memoria o inferencias sin RAG.\nNo puedes decidir solo con la evaluación anterior.\nNo puedes decidir solo con la respuesta adicional del proveedor.\n\nSi tienes una pregunta a reanalizar, debes hacer exactamente este ciclo:\n1. Llamar a ${RAG_TOOL_NAME}.\n2. Leer la ficha recuperada.\n3. Comprobar que metadata.question_id coincide con question_id.\n4. Analizar únicamente la respuesta adicional del proveedor.\n5. Decidir final_score = 1 o final_score = 3.\n6. Devolver JSON final.\n\nEres un agente experto en análisis de riesgos técnicos de ciberseguridad para soluciones SaaS.\n\nEstás reanalizando preguntas que quedaron con score = 2 tras una primera evaluación.\n\nHERRAMIENTA DISPONIBLE:\nNombre exacto de la herramienta:\n${RAG_TOOL_NAME}\n\nUso de la herramienta:\n- La herramienta recupera la ficha oficial del catálogo de riesgos.\n- La herramienta debe usarse antes de reanalizar cada pregunta.\n- La herramienta recibe un único input textual.\n- Ese input debe ser exactamente el valor tool_input de la pregunta.\n- No cambies, resumas ni reformules tool_input.\n- No llames a la herramienta con otro texto diferente.\n\nCONTRATO DE USO RAG:\n- Debes realizar una llamada independiente a ${RAG_TOOL_NAME} por cada question_id.\n- Si hay 1 pregunta, debes hacer 1 llamada.\n- Si hay 3 preguntas, debes hacer 3 llamadas.\n- Si no usas la herramienta para una pregunta, la evaluación de esa pregunta es inválida.\n- Si la herramienta no devuelve ficha válida después de llamarla, final_score = 1 y añade una nota en batch_validation_notes.\n- Si metadata.question_id no coincide exactamente con question_id, descarta la ficha, final_score = 1 y añade una nota en batch_validation_notes.\n- No uses documentos de otra pregunta.\n- No inventes reglas que no estén en la ficha recuperada o en la evaluación anterior.\n\nQUÉ CONTIENE LA FICHA RAG:\n- reglas de scoring\n- controles asociados\n- incumplimientos\n- condiciones de cumplimiento\n- condiciones de ambigüedad\n- reglas condicionales\n- severidad\n- mitigación\n\nOBJETIVO DEL REANÁLISIS:\nDecidir si la respuesta adicional del proveedor resuelve definitivamente la duda.\n\nREGLA PRINCIPAL:\n- Analiza únicamente provider_followup.provider_followup_answer como respuesta nueva del proveedor.\n- No analices previous_decision_reason como si fuera respuesta nueva.\n- No analices previous_answer_summary como si fuera respuesta nueva.\n- No analices previous_provider_answer como si fuera respuesta nueva.\n- No analices previous_provider_details como si fuera respuesta nueva.\n- La evaluación anterior solo sirve como contexto de por qué se pidió aclaración.\n\nSCORES PERMITIDOS:\n- final_score = 3: la respuesta adicional confirma claramente que el control está implantado y cubre el alcance requerido.\n- final_score = 1: la respuesta adicional confirma incumplimiento, sigue siendo ambigua, queda pendiente, está en proceso o no aporta evidencia suficiente.\n- No devuelvas final_score = 2.\n\nREGLA DE UNA SOLA RONDA:\n- Esta es la única ronda automática de follow-up.\n- Si la respuesta sigue siendo ambigua, incompleta, genérica, \"por especificar\", \"detallar\", \"depende\", \"pendiente\", \"se puede generar\", \"en proceso\", \"no aprobado\" o \"no documentado\", devuelve final_score = 1.\n- No solicites otro follow-up.\n- No generes nuevas preguntas al proveedor.\n\nREGLAS GENERALES DE DECISIÓN:\n- Si provider_response_detected es false, final_score = 1.\n- Si provider_followup_answer está vacío, final_score = 1.\n- Si provider_followup_answer solo contiene texto genérico, final_score = 1.\n- Si provider_followup_answer aporta tecnología, configuración, alcance y confirmación clara del control, final_score = 3.\n- Si el proveedor dice que algo está en proceso, pendiente, no aprobado o no documentado, final_score = 1.\n- Si el proveedor indica que no existe el control, final_score = 1.\n- Si el proveedor indica una medida equivalente suficiente, final_score = 3.\n\nREGLAS ESPECÍFICAS:\n- Q_007: final_score = 3 si se confirma identificador único/personal por usuario y ausencia de cuentas compartidas. Si no queda claro, final_score = 1.\n- Q_008: final_score = 3 si se describe proceso o herramienta para identificar y gestionar roles de administración. Si es genérico, final_score = 1.\n- Q_011: final_score = 3 si se confirma repositorio centralizado real o integración IAM/LDAP/AD. Si es solo base local y el control exigía centralización corporativa, final_score = 1.\n- Q_012: final_score = 3 si se describe procedimiento de altas, bajas y modificaciones con responsables y plazos. Si falta procedimiento o plazos, final_score = 1.\n- Q_013: final_score = 3 si se confirma RBAC/perfiles con roles definidos y asignación de permisos. Si falta granularidad o detalle, final_score = 1.\n- Q_019: final_score = 3 si se confirma hash seguro de contraseñas, por ejemplo bcrypt, Argon2, PBKDF2, salt único o mecanismo equivalente. Si no hay algoritmo o mecanismo claro, final_score = 1.\n- Q_021: final_score = 3 si se confirma timeout, aplicabilidad a usuarios/roles y si es configurable o suficientemente gestionado. Si no queda claro, final_score = 1.\n- Q_023: final_score = 3 si se confirma TLS 1.2 o TLS 1.3 y que SSL/TLS 1.0/TLS 1.1 están deshabilitados. Si no queda claro, final_score = 1.\n- Q_028: final_score = 3 si se confirma algoritmo de cifrado robusto para backups o datos en reposo, por ejemplo AES-256, y alcance suficiente. Si no hay algoritmo claro, final_score = 1.\n- Q_029: final_score = 3 si se confirma HTTPS con TLS 1.2 o superior y protocolos/cifrados inseguros deshabilitados. Si solo dice SSL o no concreta versiones, final_score = 1.\n- Q_030: final_score = 3 si se detalla proceso de backup, retención, ubicación, integridad y restauración. Si faltan elementos clave, final_score = 1.\n- Q_031: final_score = 3 solo si se aportan valores RTO/RPO claros o documentación equivalente aprobada. Si depende del problema o no hay valores cerrados, final_score = 1.\n- Q_032: final_score = 3 solo si existe política de retención documentada/aprobada con periodos o criterios claros, medidas de seguridad y accesos. Si está en proceso o pendiente, final_score = 1.\n- Q_034: final_score = 3 solo si se confirma proceso estandarizado/documentado de finalización y baja. Si depende del proveedor/terceros o está pendiente de confirmar, final_score = 1.\n- Q_036: final_score = 3 si se detalla devolución de datos, formatos, integridad y plazos. Si falta detalle técnico, final_score = 1.\n- Q_045: final_score = 3 si se confirma aislamiento lógico/físico de entornos y no uso de datos reales o uso anonimizado. Si no queda claro, final_score = 1.\n- Q_057: final_score = 3 si se describen procedimientos de comunicación y escalado de incidentes con responsables/canales/criterios. Si es genérico, final_score = 1.\n\nFORMATO:\nDespués de usar la herramienta, devuelve únicamente JSON válido.\nNo uses Markdown.\nNo escribas texto fuera del JSON.\nNo uses bloques de código.\nEl primer carácter de la respuesta final debe ser {.\nEl último carácter de la respuesta final debe ser }.\n\nREGLAS DE SALIDA:\n- Devuelve una evaluación por cada pregunta recibida.\n- No inventes preguntas.\n- No omitas preguntas.\n- No devuelvas final_score = 2.\n- final_score_type solo puede ser \"non_compliance\" o \"compliant\".\n- resolved_by_provider debe ser true solo si final_score = 3.\n- answer_summary máximo 25 palabras.\n- decision_reason máximo 40 palabras.\n- Incluye rag_used y rag_retrieved_question_id si has podido identificarlo.\n`;\n\nconst userPrompt = `\nANTES DE RESPONDER, DEBES USAR LA HERRAMIENTA.\n\nPLAN OBLIGATORIO DE LLAMADAS A TOOL:\n${toolCallPlanText}\n\nREGLA CRÍTICA:\nNo generes la respuesta JSON final hasta haber ejecutado todas las llamadas anteriores.\n\nCASE_ID:\n${batchData.case_id}\n\nBATCH_ID:\n${batchData.batch_id}\n\nFOLLOWUP_ROUND:\n${batchData.followup_round || 1}\n\nPREGUNTAS_A_REANALIZAR:\n${JSON.stringify(compactQuestions, null, 2)}\n\nPROCEDIMIENTO OBLIGATORIO POR CADA PREGUNTA:\n1. Lee question_id.\n2. Lee tool_input.\n3. Llama a ${RAG_TOOL_NAME} usando exactamente el valor de tool_input.\n4. Comprueba que la ficha recuperada tiene metadata.question_id igual al question_id.\n5. Analiza únicamente provider_followup.provider_followup_answer como respuesta nueva.\n6. Decide final_score = 1 o final_score = 3.\n7. Devuelve una evaluación para esa pregunta.\n\nESTRUCTURA OBLIGATORIA DE RESPUESTA FINAL:\n{\n  \"case_id\": \"${batchData.case_id}\",\n  \"batch_id\": \"${batchData.batch_id}\",\n  \"followup_round\": ${batchData.followup_round || 1},\n  \"question_evaluations\": [\n    {\n      \"question_id\": \"\",\n      \"final_score\": 1,\n      \"final_score_type\": \"non_compliance|compliant\",\n      \"answer_summary\": \"\",\n      \"decision_reason\": \"\",\n      \"resolved_by_provider\": false,\n      \"rag_used\": false,\n      \"rag_retrieved_question_id\": \"\"\n    }\n  ],\n  \"batch_validation_notes\": []\n}\n\nREGLAS FINALES:\n- Devuelve una evaluación por cada pregunta de PREGUNTAS_A_REANALIZAR.\n- No inventes question_id.\n- No devuelvas final_score = 2.\n- Si provider_followup.provider_response_detected es false, final_score = 1.\n- Si provider_followup.provider_followup_answer_is_weak_or_empty es true, normalmente final_score = 1.\n- Analiza únicamente provider_followup.provider_followup_answer como respuesta nueva.\n- La evaluación anterior es solo contexto.\n- Usa ${RAG_TOOL_NAME} con el tool_input de cada pregunta antes de evaluar.\n- Devuelve solo JSON válido.\n`;\n\nreturn {\n  json: {\n    case_id: batchData.case_id,\n    followup_round: batchData.followup_round || 1,\n    batch_id: batchData.batch_id,\n\n    batch_data: batchData,\n    compact_questions: compactQuestions,\n    required_tool_calls: requiredToolCalls,\n\n    system_prompt: systemPrompt,\n    user_prompt: userPrompt,\n\n    rag_mode: \"agent_tool_qdrant_vector_store_followup\",\n    rag_tool_name: RAG_TOOL_NAME,\n    rag_collection_expected: RAG_COLLECTION_EXPECTED,\n\n    /*\n      Campos útiles para validar después del AI Agent.\n      Activa Return Intermediate Steps en el AI Agent y revisa si se han ejecutado.\n    */\n    expected_tool_call_count: requiredToolCalls.length,\n    expected_tool_names: [RAG_TOOL_NAME],\n\n    debug_questions_found: compactQuestions.map(q => q.question_id),\n    debug_tool_inputs: compactQuestions.map(q => ({\n      question_id: q.question_id,\n      tool_input: q.tool_input\n    })),\n    debug_required_tool_calls: requiredToolCalls,\n    debug_provider_answers_detected: compactQuestions.map(q => ({\n      question_id: q.question_id,\n      provider_response_detected: q.provider_followup.provider_response_detected,\n      provider_followup_answer_preview: String(q.provider_followup.provider_followup_answer || \"\").slice(0, 160)\n    }))\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        224
+      ],
+      "id": "a6443bd6-c717-474a-ad11-01fa05c73735",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function getRawModelOutput(itemJson) {\n  let raw =\n    itemJson.output ||\n    itemJson.text ||\n    itemJson.response ||\n    itemJson.result ||\n    itemJson.message ||\n    itemJson.data ||\n    \"\";\n\n  if (raw && typeof raw === \"object\") {\n    if (raw.output) raw = raw.output;\n    else if (raw.text) raw = raw.text;\n    else if (raw.response) raw = raw.response;\n    else if (raw.message) raw = raw.message;\n    else if (raw.content) raw = raw.content;\n    else raw = JSON.stringify(raw);\n  }\n\n  if (typeof raw !== \"string\") {\n    raw = JSON.stringify(raw);\n  }\n\n  return raw.trim();\n}\n\nfunction extractJsonObject(raw) {\n  raw = String(raw || \"\")\n    .replace(/^```json/i, \"\")\n    .replace(/^```/i, \"\")\n    .replace(/```$/i, \"\")\n    .trim();\n\n  try {\n    return JSON.parse(raw);\n  } catch (e) {}\n\n  const first = raw.indexOf(\"{\");\n  const last = raw.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON en la respuesta del modelo: \" + raw);\n  }\n\n  const candidate = raw.slice(first, last + 1);\n\n  try {\n    return JSON.parse(candidate);\n  } catch (e) {\n    throw new Error(\"Se encontró un bloque JSON, pero no era JSON válido: \" + candidate);\n  }\n}\n\nfunction normalizeQid(value) {\n  return String(value || \"\").trim().toUpperCase();\n}\n\nfunction getPreviousPromptItem(expectedBatchId) {\n  const possibleNames = [\n    \"Code - Construir prompt follow-up\",\n    \"Code in JavaScript3\",\n    \"Code in JavaScript2\",\n    \"Code in JavaScript1\",\n    \"Code in JavaScript\",\n    \"Code\"\n  ];\n\n  const currentIndex = typeof $itemIndex !== \"undefined\" ? $itemIndex : 0;\n\n  for (const name of possibleNames) {\n    try {\n      const items = $items(name);\n\n      if (!items || !Array.isArray(items)) continue;\n\n      if (items[currentIndex]?.json) {\n        const candidate = items[currentIndex].json || {};\n        const candidateBatchId = candidate.batch_id || candidate.batch_data?.batch_id || \"\";\n\n        if (\n          candidate.batch_data &&\n          (!expectedBatchId || candidateBatchId === expectedBatchId)\n        ) {\n          return candidate;\n        }\n      }\n\n      if (expectedBatchId) {\n        for (const item of items) {\n          const candidate = item.json || {};\n          const candidateBatchId = candidate.batch_id || candidate.batch_data?.batch_id || \"\";\n\n          if (candidate.batch_data && candidateBatchId === expectedBatchId) {\n            return candidate;\n          }\n        }\n      }\n\n      for (const item of items) {\n        const candidate = item.json || {};\n\n        if (candidate.batch_data) {\n          return candidate;\n        }\n      }\n    } catch (e) {}\n  }\n\n  return {};\n}\n\nfunction normalizeFinalScore(value) {\n  const score = Number(value);\n\n  if (score === 3) return 3;\n\n  return 1;\n}\n\nfunction normalizeEvaluation(ev) {\n  const qid = normalizeQid(ev.question_id);\n  const finalScore = normalizeFinalScore(\n    ev.final_score !== undefined ? ev.final_score : ev.score\n  );\n\n  return {\n    question_id: qid,\n    final_score: finalScore,\n    final_score_type: finalScore === 3 ? \"compliant\" : \"non_compliance\",\n    answer_summary: ev.answer_summary || \"\",\n    decision_reason: ev.decision_reason || \"\",\n    resolved_by_provider: finalScore === 3\n  };\n}\n\nfunction createFallbackEvaluation(qid, reason) {\n  return {\n    question_id: qid,\n    final_score: 1,\n    final_score_type: \"non_compliance\",\n    answer_summary: \"No se ha podido aplicar una resolución concluyente del follow-up.\",\n    decision_reason: reason || \"Al existir una única ronda automática de follow-up, se fuerza incumplimiento.\",\n    resolved_by_provider: false\n  };\n}\n\nconst raw = getRawModelOutput($json);\n\nlet parsed;\n\ntry {\n  parsed = extractJsonObject(raw);\n} catch (e) {\n  throw new Error(\n    \"El modelo no devolvió JSON válido en el follow-up. No se guardará un resultado vacío. Error: \" +\n    e.message +\n    \"\\nRAW:\\n\" +\n    raw.slice(0, 2000)\n  );\n}\n\nif (!Array.isArray(parsed.question_evaluations)) {\n  throw new Error(\n    \"El JSON del modelo no contiene question_evaluations como array. No se guardará resultado vacío. JSON: \" +\n    JSON.stringify(parsed).slice(0, 2000)\n  );\n}\n\nif (parsed.question_evaluations.length === 0) {\n  throw new Error(\n    \"El modelo devolvió question_evaluations vacío. No se guardará resultado vacío. RAW: \" +\n    raw.slice(0, 2000)\n  );\n}\n\nconst parsedBatchId = parsed.batch_id || \"\";\nconst promptItem = getPreviousPromptItem(parsedBatchId);\nconst batchData = promptItem.batch_data || {};\n\nconst caseId =\n  parsed.case_id ||\n  batchData.case_id ||\n  promptItem.case_id ||\n  \"\";\n\nconst batchId =\n  parsed.batch_id ||\n  batchData.batch_id ||\n  promptItem.batch_id ||\n  \"\";\n\nconst previousByQuestion = {};\n\nfor (const q of batchData.questions || []) {\n  const qid = normalizeQid(q.question_id);\n  if (qid) {\n    previousByQuestion[qid] = q.previous_evaluation || {};\n  }\n}\n\nconst expectedIds = Object.keys(previousByQuestion);\n\nconst byId = {};\n\nfor (const ev of parsed.question_evaluations) {\n  const qid = normalizeQid(ev.question_id);\n\n  if (!qid) continue;\n\n  // Si tenemos batch_data, filtramos por preguntas esperadas.\n  // Si no lo tenemos, NO filtramos, porque si filtramos con expectedIds vacío\n  // nos cargamos todas las evaluaciones válidas del modelo.\n  if (expectedIds.length > 0 && !expectedIds.includes(qid)) {\n    continue;\n  }\n\n  byId[qid] = normalizeEvaluation(ev);\n}\n\n// Si tenemos batch_data y el modelo omitió alguna pregunta,\n// la metemos como score 1 por la regla de una sola ronda.\nif (expectedIds.length > 0) {\n  for (const qid of expectedIds) {\n    if (!byId[qid]) {\n      byId[qid] = createFallbackEvaluation(\n        qid,\n        \"El modelo omitió esta pregunta en el reanálisis de follow-up. Se fuerza incumplimiento.\"\n      );\n    }\n  }\n}\n\nconst questionEvaluations = Object.values(byId);\n\nif (questionEvaluations.length === 0) {\n  throw new Error(\n    \"Tras normalizar, question_evaluations ha quedado vacío. Esto no debe guardarse. \" +\n    \"Revisa el output del AI Agent y el nombre del nodo 'Code - Construir prompt follow-up'. RAW: \" +\n    raw.slice(0, 2000)\n  );\n}\n\nconst normalized = {\n  case_id: caseId,\n  batch_id: batchId,\n  followup_round: 1,\n  question_evaluations: questionEvaluations,\n  batch_validation_notes: parsed.batch_validation_notes || [],\n  normalizer_debug: {\n    raw_model_output_preview: raw.slice(0, 500),\n    parsed_question_count: parsed.question_evaluations.length,\n    normalized_question_count: questionEvaluations.length,\n    expected_question_count: expectedIds.length,\n    expected_question_ids: expectedIds,\n    normalized_question_ids: questionEvaluations.map(ev => ev.question_id),\n    prompt_batch_data_found: Object.keys(batchData).length > 0\n  }\n};\n\nconst b64 = Buffer.from(\n  JSON.stringify(normalized, null, 2),\n  \"utf8\"\n).toString(\"base64\");\n\nreturn {\n  json: {\n    case_id: normalized.case_id,\n    batch_id: normalized.batch_id,\n    followup_round: 1,\n    followup_reanalysis: normalized,\n    followup_reanalysis_b64: b64,\n    raw_model_output: raw,\n    normalized_question_count: questionEvaluations.length,\n    normalized_question_ids: questionEvaluations.map(ev => ev.question_id)\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        320
+      ],
+      "id": "b98fe27f-cb08-44ee-920f-e2c276873aea",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=mkdir -p \"/data/cases/{{$json.case_id}}/03_analysis/followup_reanalysis_results\" && printf '%s' '{{$json.followup_reanalysis_b64}}' | base64 -d > \"/data/cases/{{$json.case_id}}/03_analysis/followup_reanalysis_results/{{$json.batch_id}}.json\" && python - <<'PY'\nimport json\nfrom pathlib import Path\n\ncase_id = \"{{$json.case_id}}\"\nbatch_id = \"{{$json.batch_id}}\"\n\npath = Path(f\"/data/cases/{case_id}/03_analysis/followup_reanalysis_results/{batch_id}.json\")\n\ndata = json.loads(path.read_text(encoding=\"utf-8\"))\n\nevaluations = data.get(\"question_evaluations\", [])\n\nif not evaluations:\n    raise Exception(f\"ERROR: Se ha intentado guardar un reanálisis vacío en {path}. Se detiene el flujo.\")\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"batch_id\": batch_id,\n    \"saved_path\": str(path),\n    \"question_evaluations_saved\": len(evaluations),\n    \"question_ids_saved\": [ev.get(\"question_id\") for ev in evaluations]\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2704,
+        384
+      ],
+      "id": "af4ead53-70c4-46a6-af53-859f7521c6d2",
+      "name": "Execute Command7"
+    },
+    {
+      "parameters": {
+        "command": "=python - <<'PY'\nimport json\nfrom pathlib import Path\nfrom datetime import datetime\nfrom collections import defaultdict\n\ndef load_json(path):\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\ndef write_json(path, data):\n    path.write_text(\n        json.dumps(data, ensure_ascii=False, indent=2),\n        encoding=\"utf-8\"\n    )\n\ndef discover_case_id():\n    root = Path(\"/data/cases\")\n    candidates = []\n\n    if not root.exists():\n        return \"\"\n\n    for case_dir in root.iterdir():\n        if not case_dir.is_dir():\n            continue\n\n        reanalysis_dir = case_dir / \"03_analysis\" / \"followup_reanalysis_results\"\n        scoring_path = case_dir / \"03_analysis\" / \"scoring_preliminary.json\"\n\n        files = list(reanalysis_dir.glob(\"*.json\"))\n\n        if files:\n            latest = max(p.stat().st_mtime for p in files)\n            candidates.append((latest, case_dir.name))\n        elif scoring_path.exists():\n            candidates.append((scoring_path.stat().st_mtime, case_dir.name))\n\n    if not candidates:\n        return \"\"\n\n    candidates.sort(reverse=True)\n    return candidates[0][1]\n\ncase_id = \"{{$json.case_id}}\".strip()\n\nif not case_id:\n    case_id = discover_case_id()\n\nif not case_id:\n    raise Exception(\"No se pudo determinar case_id para generar análisis final.\")\n\nbase = Path(\"/data/cases\") / case_id\nanalysis_dir = base / \"03_analysis\"\nreanalysis_dir = analysis_dir / \"followup_reanalysis_results\"\n\npreliminary_path = analysis_dir / \"scoring_preliminary.json\"\n\nif not preliminary_path.exists():\n    raise Exception(f\"No existe {preliminary_path}\")\n\npreliminary = load_json(preliminary_path)\n\n# ------------------------------------------------------------\n# 1. Leer de forma robusta los resultados del follow-up\n# ------------------------------------------------------------\n\nupdates = {}\nreanalysis_files_read = []\nreanalysis_files_found = []\n\nif reanalysis_dir.exists():\n    reanalysis_files_found = sorted(reanalysis_dir.glob(\"*.json\"))\n\nfor path in reanalysis_files_found:\n    try:\n        data = load_json(path)\n    except Exception as e:\n        continue\n\n    reanalysis_files_read.append(str(path))\n\n    # Soportamos varias estructuras posibles.\n    if isinstance(data.get(\"question_evaluations\"), list):\n        evaluations = data.get(\"question_evaluations\", [])\n    elif isinstance(data.get(\"followup_reanalysis\", {}).get(\"question_evaluations\"), list):\n        evaluations = data.get(\"followup_reanalysis\", {}).get(\"question_evaluations\", [])\n    elif isinstance(data.get(\"scoring_batch\", {}).get(\"question_evaluations\"), list):\n        evaluations = data.get(\"scoring_batch\", {}).get(\"question_evaluations\", [])\n    else:\n        evaluations = []\n\n    for ev in evaluations:\n        qid = str(ev.get(\"question_id\", \"\")).strip().upper()\n\n        if not qid:\n            continue\n\n        try:\n            final_score = int(ev.get(\"final_score\"))\n        except Exception:\n            try:\n                final_score = int(ev.get(\"score\"))\n            except Exception:\n                final_score = 1\n\n        if final_score not in [1, 3]:\n            final_score = 1\n\n        updates[qid] = {\n            \"question_id\": qid,\n            \"final_score\": final_score,\n            \"final_score_type\": \"compliant\" if final_score == 3 else \"non_compliance\",\n            \"answer_summary\": ev.get(\"answer_summary\", \"\"),\n            \"decision_reason\": ev.get(\"decision_reason\", \"\"),\n            \"resolved_by_provider\": final_score == 3,\n            \"source_reanalysis_file\": path.name\n        }\n\n# ------------------------------------------------------------\n# 2. Aplicar updates sobre scoring_preliminary\n# ------------------------------------------------------------\n\nfinal_evaluations = []\nwarnings = []\n\nfor ev in preliminary.get(\"question_evaluations\", []):\n    qid = str(ev.get(\"question_id\", \"\")).strip().upper()\n    final_ev = dict(ev)\n\n    update = updates.get(qid)\n\n    if update:\n        final_score = int(update[\"final_score\"])\n\n        final_ev[\"followup_resolution\"] = {\n            \"followup_round\": 1,\n            \"resolved_by_provider\": update[\"resolved_by_provider\"],\n            \"answer_summary\": update.get(\"answer_summary\", \"\"),\n            \"decision_reason\": update.get(\"decision_reason\", \"\"),\n            \"source_reanalysis_file\": update.get(\"source_reanalysis_file\", \"\")\n        }\n\n        if final_score == 3:\n            final_ev[\"score\"] = 3\n            final_ev[\"score_type\"] = \"compliant\"\n            final_ev[\"answer_summary\"] = update.get(\"answer_summary\", \"\") or final_ev.get(\"answer_summary\", \"\")\n            final_ev[\"decision_reason\"] = update.get(\"decision_reason\", \"\") or final_ev.get(\"decision_reason\", \"\")\n            final_ev[\"generates_finding\"] = False\n            final_ev[\"requires_provider_followup\"] = False\n            final_ev[\"requires_human_review\"] = False\n            final_ev[\"followup_questions\"] = []\n            final_ev[\"level\"] = \"SIN RIESGO\"\n            final_ev[\"risk_id\"] = \"\"\n            final_ev[\"risk_name\"] = \"\"\n            final_ev[\"control_ids\"] = []\n            final_ev[\"incumplimiento_identificado\"] = \"\"\n            final_ev[\"controles_asociados\"] = \"\"\n            final_ev[\"amenazas\"] = []\n            final_ev[\"mitigation\"] = \"\"\n            final_ev[\"mitigation_guide\"] = \"\"\n            final_ev[\"report_context_example\"] = \"\"\n            final_ev[\"report_detail_example\"] = \"\"\n            final_ev[\"tiempo_mitigacion\"] = \"\"\n\n        else:\n            final_ev[\"score\"] = 1\n            final_ev[\"score_type\"] = \"non_compliance\"\n            final_ev[\"answer_summary\"] = update.get(\"answer_summary\", \"\") or final_ev.get(\"answer_summary\", \"\")\n            final_ev[\"decision_reason\"] = update.get(\"decision_reason\", \"\") or final_ev.get(\"decision_reason\", \"\")\n            final_ev[\"generates_finding\"] = True\n            final_ev[\"requires_provider_followup\"] = False\n            final_ev[\"requires_human_review\"] = False\n            final_ev[\"followup_questions\"] = []\n\n    else:\n        # Si no hay update, mantenemos la evaluación previa.\n        try:\n            score = int(final_ev.get(\"score\"))\n        except Exception:\n            score = 2\n\n        # Regla máximo 1 ronda:\n        # si alguna pregunta sigue score 2 y NO hay update, se convierte a score 1.\n        if score == 2:\n            final_ev[\"score\"] = 1\n            final_ev[\"score_type\"] = \"non_compliance\"\n            final_ev[\"generates_finding\"] = True\n            final_ev[\"requires_provider_followup\"] = False\n            final_ev[\"requires_human_review\"] = False\n            final_ev[\"followup_questions\"] = []\n            final_ev[\"followup_resolution\"] = {\n                \"followup_round\": 1,\n                \"resolved_by_provider\": False,\n                \"decision_reason\": (\n                    \"Tras una ronda de follow-up, no se encontró una respuesta concluyente \"\n                    \"o no se pudo aplicar el reanálisis. Se trata como incumplimiento para generar informe final.\"\n                )\n            }\n\n            warnings.append({\n                \"type\": \"score_2_without_followup_update\",\n                \"question_id\": qid,\n                \"description\": \"No se encontró actualización de follow-up para una pregunta score=2. Se convirtió a score=1.\"\n            })\n\n        elif score == 1:\n            final_ev[\"score\"] = 1\n            final_ev[\"score_type\"] = \"non_compliance\"\n            final_ev[\"generates_finding\"] = True\n            final_ev[\"requires_provider_followup\"] = False\n            final_ev[\"followup_questions\"] = []\n\n        elif score == 3:\n            final_ev[\"score\"] = 3\n            final_ev[\"requires_provider_followup\"] = False\n            final_ev[\"requires_human_review\"] = False\n            final_ev[\"followup_questions\"] = []\n\n    final_evaluations.append(final_ev)\n\n# ------------------------------------------------------------\n# 3. Findings finales\n# ------------------------------------------------------------\n\nfindings = []\n\nfor ev in final_evaluations:\n    try:\n        score = int(ev.get(\"score\"))\n    except Exception:\n        score = None\n\n    if score == 1 or ev.get(\"generates_finding\") is True:\n        findings.append(ev)\n\nfindings_by_level = defaultdict(list)\n\nfor finding in findings:\n    level = finding.get(\"level\") or \"SIN NIVEL\"\n    findings_by_level[level].append(finding)\n\nsummary = {\n    \"total_evaluations\": len(final_evaluations),\n    \"total_findings\": len(findings),\n    \"critical_or_high\": len(findings_by_level.get(\"ALTO\", [])),\n    \"medium\": len(findings_by_level.get(\"MEDIO\", [])),\n    \"low\": len(findings_by_level.get(\"BAJO\", [])),\n    \"sin_nivel\": len(findings_by_level.get(\"SIN NIVEL\", [])),\n    \"resolved_by_followup\": len([\n        ev for ev in final_evaluations\n        if ev.get(\"followup_resolution\", {}).get(\"resolved_by_provider\") is True\n    ]),\n    \"not_resolved_by_followup\": len([\n        ev for ev in final_evaluations\n        if ev.get(\"followup_resolution\") and ev.get(\"followup_resolution\", {}).get(\"resolved_by_provider\") is False\n    ])\n}\n\nscoring_final = {\n    \"case_id\": case_id,\n    \"status\": \"FINAL_SCORING_DONE\",\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"total_evaluations\": len(final_evaluations),\n    \"total_findings\": len(findings),\n    \"summary\": summary,\n    \"followup_updates_applied\": sorted(list(updates.keys())),\n    \"reanalysis_files_read\": reanalysis_files_read,\n    \"warnings\": warnings,\n    \"question_evaluations\": final_evaluations\n}\n\nrisk_analysis = {\n    \"case_id\": case_id,\n    \"status\": \"RISK_ANALYSIS_READY\",\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"summary\": summary,\n    \"findings\": findings,\n    \"findings_by_level\": {\n        level: values for level, values in findings_by_level.items()\n    }\n}\n\nreport_data = {\n    \"case_id\": case_id,\n    \"status\": \"REPORT_DATA_READY\",\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"summary\": summary,\n    \"findings\": findings,\n    \"question_evaluations\": final_evaluations,\n    \"metadata\": {\n        \"source\": \"scoring_preliminary.json + followup_reanalysis_results\",\n        \"followup_round\": 1,\n        \"max_followup_rounds\": 1,\n        \"followup_updates_applied\": sorted(list(updates.keys())),\n        \"reanalysis_files_read\": reanalysis_files_read\n    }\n}\n\nscoring_final_path = analysis_dir / \"scoring_final.json\"\nrisk_analysis_path = analysis_dir / \"risk_analysis.json\"\nreport_data_path = analysis_dir / \"report_data.json\"\ncase_status_path = analysis_dir / \"case_status.json\"\n\nwrite_json(scoring_final_path, scoring_final)\nwrite_json(risk_analysis_path, risk_analysis)\nwrite_json(report_data_path, report_data)\n\ncase_status = {\n    \"case_id\": case_id,\n    \"status\": \"READY_FOR_REPORT\",\n    \"updated_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"followup_required\": False,\n    \"followup_round\": 1,\n    \"total_evaluations\": len(final_evaluations),\n    \"total_findings\": len(findings),\n    \"resolved_by_followup\": summary[\"resolved_by_followup\"],\n    \"not_resolved_by_followup\": summary[\"not_resolved_by_followup\"],\n    \"followup_updates_applied\": sorted(list(updates.keys())),\n    \"reanalysis_files_read\": reanalysis_files_read,\n    \"scoring_final_path\": str(scoring_final_path),\n    \"risk_analysis_path\": str(risk_analysis_path),\n    \"report_data_path\": str(report_data_path),\n    \"warnings\": warnings\n}\n\nwrite_json(case_status_path, case_status)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"status\": \"READY_FOR_REPORT\",\n    \"total_evaluations\": len(final_evaluations),\n    \"total_findings\": len(findings),\n    \"resolved_by_followup\": summary[\"resolved_by_followup\"],\n    \"not_resolved_by_followup\": summary[\"not_resolved_by_followup\"],\n    \"followup_updates_applied\": sorted(list(updates.keys())),\n    \"reanalysis_files_read\": reanalysis_files_read,\n    \"warnings_count\": len(warnings),\n    \"scoring_final_path\": str(scoring_final_path),\n    \"risk_analysis_path\": str(risk_analysis_path),\n    \"report_data_path\": str(report_data_path),\n    \"case_status_path\": str(case_status_path)\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2688,
+        224
+      ],
+      "id": "b250dec4-35d1-4ff5-a318-32c60519d01e",
+      "name": "Execute Command8"
+    },
+    {
+      "parameters": {
+        "command": "=python - <<'PY'\nimport json\nimport re\nfrom pathlib import Path\nfrom datetime import datetime\nfrom collections import defaultdict\n\ncase_id = \"{{$json.case_id}}\".strip()\n\nif not case_id or \"{{\" in case_id or \"}}\" in case_id or case_id.lower() in {\"undefined\", \"null\", \"none\"}:\n    case_id = \"\"\n\ndef load_json(path, default=None):\n    path = Path(path)\n\n    if not path.exists():\n        return default\n\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\ndef write_json(path, data):\n    path = Path(path)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(\n        json.dumps(data, ensure_ascii=False, indent=2),\n        encoding=\"utf-8\"\n    )\n\ndef discover_case_id():\n    root = Path(\"/data/cases\")\n    candidates = []\n\n    if not root.exists():\n        return \"\"\n\n    for case_dir in root.iterdir():\n        if not case_dir.is_dir():\n            continue\n\n        possible_files = [\n            case_dir / \"02_json\" / \"case_meta.json\",\n            case_dir / \"03_analysis\" / \"case_status.json\",\n            case_dir / \"03_analysis\" / \"report_data.json\",\n            case_dir / \"03_analysis\" / \"scoring_final.json\",\n            case_dir / \"04_report\" / \"report_pack.json\"\n        ]\n\n        existing = [p for p in possible_files if p.exists()]\n\n        if existing:\n            latest = max(p.stat().st_mtime for p in existing)\n            candidates.append((latest, case_dir.name))\n\n    if not candidates:\n        return \"\"\n\n    candidates.sort(reverse=True)\n    return candidates[0][1]\n\ndef norm(value):\n    return str(value or \"\").strip()\n\ndef clean_text(value):\n    text = norm(value)\n    text = re.sub(r\"\\s+\", \" \", text)\n    return text.strip()\n\ndef normalize_level(value):\n    v = norm(value).upper()\n\n    if \"ALTO\" in v:\n        return \"ALTO\"\n\n    if \"MEDIO\" in v:\n        return \"MEDIO\"\n\n    if \"BAJO\" in v:\n        return \"BAJO\"\n\n    return \"\"\n\nLEVEL_RANK = {\n    \"\": 0,\n    \"BAJO\": 1,\n    \"MEDIO\": 2,\n    \"ALTO\": 3\n}\n\ndef max_level(levels):\n    result = \"\"\n\n    for level in levels:\n        level = normalize_level(level)\n\n        if LEVEL_RANK.get(level, 0) > LEVEL_RANK.get(result, 0):\n            result = level\n\n    return result\n\ndef mitigation_time(level):\n    level = normalize_level(level)\n\n    if level == \"ALTO\":\n        return \"3 meses\"\n\n    if level == \"MEDIO\":\n        return \"12 meses\"\n\n    if level == \"BAJO\":\n        return \"Pte.\"\n\n    return \"\"\n\ndef risk_color(level):\n    level = normalize_level(level)\n\n    if level == \"ALTO\":\n        return \"red\"\n\n    if level == \"MEDIO\":\n        return \"orange\"\n\n    if level == \"BAJO\":\n        return \"yellow\"\n\n    return \"gray\"\n\ndef unique_keep_order(values):\n    out = []\n    seen = set()\n\n    for value in values:\n        if isinstance(value, list):\n            candidates = value\n        else:\n            candidates = [value]\n\n        for candidate in candidates:\n            text = clean_text(candidate)\n\n            if not text:\n                continue\n\n            key = text.lower()\n\n            if key not in seen:\n                seen.add(key)\n                out.append(text)\n\n    return out\n\ndef as_list(value):\n    if value is None:\n        return []\n\n    if isinstance(value, list):\n        return value\n\n    if isinstance(value, str):\n        parts = re.split(r\"[;\\n]+\", value)\n        return [p.strip() for p in parts if p.strip()]\n\n    return [str(value)]\n\ndef is_empty_or_pending(value):\n    text = str(value or \"\").strip().lower()\n\n    if not text:\n        return True\n\n    if text in {\n        \"n/a\",\n        \"#n/a\",\n        \"na\",\n        \"null\",\n        \"none\",\n        \"undefined\",\n        \"pendiente\",\n        \"pendiente de confirmar\"\n    }:\n        return True\n\n    return False\n\ndef first_value(*values, fallback=\"Pendiente de confirmar\"):\n    for value in values:\n        if isinstance(value, list):\n            value = \", \".join([str(v) for v in value if str(v).strip()])\n\n        text = str(value or \"\").strip()\n\n        if not is_empty_or_pending(text):\n            return text\n\n    return fallback\n\ndef normalize_tier(value):\n    if value is None or value == \"\":\n        return \"\"\n\n    if isinstance(value, int):\n        return f\"TIER {value}\"\n\n    text = str(value).strip().upper()\n\n    if not text:\n        return \"\"\n\n    match = re.search(r\"(\\d+)\", text)\n\n    if match:\n        return f\"TIER {match.group(1)}\"\n\n    if text.startswith(\"TIER\"):\n        return text\n\n    return text\n\ndef discover_questionnaire_file(base):\n    candidates = []\n\n    folders = [\n        base / \"01_originales\",\n        base / \"01_input\",\n        base / \"02_json\",\n        base\n    ]\n\n    valid_extensions = {\n        \".xlsx\",\n        \".xls\",\n        \".xlsm\"\n    }\n\n    for folder in folders:\n        if not folder.exists():\n            continue\n\n        for path in folder.iterdir():\n            if not path.is_file():\n                continue\n\n            if path.name.startswith(\"~$\"):\n                continue\n\n            name = path.name.lower()\n            suffix = path.suffix.lower()\n\n            if suffix in valid_extensions and any(token in name for token in [\"cuestionario\", \"questionnaire\"]):\n                candidates.append(path)\n\n    if candidates:\n        candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)\n        return str(candidates[0])\n\n    originales = base / \"01_originales\"\n\n    if originales.exists():\n        excel_files = [\n            p for p in originales.iterdir()\n            if p.is_file()\n            and not p.name.startswith(\"~$\")\n            and p.suffix.lower() in valid_extensions\n        ]\n\n        if excel_files:\n            excel_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)\n            return str(excel_files[0])\n\n    return \"\"\n\ndef question_text(ev):\n    parts = []\n\n    if ev.get(\"provider_answer\"):\n        parts.append(f\"Respuesta: {ev.get('provider_answer')}\")\n\n    if ev.get(\"provider_details\"):\n        parts.append(f\"Explicación: {ev.get('provider_details')}\")\n\n    if not parts and ev.get(\"answer_summary\"):\n        parts.append(ev.get(\"answer_summary\"))\n\n    return \"\\n\".join(parts).strip()\n\ndef build_question_map(evaluations):\n    qmap = {}\n\n    for ev in evaluations:\n        qid = norm(ev.get(\"question_id\")).upper()\n\n        if not qid:\n            continue\n\n        qmap[qid] = {\n            \"question_id\": qid,\n            \"provider_answer\": ev.get(\"provider_answer\", \"\"),\n            \"provider_details\": ev.get(\"provider_details\", \"\"),\n            \"answer_summary\": ev.get(\"answer_summary\", \"\"),\n            \"decision_reason\": ev.get(\"decision_reason\", \"\"),\n            \"score\": ev.get(\"score\"),\n            \"score_type\": ev.get(\"score_type\"),\n            \"text\": question_text(ev)\n        }\n\n    return qmap\n\nQUESTION_GROUPS = {\n    \"arquitectura\": [\n        \"Q_041\", \"Q_042\", \"Q_043\", \"Q_044\", \"Q_045\", \"Q_046\",\n        \"Q_049\", \"Q_050\", \"Q_051\", \"Q_052\", \"Q_054\", \"Q_055\", \"Q_056\"\n    ],\n    \"autenticacion\": [\n        \"Q_007\", \"Q_008\", \"Q_009\", \"Q_010\", \"Q_011\", \"Q_012\",\n        \"Q_013\", \"Q_014\", \"Q_015\", \"Q_016\", \"Q_017\", \"Q_018\",\n        \"Q_019\", \"Q_020\", \"Q_021\"\n    ],\n    \"monitorizacion\": [\n        \"Q_037\", \"Q_038\", \"Q_039\", \"Q_040\"\n    ],\n    \"seguridad_sistemas\": [\n        \"Q_005\", \"Q_006\", \"Q_022\", \"Q_023\", \"Q_024\", \"Q_025\",\n        \"Q_026\", \"Q_027\", \"Q_028\", \"Q_029\", \"Q_033\", \"Q_047\",\n        \"Q_048\", \"Q_057\"\n    ],\n    \"continuidad\": [\n        \"Q_030\", \"Q_031\", \"Q_032\", \"Q_034\", \"Q_035\", \"Q_036\"\n    ]\n}\n\ndef build_platform_inputs(qmap):\n    result = {}\n\n    for group_name, qids in QUESTION_GROUPS.items():\n        items = []\n\n        for qid in qids:\n            q = qmap.get(qid)\n\n            if q:\n                items.append(q)\n\n        result[group_name] = items\n\n    return result\n\ndef finding_score(ev):\n    try:\n        return int(ev.get(\"score\"))\n    except Exception:\n        return None\n\nif not case_id:\n    case_id = discover_case_id()\n\nif not case_id:\n    raise Exception(\"No se pudo determinar case_id para construir report_pack.\")\n\nbase = Path(\"/data/cases\") / case_id\njson_dir = base / \"02_json\"\nanalysis_dir = base / \"03_analysis\"\nreport_dir = base / \"04_report\"\nassets_dir = report_dir / \"assets\"\n\nreport_dir.mkdir(parents=True, exist_ok=True)\nassets_dir.mkdir(parents=True, exist_ok=True)\n\ntriaje_path = json_dir / \"triaje.json\"\nquestionnaire_path = json_dir / \"questionnaire.json\"\ncase_meta_path = json_dir / \"case_meta.json\"\nscoring_final_path = analysis_dir / \"scoring_final.json\"\nrisk_analysis_path = analysis_dir / \"risk_analysis.json\"\nreport_data_path = analysis_dir / \"report_data.json\"\n\ntriaje = load_json(triaje_path, {})\nquestionnaire = load_json(questionnaire_path, {})\ncase_meta = load_json(case_meta_path, {})\nscoring_final = load_json(scoring_final_path, {})\nrisk_analysis = load_json(risk_analysis_path, {})\nreport_data = load_json(report_data_path, {})\n\ncase_meta_summary = case_meta.get(\"summary\", {}) if isinstance(case_meta, dict) else {}\n\nevaluations = (\n    scoring_final.get(\"question_evaluations\")\n    or report_data.get(\"question_evaluations\")\n    or []\n)\n\nfindings = (\n    risk_analysis.get(\"findings\")\n    or report_data.get(\"findings\")\n    or [\n        ev for ev in evaluations\n        if finding_score(ev) == 1 or ev.get(\"generates_finding\") is True\n    ]\n)\n\nqmap = build_question_map(evaluations)\n\ncontract = triaje.get(\"contract\", {}) if isinstance(triaje, dict) else {}\nsolution = triaje.get(\"solution\", {}) if isinstance(triaje, dict) else {}\ninformation = triaje.get(\"information\", {}) if isinstance(triaje, dict) else {}\nprovider_interaction = triaje.get(\"provider_interaction\", {}) if isinstance(triaje, dict) else {}\nrisk_context = triaje.get(\"risk_context\", {}) if isinstance(triaje, dict) else {}\nderived_flags = triaje.get(\"derived_flags\", {}) if isinstance(triaje, dict) else {}\n\nmeta_tier_raw = case_meta.get(\"tier\", \"\")\ntier = normalize_tier(meta_tier_raw)\n\nif tier:\n    tier_source = \"case_meta.json\"\n    tier_reason = f\"TIER informado en case_meta.json con valor original: {meta_tier_raw}.\"\nelse:\n    tier = \"Pendiente de confirmar\"\n    tier_source = \"missing\"\n    tier_reason = \"No se ha encontrado TIER en case_meta.json.\"\n\ncase_meta_project_code = case_meta_summary.get(\"project_code\", \"\")\ncase_meta_business_line = case_meta_summary.get(\"business_line\", \"\")\ncase_meta_business_area = case_meta_summary.get(\"business_area\", \"\")\ncase_meta_provider = case_meta_summary.get(\"provider\", \"\")\ncase_meta_contract_name = case_meta_summary.get(\"contract_name\", \"\")\ncase_meta_solution_type = case_meta_summary.get(\"solution_type\", \"\")\ncase_meta_saas_name = case_meta_summary.get(\"saas_name\", \"\")\ncase_meta_classification = case_meta_summary.get(\"classification\", \"\")\ncase_meta_personal_data = case_meta_summary.get(\"personal_data\", \"\")\ncase_meta_personal_data_regime = case_meta_summary.get(\"personal_data_regime\", \"\")\n\nproject_name = first_value(\n    case_meta_project_code,\n    contract.get(\"project_code\"),\n    case_meta_saas_name,\n    solution.get(\"saas_name\"),\n    case_meta_contract_name,\n    contract.get(\"contract_name\"),\n    case_id,\n    fallback=case_id\n)\n\nproject_display_name = first_value(\n    case_meta_saas_name,\n    solution.get(\"saas_name\"),\n    case_meta_project_code,\n    contract.get(\"project_code\"),\n    case_meta_contract_name,\n    contract.get(\"contract_name\"),\n    case_id,\n    fallback=case_id\n)\n\nbusiness_line = first_value(\n    case_meta_business_line,\n    contract.get(\"business_line\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nbusiness_area = first_value(\n    case_meta_business_area,\n    contract.get(\"business_area\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nprovider = first_value(\n    case_meta_provider,\n    contract.get(\"providers\", []),\n    fallback=\"Pendiente de confirmar\"\n)\n\ncontract_name = first_value(\n    case_meta_contract_name,\n    contract.get(\"contract_name\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\ncontract_description = first_value(\n    contract.get(\"short_description\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nbusiness_activity = first_value(\n    contract.get(\"business_activity\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nprocurement_model = first_value(\n    contract.get(\"procurement_model\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\ncontract_duration = first_value(\n    contract.get(\"contract_duration\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\naward_date_expected = first_value(\n    contract.get(\"award_date_expected\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nsolution_type = first_value(\n    case_meta_solution_type,\n    solution.get(\"solution_type\"),\n    fallback=\"SaaS / Cloud\"\n)\n\nsaas_functionality = first_value(\n    solution.get(\"saas_functionality\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\ninformation_classification = first_value(\n    case_meta_classification,\n    information.get(\"classification\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\ninformation_detail = first_value(\n    information.get(\"classification_detail\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\npersonal_data = (\n    case_meta_personal_data\n    if case_meta_personal_data not in [\"\", None]\n    else information.get(\"personal_data\", \"\")\n)\n\npersonal_data_regime = first_value(\n    case_meta_personal_data_regime,\n    information.get(\"personal_data_regime\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\npersonal_data_types = information.get(\"personal_data_types\") or []\n\npersonal_data_volume = first_value(\n    information.get(\"personal_data_volume\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nprocessing_location = first_value(\n    information.get(\"processing_location\"),\n    fallback=\"Pendiente de confirmar\"\n)\n\nuser_types = solution.get(\"user_types\") or []\nconnection_with_company = solution.get(\"connection_with_company\", \"\")\n\nquestionnaire_file = discover_questionnaire_file(base)\n\nhuman_review = []\n\nfor field_name, field_value in [\n    (\"Proyecto\", project_name),\n    (\"Línea de negocio\", business_line),\n    (\"Clasificación de la información\", information_classification),\n    (\"Proveedor\", provider)\n]:\n    if is_empty_or_pending(field_value):\n        human_review.append({\n            \"field\": field_name,\n            \"reason\": \"Dato obligatorio ausente o no confirmado.\"\n        })\n\nif not tier or \"pendiente\" in tier.lower():\n    human_review.append({\n        \"field\": \"TIER\",\n        \"reason\": \"No se ha encontrado el TIER en case_meta.json.\"\n    })\n\nif not questionnaire_file:\n    human_review.append({\n        \"field\": \"Cuestionario original\",\n        \"reason\": \"No se ha encontrado el Excel original del cuestionario en 01_originales.\"\n    })\n\ngroups = defaultdict(list)\n\nfor ev in findings:\n    risk_name = clean_text(ev.get(\"risk_name\")) or \"Riesgo pendiente de clasificar\"\n    groups[risk_name].append(ev)\n\nrisk_groups = []\nrisk_totals = {\n    \"ALTO\": 0,\n    \"MEDIO\": 0,\n    \"BAJO\": 0\n}\n\nfor idx, (risk_name, items) in enumerate(groups.items(), start=1):\n    group_level = max_level([ev.get(\"level\") for ev in items])\n\n    if not group_level:\n        group_level = \"MEDIO\"\n        human_review.append({\n            \"field\": f\"Nivel de riesgo - {risk_name}\",\n            \"reason\": \"No se ha podido determinar nivel; se marca MEDIO para revisión.\"\n        })\n\n    if group_level in risk_totals:\n        risk_totals[group_level] += 1\n\n    control_ids = []\n    incumplimientos = []\n    controles_asociados = []\n    amenazas = []\n    contextos = []\n    detalles = []\n    medidas = []\n    source_questions = []\n\n    for ev in items:\n        source_questions.append(ev.get(\"question_id\", \"\"))\n\n        control_ids.extend(as_list(ev.get(\"control_ids\")))\n        control_ids.extend(as_list(ev.get(\"control_id\")))\n\n        incumplimientos.append(ev.get(\"incumplimiento_identificado\", \"\"))\n        controles_asociados.append(ev.get(\"controles_asociados\", \"\"))\n        amenazas.extend(as_list(ev.get(\"amenazas\")))\n\n        contextos.append(ev.get(\"report_context_example\", \"\"))\n        detalles.append(ev.get(\"report_detail_example\", \"\"))\n\n        mitigation_guide = ev.get(\"mitigation_guide\", \"\")\n        mitigation = ev.get(\"mitigation\", \"\")\n\n        medidas.append(mitigation_guide or mitigation)\n\n    risk_groups.append({\n        \"risk_key\": risk_name,\n        \"report_code\": f\"R_{idx:03d}\",\n        \"risk_name\": risk_name.upper(),\n        \"level\": group_level,\n        \"color\": risk_color(group_level),\n        \"mitigation_time\": mitigation_time(group_level),\n        \"area_afectacion\": \"Local al proyecto\",\n        \"source_questions\": unique_keep_order(source_questions),\n        \"control_ids\": unique_keep_order(control_ids),\n        \"incumplimientos\": unique_keep_order(incumplimientos),\n        \"controles_asociados\": unique_keep_order(controles_asociados),\n        \"amenazas\": unique_keep_order(amenazas),\n        \"contextos\": unique_keep_order(contextos),\n        \"detalles\": unique_keep_order(detalles),\n        \"medidas_mitigantes\": unique_keep_order(medidas),\n        \"findings\": items\n    })\n\nglobal_level = max_level([g[\"level\"] for g in risk_groups])\n\nif not global_level:\n    global_level = \"BAJO\"\n\ndeuda = []\n\nfor group in risk_groups:\n    for medida in group.get(\"medidas_mitigantes\", []):\n        deuda.append({\n            \"risk_group\": group[\"risk_key\"],\n            \"risk_code\": group[\"report_code\"],\n            \"medida_mitigante\": medida,\n            \"tiempo_maximo_mitigacion\": group[\"mitigation_time\"],\n            \"level\": group[\"level\"]\n        })\n\nreport_pack = {\n    \"case_id\": case_id,\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"sources\": {\n        \"case_meta_path\": str(case_meta_path),\n        \"triaje_path\": str(triaje_path),\n        \"questionnaire_json_path\": str(questionnaire_path),\n        \"questionnaire_file\": questionnaire_file,\n        \"scoring_final_path\": str(scoring_final_path),\n        \"risk_analysis_path\": str(risk_analysis_path),\n        \"report_data_path\": str(report_data_path)\n    },\n    \"cover\": {\n        \"proyecto\": project_name,\n        \"negocio\": business_line\n    },\n    \"control_versions\": {\n        \"version\": \"1.0\",\n        \"responsable\": \"Arquitectura de seguridad\",\n        \"fecha\": datetime.now().strftime(\"%d/%m/%Y\"),\n        \"descripcion\": \"Versión inicial\"\n    },\n    \"project_context_input\": {\n        \"linea_negocio\": business_line,\n        \"area_negocio\": business_area,\n        \"proyecto\": project_name,\n        \"nombre_solucion\": project_display_name,\n        \"case_id\": case_id,\n        \"tier\": tier,\n        \"tier_source\": tier_source,\n        \"tier_reason\": tier_reason,\n        \"tipo_informacion\": information_classification,\n        \"detalle_informacion\": information_detail,\n        \"datos_personales\": personal_data,\n        \"regimen_datos_personales\": personal_data_regime,\n        \"tipos_datos_personales\": personal_data_types,\n        \"volumen_datos_personales\": personal_data_volume,\n        \"ubicacion_tratamiento\": processing_location,\n        \"proveedor\": provider,\n        \"nombre_contratacion\": contract_name,\n        \"descripcion_contratacion\": contract_description,\n        \"actividad_negocio\": business_activity,\n        \"modelo_contratacion\": procurement_model,\n        \"duracion_contrato\": contract_duration,\n        \"fecha_prevista_adjudicacion\": award_date_expected,\n        \"saas_cloud\": solution_type,\n        \"funcionalidad_saas\": saas_functionality,\n        \"tipos_usuarios\": user_types,\n        \"conexion_empresa\": connection_with_company,\n        \"provider_interaction\": provider_interaction,\n        \"risk_context\": risk_context,\n        \"derived_flags\": derived_flags,\n        \"case_meta\": case_meta,\n        \"triaje\": triaje\n    },\n    \"global_risk\": {\n        \"level\": global_level,\n        \"label\": f\"RIESGO {global_level}\",\n        \"color\": risk_color(global_level),\n        \"mitigation_time\": mitigation_time(global_level)\n    },\n    \"executive_visual\": {\n        \"nombre_proyecto\": project_name,\n        \"clasificacion_informacion\": information_classification,\n        \"linea_negocio\": business_line,\n        \"nivel_afectacion\": \"Local al proyecto\",\n        \"riesgo_global\": global_level,\n        \"risk_totals\": risk_totals\n    },\n    \"question_map\": qmap,\n    \"platform_characteristics_input\": build_platform_inputs(qmap),\n    \"risk_groups\": risk_groups,\n    \"deuda_tecnologica\": deuda,\n    \"summary\": {\n        \"total_evaluations\": len(evaluations),\n        \"total_findings\": len(findings),\n        \"total_risk_groups\": len(risk_groups),\n        \"risk_totals\": risk_totals\n    },\n    \"human_review\": human_review\n}\n\nreport_pack_path = report_dir / \"report_pack.json\"\n\nwrite_json(report_pack_path, report_pack)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"status\": \"REPORT_PACK_READY\",\n    \"report_pack_path\": str(report_pack_path),\n    \"case_meta_path\": str(case_meta_path),\n    \"tier\": tier,\n    \"tier_source\": tier_source,\n    \"questionnaire_file\": questionnaire_file,\n    \"project_name\": project_name,\n    \"project_display_name\": project_display_name,\n    \"business_line\": business_line,\n    \"provider\": provider,\n    \"total_risk_groups\": len(risk_groups),\n    \"risk_totals\": risk_totals,\n    \"global_risk\": global_level,\n    \"human_review_count\": len(human_review)\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2848,
+        224
+      ],
+      "id": "8dbc9184-0ff9-489c-aaa0-a65755499d00",
+      "name": "Execute Command9"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=cat \"{{$json.report_pack_path}}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        3232,
+        224
+      ],
+      "id": "7d9b6f67-6824-419c-9ed3-7b663f5505e2",
+      "name": "Execute Command10"
+    },
+    {
+      "parameters": {
+        "command": "=mkdir -p \"/data/cases/{{$json.case_id}}/04_report\" && printf '%s' '{{$json.report_narrative_b64}}' | base64 -d > \"/data/cases/{{$json.case_id}}/04_report/report_narrative_ai.json\" && python - <<'PY'\nimport json\nfrom pathlib import Path\nfrom datetime import datetime\n\ncase_id = \"{{$json.case_id}}\"\n\nbase = Path(\"/data/cases\") / case_id\nreport_dir = base / \"04_report\"\n\npack_path = report_dir / \"report_pack.json\"\nnarrative_path = report_dir / \"report_narrative_ai.json\"\nrender_path = report_dir / \"report_render_data.json\"\n\nif not pack_path.exists():\n    raise Exception(f\"No existe report_pack.json: {pack_path}\")\n\nif not narrative_path.exists():\n    raise Exception(f\"No existe report_narrative_ai.json: {narrative_path}\")\n\npack = json.loads(pack_path.read_text(encoding=\"utf-8\"))\nnarrative = json.loads(narrative_path.read_text(encoding=\"utf-8\"))\n\nrender_data = {\n    **pack,\n    \"narrative\": narrative,\n    \"render_created_at\": datetime.now().isoformat(timespec=\"seconds\")\n}\n\nrender_path.write_text(\n    json.dumps(render_data, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"status\": \"REPORT_RENDER_DATA_READY\",\n    \"report_render_data_path\": str(render_path),\n    \"report_pack_path\": str(pack_path),\n    \"report_narrative_path\": str(narrative_path)\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        4112,
+        224
+      ],
+      "id": "dec3d4fb-1a5f-4238-a4ee-afd3908a7195",
+      "name": "Execute Command11"
+    },
+    {
+      "parameters": {
+        "command": "=/usr/bin/python3 /data/scripts/generate_risk_report_docx.py --case_id \"{{$json.case_id}}\" --data_path \"{{$json.report_render_data_path}}\" --template_path \"/data/templates/NuevaPlantillaInforme_MARKERS.docx\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        4480,
+        224
+      ],
+      "id": "91e058b1-bb2a-4356-9629-b51aaccbb22e",
+      "name": "Execute Command12"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la salida de Generate DOCX: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4656,
+        224
+      ],
+      "id": "0d02c7ae-696a-498b-86bf-d37c4e8b6451",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la salida de Build report pack: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3056,
+        224
+      ],
+      "id": "f4cfcc2b-c84a-4abb-98d2-aab7c33621e4",
+      "name": "Code in JavaScript8"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear la salida de Merge report render data: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4304,
+        224
+      ],
+      "id": "f2bbe419-93b4-4194-8317-492f2922d6f1",
+      "name": "Code in JavaScript9"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = $json.stdout || \"\";\nlet reportPack;\n\ntry {\n  reportPack = JSON.parse(stdout);\n} catch (e) {\n  throw new Error(\"No se pudo parsear report_pack.json: \" + stdout);\n}\n\nfunction text(value) {\n  return String(value ?? \"\").replace(/\\s+/g, \" \").trim();\n}\n\nfunction yesNo(value) {\n  if (value === true) return \"sí\";\n  if (value === false) return \"no\";\n  return text(value) || \"no indicado\";\n}\n\nfunction arr(value) {\n  if (!value) return [];\n  if (Array.isArray(value)) return value.map(v => text(v)).filter(Boolean);\n  return [text(value)].filter(Boolean);\n}\n\nfunction truncate(value, maxLength = 900) {\n  const t = text(value);\n\n  if (t.length <= maxLength) return t;\n\n  return t.slice(0, maxLength).trim() + \"...\";\n}\n\nfunction getQuestionFacts(items, maxItems = 18) {\n  return (items || [])\n    .slice(0, maxItems)\n    .map(q => {\n      return {\n        question_id: q.question_id || \"\",\n        score: q.score,\n        score_type: q.score_type || \"\",\n        level: q.level || \"\",\n        provider_answer: truncate(q.provider_answer || \"\", 350),\n        provider_details: truncate(q.provider_details || \"\", 500),\n        answer_summary: truncate(q.answer_summary || \"\", 350),\n        decision_reason: truncate(q.decision_reason || \"\", 450),\n        risk_name: q.risk_name || \"\",\n        incumplimiento_identificado: truncate(q.incumplimiento_identificado || \"\", 500),\n        mitigation: truncate(q.mitigation || \"\", 500)\n      };\n    });\n}\n\nfunction getGroup(name) {\n  return reportPack.platform_characteristics_input?.[name] || [];\n}\n\nconst c = reportPack.project_context_input || {};\nconst ev = reportPack.executive_visual || {};\nconst globalRisk = reportPack.global_risk || {};\nconst summary = reportPack.summary || {};\nconst findings = reportPack.findings || [];\n\nconst compactContext = {\n  case_id: reportPack.case_id,\n  proyecto: c.proyecto || reportPack.case_id,\n  nombre_solucion: c.nombre_solucion || c.proyecto || reportPack.case_id,\n  linea_negocio: c.linea_negocio || \"Pendiente de confirmar\",\n  area_negocio: c.area_negocio || \"Pendiente de confirmar\",\n  proveedor: c.proveedor || \"Pendiente de confirmar\",\n  tier: c.tier || summary.tier || \"Pendiente de confirmar\",\n  tier_reason: c.tier_reason || \"\",\n  tipo_informacion: c.tipo_informacion || \"Pendiente de confirmar\",\n  detalle_informacion: c.detalle_informacion || \"\",\n  datos_personales: yesNo(c.datos_personales),\n  regimen_datos_personales: c.regimen_datos_personales || \"\",\n  tipos_datos_personales: arr(c.tipos_datos_personales).join(\", \"),\n  volumen_datos_personales: c.volumen_datos_personales || \"\",\n  ubicacion_tratamiento: c.ubicacion_tratamiento || \"\",\n  saas_cloud: c.saas_cloud || \"SaaS / Cloud\",\n  funcionalidad_saas: c.funcionalidad_saas || \"\",\n  tipos_usuarios: arr(c.tipos_usuarios).join(\", \"),\n  conexion_empresa: yesNo(c.conexion_empresa),\n  provider_access_detail: c.provider_interaction?.provider_access_detail || \"\",\n  service_is_critical: yesNo(c.risk_context?.service_is_critical),\n  riesgo_global: globalRisk.level || ev.riesgo_global || \"\",\n  total_alto: ev.risk_totals?.ALTO ?? summary.alto ?? 0,\n  total_medio: ev.risk_totals?.MEDIO ?? summary.medio ?? 0,\n  total_bajo: ev.risk_totals?.BAJO ?? summary.bajo ?? 0,\n  total_findings: summary.total_findings ?? findings.length ?? 0\n};\n\nconst sectionFacts = {\n  arquitectura: getQuestionFacts(getGroup(\"arquitectura\")),\n  autenticacion: getQuestionFacts(getGroup(\"autenticacion\")),\n  monitorizacion: getQuestionFacts(getGroup(\"monitorizacion\")),\n  seguridad_sistemas: getQuestionFacts(getGroup(\"seguridad_sistemas\")),\n  continuidad: getQuestionFacts(getGroup(\"continuidad\"))\n};\n\nconst topFindings = (findings || [])\n  .slice(0, 20)\n  .map(f => ({\n    question_id: f.question_id || \"\",\n    level: f.level || \"\",\n    risk_name: f.risk_name || \"\",\n    answer_summary: truncate(f.answer_summary || \"\", 350),\n    decision_reason: truncate(f.decision_reason || \"\", 450),\n    incumplimiento_identificado: truncate(f.incumplimiento_identificado || \"\", 500),\n    mitigation: truncate(f.mitigation || \"\", 500)\n  }));\n\nconst narrativeInput = {\n  contexto_proyecto: compactContext,\n  resumen_riesgo: {\n    riesgo_global: compactContext.riesgo_global,\n    total_findings: compactContext.total_findings,\n    total_alto: compactContext.total_alto,\n    total_medio: compactContext.total_medio,\n    total_bajo: compactContext.total_bajo\n  },\n  hechos_por_apartado: sectionFacts,\n  principales_hallazgos: topFindings\n};\n\nconst systemPrompt = `\nEres un redactor experto de informes técnicos de ciberseguridad para soluciones SaaS.\n\nTu tarea es redactar texto final para un informe profesional.\n\nNo estás evaluando riesgos.\nNo debes cambiar scores, niveles, controles, mitigaciones ni conclusiones técnicas.\nDebes redactar usando únicamente los datos recibidos.\n\nENFOQUE:\n- Redacta con libertad profesional.\n- No copies un borrador.\n- No devuelvas frases genéricas.\n- No inventes información.\n- Usa el triaje, el TIER, la clasificación de información, los datos personales, las respuestas del proveedor y los hallazgos detectados.\n- Si falta evidencia, dilo de forma profesional: \"no queda acreditado\", \"no se aporta evidencia suficiente\", \"no se confirma en la información analizada\".\n\nCAMPOS A REDACTAR:\n1. contexto_proyecto:\n   - Debe explicar el proyecto, solución, proveedor, línea/área de negocio, modelo SaaS/cloud, TIER, información tratada, datos personales, GDPR si aplica, ubicación del tratamiento y usuarios.\n   - Debe tener entre 100 y 190 palabras.\n\n2. caracteristicas_generales.arquitectura:\n   - Debe describir arquitectura, hosting, modelo cloud/SaaS, tecnologías, aislamiento, entornos, integraciones, APIs y extracción/devolución de información.\n   - Debe basarse en las respuestas y hallazgos del apartado arquitectura.\n\n3. caracteristicas_generales.autenticacion:\n   - Debe describir usuarios, roles, repositorio de usuarios, federación, contraseñas, MFA, gestión del ciclo de vida y timeout.\n   - No hables aquí de TLS, HSTS, AES, RC4, backups o SIEM.\n\n4. caracteristicas_generales.monitorizacion:\n   - Debe describir logs, SIEM, alertas, eventos de seguridad, trazabilidad y capacidad de detección.\n   - No hables aquí de backups, TLS, MFA, AES o HSTS.\n\n5. caracteristicas_generales.seguridad_sistemas:\n   - Debe describir pentesting, Red Team/Blue Team, TLS/HTTPS, HSTS, RC4, cifrado, antimalware, firewall, IDS/IPS e incidentes.\n   - No hables aquí de RTO/RPO o retención salvo que sea estrictamente necesario.\n\n6. caracteristicas_generales.continuidad:\n   - Debe describir backups, retención, RTO/RPO, restauración, baja del servicio, devolución y destrucción de datos.\n\nESTILO:\n- Español formal.\n- Tono de informe de ciberseguridad.\n- Redacción clara, natural y no repetitiva.\n- No uses listas dentro de los campos narrativos.\n- No uses markdown.\n- Cada campo debe ser un string redactado.\n- Cada característica general debe tener entre 70 y 150 palabras.\n- Puedes mencionar tanto fortalezas como carencias si aparecen en los datos.\n\nPROHIBIDO:\n- No inventes tecnologías, ubicaciones, certificaciones ni controles.\n- No cambies el nivel de riesgo.\n- No crees nuevos hallazgos.\n- No devuelvas campos vacíos.\n- No devuelvas objetos dentro de los campos narrativos.\n- No escribas \"borrador\", \"pendiente de redactar\" ni \"no indicado\" como única respuesta.\n- No incluyas explicaciones fuera del JSON.\n\nFORMATO:\nDevuelve únicamente JSON válido.\nNo uses Markdown.\nNo uses bloques de código.\nEl primer carácter debe ser {.\nEl último carácter debe ser }.\n`;\n\nconst userPrompt = `\nDATOS PARA REDACTAR:\n${JSON.stringify(narrativeInput, null, 2)}\n\nESTRUCTURA EXACTA OBLIGATORIA:\n{\n  \"case_id\": \"${reportPack.case_id}\",\n  \"contexto_proyecto\": \"\",\n  \"caracteristicas_generales\": {\n    \"arquitectura\": \"\",\n    \"autenticacion\": \"\",\n    \"monitorizacion\": \"\",\n    \"seguridad_sistemas\": \"\",\n    \"continuidad\": \"\"\n  },\n  \"observaciones_revision_humana\": []\n}\n\nVALIDACIÓN ANTES DE RESPONDER:\n- contexto_proyecto debe ser un texto final de informe.\n- arquitectura debe ser un texto final de informe.\n- autenticacion debe ser un texto final de informe.\n- monitorizacion debe ser un texto final de informe.\n- seguridad_sistemas debe ser un texto final de informe.\n- continuidad debe ser un texto final de informe.\n- Ningún campo narrativo puede estar vacío.\n- Ningún campo narrativo puede ser una palabra o frase aislada.\n- No uses información no presente en DATOS PARA REDACTAR.\n- Devuelve solo JSON válido.\n`;\n\nreturn {\n  json: {\n    case_id: reportPack.case_id,\n    report_pack: reportPack,\n    report_pack_b64: Buffer.from(JSON.stringify(reportPack), \"utf8\").toString(\"base64\"),\n    narrative_input: narrativeInput,\n    system_prompt: systemPrompt,\n    user_prompt: userPrompt,\n    narrative_model_recommended: \"Gemini 3.5 Flash\",\n    narrative_temperature_recommended: 0.25,\n    narrative_max_output_tokens_recommended: 3000\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3408,
+        240
+      ],
+      "id": "f822e53e-f368-4f3f-b126-71c7822d15fb",
+      "name": "Code - Construir prompt redacción informe"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function getRawModelOutput(itemJson) {\n  let raw =\n    itemJson.output ||\n    itemJson.text ||\n    itemJson.response ||\n    itemJson.result ||\n    itemJson.message ||\n    itemJson.data ||\n    \"\";\n\n  if (raw && typeof raw === \"object\") {\n    if (raw.output) raw = raw.output;\n    else if (raw.text) raw = raw.text;\n    else if (raw.response) raw = raw.response;\n    else if (raw.message) raw = raw.message;\n    else if (raw.content) raw = raw.content;\n    else raw = JSON.stringify(raw);\n  }\n\n  return String(raw || \"\").trim();\n}\n\nfunction extractJsonObject(raw) {\n  raw = String(raw || \"\")\n    .replace(/^```json/i, \"\")\n    .replace(/^```/i, \"\")\n    .replace(/```$/i, \"\")\n    .trim();\n\n  try {\n    return JSON.parse(raw);\n  } catch (e) {}\n\n  const first = raw.indexOf(\"{\");\n  const last = raw.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON en la respuesta del agente: \" + raw);\n  }\n\n  return JSON.parse(raw.slice(first, last + 1));\n}\n\nfunction decodeB64Json(value) {\n  if (!value) return null;\n\n  try {\n    return JSON.parse(Buffer.from(String(value), \"base64\").toString(\"utf8\"));\n  } catch (e) {\n    return null;\n  }\n}\n\nfunction getPreviousPromptItem() {\n  const currentIndex = typeof $itemIndex !== \"undefined\" ? $itemIndex : 0;\n\n  if ($json.report_pack) {\n    return $json;\n  }\n\n  if ($json.report_pack_b64) {\n    const decoded = decodeB64Json($json.report_pack_b64);\n    if (decoded) {\n      return {\n        ...$json,\n        report_pack: decoded\n      };\n    }\n  }\n\n  const possibleNames = [\n    \"Code - Construir prompt redacción informe\",\n    \"Code in JavaScript5\",\n    \"Code in JavaScript6\",\n    \"Code in JavaScript4\",\n    \"Code in JavaScript3\",\n    \"Code in JavaScript2\",\n    \"Code in JavaScript1\",\n    \"Code in JavaScript\",\n    \"Code\"\n  ];\n\n  for (const name of possibleNames) {\n    try {\n      const items = $items(name);\n\n      if (items?.[currentIndex]?.json?.report_pack) {\n        return items[currentIndex].json;\n      }\n\n      if (items?.[currentIndex]?.json?.report_pack_b64) {\n        const decoded = decodeB64Json(items[currentIndex].json.report_pack_b64);\n        if (decoded) {\n          return {\n            ...items[currentIndex].json,\n            report_pack: decoded\n          };\n        }\n      }\n\n      if (items) {\n        for (const item of items) {\n          if (item.json?.report_pack) return item.json;\n\n          if (item.json?.report_pack_b64) {\n            const decoded = decodeB64Json(item.json.report_pack_b64);\n            if (decoded) {\n              return {\n                ...item.json,\n                report_pack: decoded\n              };\n            }\n          }\n        }\n      }\n    } catch (e) {}\n  }\n\n  return {};\n}\n\nfunction normalizeText(value) {\n  if (value === null || value === undefined) return \"\";\n\n  if (typeof value === \"object\") {\n    if (Array.isArray(value)) {\n      return value\n        .map(v => normalizeText(v))\n        .filter(Boolean)\n        .join(\" \");\n    }\n\n    return Object.entries(value)\n      .map(([key, val]) => {\n        const cleanVal = normalizeText(val);\n        if (!cleanVal) return \"\";\n        const cleanKey = String(key || \"\")\n          .replace(/_/g, \" \")\n          .trim();\n        return `${cleanKey}: ${cleanVal}.`;\n      })\n      .filter(Boolean)\n      .join(\" \");\n  }\n\n  return String(value || \"\")\n    .replace(/\\s+/g, \" \")\n    .replace(/\\s+\\./g, \".\")\n    .replace(/\\.\\s*\\./g, \".\")\n    .trim();\n}\n\nfunction isWeakText(value) {\n  const text = normalizeText(value).toLowerCase();\n\n  if (!text) return true;\n\n  const weakExact = [\n    \"pendiente de confirmar\",\n    \"información no aportada\",\n    \"informacion no aportada\",\n    \"por especificar\",\n    \"detallar\",\n    \"diarios\",\n    \"diaria\",\n    \"nunca\",\n    \"no\",\n    \"si\",\n    \"sí\",\n    \"otros\"\n  ];\n\n  if (weakExact.includes(text)) return true;\n\n  if (text.length < 55) return true;\n\n  const wordCount = text.split(/\\s+/).filter(Boolean).length;\n  if (wordCount < 10) return true;\n\n  return false;\n}\n\nfunction isObjectLike(value) {\n  return value && typeof value === \"object\" && !Array.isArray(value);\n}\n\nfunction getCgRaw(parsed, key) {\n  const cg = parsed.caracteristicas_generales || {};\n\n  const aliases = {\n    arquitectura: [\n      \"arquitectura\",\n      \"Arquitectura\"\n    ],\n    autenticacion: [\n      \"autenticacion\",\n      \"autenticación\",\n      \"Autenticacion\",\n      \"Autenticación\"\n    ],\n    monitorizacion: [\n      \"monitorizacion\",\n      \"monitorización\",\n      \"Monitorizacion\",\n      \"Monitorización\"\n    ],\n    seguridad_sistemas: [\n      \"seguridad_sistemas\",\n      \"seguridad sistemas\",\n      \"seguridad de sistemas\",\n      \"SeguridadSistemas\",\n      \"Seguridad sistemas\",\n      \"Seguridad de sistemas\"\n    ],\n    continuidad: [\n      \"continuidad\",\n      \"Continuidad\"\n    ]\n  };\n\n  for (const alias of aliases[key] || [key]) {\n    if (cg[alias] !== undefined && cg[alias] !== null) {\n      return cg[alias];\n    }\n  }\n\n  return \"\";\n}\n\nfunction getCg(parsed, key) {\n  return normalizeText(getCgRaw(parsed, key));\n}\n\nfunction safeArray(value) {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  return [value];\n}\n\nfunction qidNumber(qid) {\n  const m = String(qid || \"\").match(/Q_(\\d+)/i);\n  return m ? Number(m[1]) : 999;\n}\n\nfunction getGroupItems(pack, groupName) {\n  const items = pack.platform_characteristics_input?.[groupName] || [];\n  return [...items].sort((a, b) => qidNumber(a.question_id) - qidNumber(b.question_id));\n}\n\nfunction findQ(pack, qid) {\n  return pack.question_map?.[qid] || null;\n}\n\nfunction questionBestText(q) {\n  if (!q) return \"\";\n\n  const parts = [];\n\n  if (q.answer_summary) parts.push(q.answer_summary);\n  if (q.provider_details) parts.push(q.provider_details);\n  if (q.provider_answer) parts.push(q.provider_answer);\n  if (q.decision_reason) parts.push(q.decision_reason);\n\n  return normalizeText(parts.join(\". \"));\n}\n\nfunction listAnswer(items, qid) {\n  const q = (items || []).find(x => x.question_id === qid);\n  return questionBestText(q);\n}\n\nfunction hasAny(textValue, words) {\n  const t = normalizeText(textValue).toLowerCase();\n  return words.some(w => t.includes(w));\n}\n\nfunction lacksAll(textValue, words) {\n  return !hasAny(textValue, words);\n}\n\nfunction hasCategoryMismatch(category, value) {\n  const t = normalizeText(value).toLowerCase();\n\n  if (!t) return true;\n\n  if (category === \"autenticacion\") {\n    const authWords = [\n      \"usuario\",\n      \"usuarios\",\n      \"roles\",\n      \"rol\",\n      \"contraseña\",\n      \"contraseñas\",\n      \"federación\",\n      \"federacion\",\n      \"mfa\",\n      \"multifactor\",\n      \"doble factor\",\n      \"2fa\",\n      \"timeout\",\n      \"sesión\",\n      \"sesion\",\n      \"identidad\",\n      \"idp\",\n      \"repositorio\",\n      \"alta\",\n      \"baja\"\n    ];\n\n    const wrongWords = [\n      \"tls\",\n      \"hsts\",\n      \"rc4\",\n      \"aes\",\n      \"https\",\n      \"siem\",\n      \"logs\",\n      \"backup\",\n      \"backups\",\n      \"rto\",\n      \"rpo\",\n      \"retención\",\n      \"retencion\"\n    ];\n\n    return hasAny(t, wrongWords) && lacksAll(t, authWords);\n  }\n\n  if (category === \"monitorizacion\") {\n    const monWords = [\n      \"log\",\n      \"logs\",\n      \"siem\",\n      \"alerta\",\n      \"alertas\",\n      \"monitorización\",\n      \"monitorizacion\",\n      \"evento\",\n      \"eventos\",\n      \"correlación\",\n      \"correlacion\",\n      \"detección\",\n      \"deteccion\",\n      \"escalado\",\n      \"incidente\",\n      \"incidentes\"\n    ];\n\n    const wrongWords = [\n      \"hsts\",\n      \"tls\",\n      \"rc4\",\n      \"aes\",\n      \"mfa\",\n      \"contraseña\",\n      \"contraseñas\",\n      \"backup\",\n      \"backups\",\n      \"rto\",\n      \"rpo\",\n      \"retención\",\n      \"retencion\"\n    ];\n\n    return hasAny(t, wrongWords) && lacksAll(t, monWords);\n  }\n\n  if (category === \"arquitectura\") {\n    const archWords = [\n      \"hosting\",\n      \"php\",\n      \"sql\",\n      \"arquitectura\",\n      \"cloud\",\n      \"saas\",\n      \"aislamiento\",\n      \"aislada\",\n      \"separada\",\n      \"entorno\",\n      \"entornos\",\n      \"api\",\n      \"apis\",\n      \"integración\",\n      \"integracion\",\n      \"datos\",\n      \"modelo\",\n      \"privado\",\n      \"multi-tenant\",\n      \"tenant\"\n    ];\n\n    return lacksAll(t, archWords);\n  }\n\n  if (category === \"seguridad_sistemas\") {\n    const secWords = [\n      \"tls\",\n      \"https\",\n      \"hsts\",\n      \"rc4\",\n      \"aes\",\n      \"cifrado\",\n      \"antivirus\",\n      \"antimalware\",\n      \"firewall\",\n      \"ids\",\n      \"ips\",\n      \"intrusión\",\n      \"intrusion\",\n      \"pentest\",\n      \"pentesting\",\n      \"red team\",\n      \"blue team\",\n      \"seguridad\",\n      \"incidentes\",\n      \"vulnerabilidades\"\n    ];\n\n    return lacksAll(t, secWords);\n  }\n\n  if (category === \"continuidad\") {\n    const contWords = [\n      \"backup\",\n      \"backups\",\n      \"copia\",\n      \"copias\",\n      \"rto\",\n      \"rpo\",\n      \"retención\",\n      \"retencion\",\n      \"baja\",\n      \"devolución\",\n      \"devolucion\",\n      \"destrucción\",\n      \"destruccion\",\n      \"recuperación\",\n      \"recuperacion\",\n      \"hosting\",\n      \"datos\"\n    ];\n\n    return lacksAll(t, contWords);\n  }\n\n  return false;\n}\n\nfunction buildFallbackContext(pack) {\n  const c = pack.project_context_input || {};\n\n  const solutionName =\n    c.nombre_solucion ||\n    c.proyecto ||\n    pack.case_id ||\n    \"la solución analizada\";\n\n  const businessLine = c.linea_negocio || \"la línea de negocio indicada en el triaje\";\n  const provider = c.proveedor || \"el proveedor indicado en el triaje\";\n  const tier = c.tier || \"TIER pendiente de confirmar\";\n  const tierReason = c.tier_reason || \"\";\n  const info = c.tipo_informacion || \"información pendiente de clasificar\";\n  const detail = c.detalle_informacion || \"\";\n  const personal =\n    c.datos_personales === true ? \"sí\" :\n    c.datos_personales === false ? \"no\" :\n    String(c.datos_personales || \"pendiente de confirmar\");\n\n  const regime = c.regimen_datos_personales || \"\";\n  const saas = c.saas_cloud || \"SaaS / Cloud\";\n  const functionality = c.funcionalidad_saas || \"dar soporte a la actividad indicada en el triaje\";\n  const processing = c.ubicacion_tratamiento || \"la infraestructura indicada por el proveedor\";\n  const users = safeArray(c.tipos_usuarios).join(\", \") || \"los usuarios indicados en el triaje\";\n  const connection = c.conexion_empresa === true ? \"sí\" : c.conexion_empresa === false ? \"no\" : String(c.conexion_empresa || \"no indicado\");\n\n  return normalizeText(\n    `El proyecto ${solutionName} se enmarca en la línea de negocio ${businessLine} y tiene como finalidad ${functionality}. ` +\n    `La solución se presta bajo un modelo ${saas} por ${provider}. ` +\n    `La información tratada se clasifica como ${info}${detail ? `, concretamente ${detail}` : \"\"}. ` +\n    `El triaje indica tratamiento de datos personales (${personal})${regime ? ` sujeto a ${regime}` : \"\"}, con tratamiento ubicado en ${processing}. ` +\n    `El caso está clasificado como ${tier}${tierReason ? `, según ${tierReason}` : \"\"}. ` +\n    `La plataforma está orientada a ${users} y la conexión directa con infraestructura de EMPRESA figura como ${connection}.`\n  );\n}\n\nfunction buildFallbackArquitectura(pack) {\n  const items = getGroupItems(pack, \"arquitectura\");\n\n  const q041 = listAnswer(items, \"Q_041\");\n  const q042 = listAnswer(items, \"Q_042\");\n  const q043 = listAnswer(items, \"Q_043\");\n  const q044 = listAnswer(items, \"Q_044\");\n  const q045 = listAnswer(items, \"Q_045\");\n  const q046 = listAnswer(items, \"Q_046\");\n  const q049 = listAnswer(items, \"Q_049\");\n  const q050 = listAnswer(items, \"Q_050\");\n  const q051 = listAnswer(items, \"Q_051\");\n  const q054 = listAnswer(items, \"Q_054\");\n  const q055 = listAnswer(items, \"Q_055\");\n  const q056 = listAnswer(items, \"Q_056\");\n\n  const sentences = [];\n\n  sentences.push(\"La plataforma se describe como una solución SaaS alojada en infraestructura de hosting del proveedor.\");\n\n  if (q041 || q042) {\n    sentences.push(`A nivel tecnológico, el proveedor indica ${normalizeText([q041, q042].filter(Boolean).join(\". \")).toLowerCase()}.`);\n  }\n\n  if (q044) {\n    sentences.push(`Respecto al aislamiento de datos, se indica ${q044.toLowerCase()}.`);\n  }\n\n  if (q045 || q046) {\n    sentences.push(`También se informa de entornos o mecanismos de aislamiento para pruebas y nuevas funcionalidades: ${normalizeText([q045, q046].filter(Boolean).join(\". \"))}.`);\n  }\n\n  if (q049) {\n    sentences.push(`El modelo cloud se describe como ${q049.toLowerCase()}.`);\n  }\n\n  const integrations = normalizeText([q050, q051, q054, q055, q056].filter(Boolean).join(\". \"));\n\n  if (integrations) {\n    sentences.push(`En cuanto a integraciones, APIs y mecanismos de extracción o recuperación de información, la información aportada es: ${integrations}.`);\n  } else {\n    sentences.push(\"No se aporta información suficiente sobre APIs, integraciones o mecanismos de extracción de datos desde la nube.\");\n  }\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction buildFallbackAutenticacion(pack) {\n  const items = getGroupItems(pack, \"autenticacion\");\n\n  const q007 = listAnswer(items, \"Q_007\");\n  const q008 = listAnswer(items, \"Q_008\");\n  const q009 = listAnswer(items, \"Q_009\");\n  const q010 = listAnswer(items, \"Q_010\");\n  const q011 = listAnswer(items, \"Q_011\");\n  const q012 = listAnswer(items, \"Q_012\");\n  const q013 = listAnswer(items, \"Q_013\");\n  const q014 = listAnswer(items, \"Q_014\");\n  const q015 = listAnswer(items, \"Q_015\");\n  const q016 = listAnswer(items, \"Q_016\");\n  const q017 = listAnswer(items, \"Q_017\");\n  const q018 = listAnswer(items, \"Q_018\");\n  const q019 = listAnswer(items, \"Q_019\");\n  const q020 = listAnswer(items, \"Q_020\");\n  const q021 = listAnswer(items, \"Q_021\");\n\n  const sentences = [];\n\n  sentences.push(\"En el bloque de autenticación, el proveedor indica que los usuarios se identifican mediante registro con roles y que existe gestión de usuarios por parte del proveedor.\");\n\n  if (q007 || q008 || q009) {\n    sentences.push(`Sobre identificación y perfiles de usuario, las respuestas indican: ${normalizeText([q007, q008, q009].filter(Boolean).join(\". \"))}.`);\n  }\n\n  if (q010) {\n    sentences.push(`Respecto a federación corporativa, se indica: ${q010}.`);\n  }\n\n  if (q011 || q012 || q013) {\n    sentences.push(`Sobre repositorio y ciclo de vida de usuarios, se aporta la siguiente información: ${normalizeText([q011, q012, q013].filter(Boolean).join(\". \"))}.`);\n  }\n\n  const pwdInfo = normalizeText([q014, q015, q016, q017, q018, q019].filter(Boolean).join(\". \"));\n\n  if (pwdInfo) {\n    sentences.push(`En relación con contraseñas, almacenamiento y política de robustez, se indica: ${pwdInfo}.`);\n  }\n\n  if (q020) {\n    sentences.push(`Respecto a MFA, la información disponible es: ${q020}.`);\n  }\n\n  if (q021) {\n    sentences.push(`Para el cierre o caducidad de sesión, se indica: ${q021}.`);\n  }\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction buildFallbackMonitorizacion(pack) {\n  const items = getGroupItems(pack, \"monitorizacion\");\n\n  const q037 = listAnswer(items, \"Q_037\");\n  const q038 = listAnswer(items, \"Q_038\");\n  const q039 = listAnswer(items, \"Q_039\");\n  const q040 = listAnswer(items, \"Q_040\");\n\n  const sentences = [];\n\n  sentences.push(\"En materia de monitorización, las respuestas del proveedor muestran carencias relevantes en la recogida, centralización y explotación de eventos de seguridad.\");\n\n  if (q037) {\n    sentences.push(`Sobre recogida de logs, se indica: ${q037}.`);\n  } else {\n    sentences.push(\"No queda acreditada una recogida completa de logs de usuarios, administradores, servidores, bases de datos y dispositivos de red.\");\n  }\n\n  if (q038) {\n    sentences.push(`Respecto a SIEM propio, se indica: ${q038}.`);\n  } else {\n    sentences.push(\"No se confirma centralización de logs en un SIEM propio.\");\n  }\n\n  if (q039) {\n    sentences.push(`Respecto a integración con SIEM externo o de EMPRESA, se indica: ${q039}.`);\n  } else {\n    sentences.push(\"No se confirma integración con un SIEM externo o con el SIEM de EMPRESA.\");\n  }\n\n  if (q040) {\n    sentences.push(`Respecto a alertas de seguridad, se indica: ${q040}.`);\n  } else {\n    sentences.push(\"No se evidencia generación de alertas de seguridad ni proceso de escalado asociado.\");\n  }\n\n  sentences.push(\"Por tanto, no queda acreditada una capacidad completa de detección, correlación, alerta y escalado de incidentes sobre la plataforma.\");\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction buildFallbackSeguridad(pack) {\n  const items = getGroupItems(pack, \"seguridad_sistemas\");\n\n  const q005 = listAnswer(items, \"Q_005\");\n  const q006 = listAnswer(items, \"Q_006\");\n  const q022 = listAnswer(items, \"Q_022\");\n  const q023 = listAnswer(items, \"Q_023\");\n  const q024 = listAnswer(items, \"Q_024\");\n  const q025 = listAnswer(items, \"Q_025\");\n  const q027 = listAnswer(items, \"Q_027\");\n  const q028 = listAnswer(items, \"Q_028\");\n  const q029 = listAnswer(items, \"Q_029\");\n  const q033 = listAnswer(items, \"Q_033\");\n  const q047 = listAnswer(items, \"Q_047\");\n  const q048 = listAnswer(items, \"Q_048\");\n  const q057 = listAnswer(items, \"Q_057\");\n\n  const sentences = [];\n\n  sentences.push(\"En seguridad de los sistemas, el proveedor confirma algunos controles técnicos, pero también se identifican carencias relevantes.\");\n\n  const testing = normalizeText([q005, q006].filter(Boolean).join(\". \"));\n  if (testing) {\n    sentences.push(`Respecto a ejercicios Red/Blue Team y pruebas de intrusión, se indica: ${testing}.`);\n  }\n\n  const comms = normalizeText([q022, q023, q024, q025, q029].filter(Boolean).join(\". \"));\n  if (comms) {\n    sentences.push(`En comunicaciones seguras, TLS/HTTPS, HSTS y algoritmos, se indica: ${comms}.`);\n  }\n\n  const crypto = normalizeText([q027, q028].filter(Boolean).join(\". \"));\n  if (crypto) {\n    sentences.push(`Para cifrado de datos en reposo, la información disponible indica: ${crypto}.`);\n  }\n\n  if (q033) {\n    sentences.push(`Respecto a antivirus o antimalware, se indica: ${q033}.`);\n  }\n\n  if (q047 || q048) {\n    sentences.push(`En arquitectura de red, filtrado y controles IDS/IPS o firewall de capa 7, se indica: ${normalizeText([q047, q048].filter(Boolean).join(\". \"))}.`);\n  }\n\n  if (q057) {\n    sentences.push(`Sobre comunicación y escalado de incidentes, se indica: ${q057}.`);\n  }\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction buildFallbackContinuidad(pack) {\n  const items = getGroupItems(pack, \"continuidad\");\n\n  const q030 = listAnswer(items, \"Q_030\");\n  const q031 = listAnswer(items, \"Q_031\");\n  const q032 = listAnswer(items, \"Q_032\");\n  const q034 = listAnswer(items, \"Q_034\");\n  const q035 = listAnswer(items, \"Q_035\");\n  const q036 = listAnswer(items, \"Q_036\");\n\n  const sentences = [];\n\n  sentences.push(\"En continuidad, el proveedor aporta información sobre copias de seguridad y recuperación de datos, aunque existen aspectos no formalizados.\");\n\n  if (q030) {\n    sentences.push(`Respecto a backups, se indica: ${q030}.`);\n  }\n\n  if (q031) {\n    sentences.push(`Sobre RTO/RPO, se indica: ${q031}.`);\n  } else {\n    sentences.push(\"No se aportan valores RTO/RPO formalizados.\");\n  }\n\n  if (q032) {\n    sentences.push(`Sobre retención de datos, se indica: ${q032}.`);\n  } else {\n    sentences.push(\"No queda acreditada una política de retención completamente documentada.\");\n  }\n\n  if (q034) {\n    sentences.push(`Respecto a finalización o baja del servicio, se indica: ${q034}.`);\n  }\n\n  if (q035) {\n    sentences.push(`Respecto a destrucción de datos, se indica: ${q035}.`);\n  }\n\n  if (q036) {\n    sentences.push(`Respecto a devolución o recuperación de datos, se indica: ${q036}.`);\n  }\n\n  return normalizeText(sentences.join(\" \"));\n}\n\nfunction normalizeObservations(value) {\n  const out = [];\n\n  for (const item of safeArray(value)) {\n    if (!item) continue;\n\n    if (typeof item === \"string\") {\n      if (item.trim()) out.push(item.trim());\n      continue;\n    }\n\n    if (typeof item === \"object\") {\n      const field = item.field || item.campo || \"\";\n      const reason = item.reason || item.motivo || item.description || \"\";\n      const text = normalizeText([field, reason].filter(Boolean).join(\": \"));\n      if (text) out.push(text);\n      continue;\n    }\n\n    out.push(String(item));\n  }\n\n  return out;\n}\n\nconst raw = getRawModelOutput($json);\nconst promptItem = getPreviousPromptItem();\nconst reportPack = promptItem.report_pack || {};\nconst narrativeInput = promptItem.narrative_input || {};\nconst draftBase = narrativeInput.borrador_base_obligatorio || {};\n\nlet parsed;\n\ntry {\n  parsed = extractJsonObject(raw);\n} catch (e) {\n  parsed = {\n    case_id: reportPack.case_id || \"\",\n    contexto_proyecto: \"\",\n    caracteristicas_generales: {},\n    observaciones_revision_humana: [\n      \"El agente no devolvió JSON válido. Se generó narrativa determinista de respaldo.\"\n    ]\n  };\n}\n\nlet contexto = normalizeText(parsed.contexto_proyecto);\nlet arquitectura = getCg(parsed, \"arquitectura\");\nlet autenticacion = getCg(parsed, \"autenticacion\");\nlet monitorizacion = getCg(parsed, \"monitorizacion\");\nlet seguridad = getCg(parsed, \"seguridad_sistemas\");\nlet continuidad = getCg(parsed, \"continuidad\");\n\nconst rawArquitectura = getCgRaw(parsed, \"arquitectura\");\nconst rawAutenticacion = getCgRaw(parsed, \"autenticacion\");\nconst rawMonitorizacion = getCgRaw(parsed, \"monitorizacion\");\nconst rawSeguridad = getCgRaw(parsed, \"seguridad_sistemas\");\nconst rawContinuidad = getCgRaw(parsed, \"continuidad\");\n\nconst observations = normalizeObservations(parsed.observaciones_revision_humana);\n\nif (isWeakText(contexto)) {\n  contexto = normalizeText(draftBase.contexto_proyecto) || buildFallbackContext(reportPack);\n  observations.push(\"Contexto generado por fallback determinista porque la salida del agente era vacía o insuficiente.\");\n}\n\nif (\n  isWeakText(arquitectura) ||\n  isObjectLike(rawArquitectura) ||\n  hasCategoryMismatch(\"arquitectura\", arquitectura)\n) {\n  arquitectura = normalizeText(draftBase.arquitectura) || buildFallbackArquitectura(reportPack);\n  observations.push(\"Arquitectura generada por fallback determinista.\");\n}\n\nif (\n  isWeakText(autenticacion) ||\n  isObjectLike(rawAutenticacion) ||\n  hasCategoryMismatch(\"autenticacion\", autenticacion)\n) {\n  autenticacion = normalizeText(draftBase.autenticacion) || buildFallbackAutenticacion(reportPack);\n  observations.push(\"Autenticación generada por fallback determinista.\");\n}\n\nif (\n  isWeakText(monitorizacion) ||\n  isObjectLike(rawMonitorizacion) ||\n  hasCategoryMismatch(\"monitorizacion\", monitorizacion)\n) {\n  monitorizacion = normalizeText(draftBase.monitorizacion) || buildFallbackMonitorizacion(reportPack);\n  observations.push(\"Monitorización generada por fallback determinista.\");\n}\n\nif (\n  isWeakText(seguridad) ||\n  isObjectLike(rawSeguridad) ||\n  hasCategoryMismatch(\"seguridad_sistemas\", seguridad)\n) {\n  seguridad = normalizeText(draftBase.seguridad_sistemas) || buildFallbackSeguridad(reportPack);\n  observations.push(\"Seguridad de sistemas generada por fallback determinista.\");\n}\n\nif (\n  isWeakText(continuidad) ||\n  isObjectLike(rawContinuidad) ||\n  hasCategoryMismatch(\"continuidad\", continuidad)\n) {\n  continuidad = normalizeText(draftBase.continuidad) || buildFallbackContinuidad(reportPack);\n  observations.push(\"Continuidad generada por fallback determinista.\");\n}\n\nconst normalized = {\n  case_id: reportPack.case_id || parsed.case_id || \"\",\n  contexto_proyecto: contexto,\n  caracteristicas_generales: {\n    arquitectura,\n    autenticacion,\n    monitorizacion,\n    seguridad_sistemas: seguridad,\n    continuidad\n  },\n  observaciones_revision_humana: [...new Set(observations)]\n};\n\nconst narrativeB64 = Buffer.from(\n  JSON.stringify(normalized, null, 2),\n  \"utf8\"\n).toString(\"base64\");\n\nreturn {\n  json: {\n    case_id: normalized.case_id,\n    report_pack_b64: promptItem.report_pack_b64 || Buffer.from(JSON.stringify(reportPack), \"utf8\").toString(\"base64\"),\n    report_narrative: normalized,\n    report_narrative_b64: narrativeB64,\n    raw_model_output: raw,\n    normalization_status: \"REPORT_NARRATIVE_NORMALIZED\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3920,
+        256
+      ],
+      "id": "2536504a-fa78-4a75-bdac-70d46fc4760e",
+      "name": "Code - Normalizar narrativa informe"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = String($json.stdout || \"\").trim();\n\nfunction extractJson(text) {\n  try {\n    return JSON.parse(text);\n  } catch (e) {}\n\n  const first = text.indexOf(\"{\");\n  const last = text.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON válido en stdout del check: \" + text);\n  }\n\n  return JSON.parse(text.slice(first, last + 1));\n}\n\nconst parsed = extractJson(stdout);\n\nif (parsed.status === \"ERROR\") {\n  throw new Error(parsed.error || \"Error en Check intake complete\");\n}\n\nreturn {\n  json: {\n    ...parsed,\n    ready_for_tier: parsed.status === \"COMPLETE\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        -160
+      ],
+      "id": "6faf5a4f-7a31-4f35-ba50-deb506f04f78",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = String($json.stdout || \"\").trim();\n\nfunction extractJson(text) {\n  try {\n    return JSON.parse(text);\n  } catch (e) {}\n\n  const first = text.indexOf(\"{\");\n  const last = text.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON válido en stdout del check: \" + text);\n  }\n\n  return JSON.parse(text.slice(first, last + 1));\n}\n\nconst parsed = extractJson(stdout);\n\nif (parsed.status === \"ERROR\") {\n  throw new Error(parsed.error || \"Error en Check intake complete\");\n}\n\nreturn {\n  json: {\n    ...parsed,\n    ready_for_tier: parsed.status === \"COMPLETE\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        16
+      ],
+      "id": "3beab086-eef5-4921-9c95-4ddeec25007a",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = String($json.stdout || \"\").trim();\n\nfunction extractJson(text) {\n  try {\n    return JSON.parse(text);\n  } catch (e) {}\n\n  const first = text.indexOf(\"{\");\n  const last = text.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON válido en stdout: \" + text);\n  }\n\n  return JSON.parse(text.slice(first, last + 1));\n}\n\nconst parsed = extractJson(stdout);\n\nif (!parsed.case_id) {\n  throw new Error(\"El parser no devolvió case_id. stdout: \" + stdout);\n}\n\nreturn {\n  json: {\n    case_id: parsed.case_id,\n    parse_ok: parsed.ok === true,\n    parse_command: parsed.command || \"parse-questionnaire\",\n    parse_output_path: parsed.output || \"\",\n    parser_result: parsed,\n    previous_exitCode: $json.exitCode,\n    previous_stderr: $json.stderr || \"\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        16
+      ],
+      "id": "1b1b14e8-938e-4594-9e75-851d73b1501c",
+      "name": "Code in JavaScript10"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = String($json.stdout || \"\").trim();\n\nfunction extractJson(text) {\n  try {\n    return JSON.parse(text);\n  } catch (e) {}\n\n  const first = text.indexOf(\"{\");\n  const last = text.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON válido en stdout: \" + text);\n  }\n\n  return JSON.parse(text.slice(first, last + 1));\n}\n\nconst parsed = extractJson(stdout);\n\nif (!parsed.case_id) {\n  throw new Error(\"El parser no devolvió case_id. stdout: \" + stdout);\n}\n\nreturn {\n  json: {\n    case_id: parsed.case_id,\n    parse_ok: parsed.ok === true,\n    parse_command: parsed.command || \"parse-triaje\",\n    parse_output_path: parsed.output || \"\",\n    parser_result: parsed,\n    previous_exitCode: $json.exitCode,\n    previous_stderr: $json.stderr || \"\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -160
+      ],
+      "id": "276a7064-e749-44f7-aca2-018e7793498f",
+      "name": "Code in JavaScript11"
+    },
+    {
+      "parameters": {
+        "command": "=case_id=\"{{$json.case_id}}\"\ndocx_path=\"{{$json.docx_path}}\"\n\npython3 - <<'PY'\nimport json\nimport re\nfrom pathlib import Path\nfrom datetime import datetime\n\ncase_id = \"\"\"{{$json.case_id}}\"\"\".strip()\ndocx_path = \"\"\"{{$json.docx_path}}\"\"\".strip()\n\nif not case_id:\n    raise Exception(\"case_id vacío para preparar subida a Google Drive.\")\n\nbase = Path(\"/data/cases\") / case_id\nreport_dir = base / \"04_report\"\n\nreport_render_data_path = report_dir / \"report_render_data.json\"\nreport_pack_path = report_dir / \"report_pack.json\"\n\ndef load_json(path):\n    path = Path(path)\n    if not path.exists():\n        return {}\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\ndef clean_folder_name(value):\n    text = str(value or \"\").strip()\n\n    if not text:\n        text = case_id\n\n    text = re.sub(r'[\\\\/:*?\"<>|]+', \"_\", text)\n    text = re.sub(r\"\\s+\", \" \", text).strip()\n    text = text.rstrip(\". \")\n\n    if len(text) > 100:\n        text = text[:100].rstrip(\". \")\n\n    if not text:\n        text = case_id\n\n    return text\n\ndata = load_json(report_render_data_path)\npack = load_json(report_pack_path)\n\nproject_name = (\n    data.get(\"cover\", {}).get(\"proyecto\")\n    or data.get(\"project_context_input\", {}).get(\"proyecto\")\n    or data.get(\"project_context\", {}).get(\"proyecto\")\n    or pack.get(\"cover\", {}).get(\"proyecto\")\n    or pack.get(\"project_context_input\", {}).get(\"proyecto\")\n    or case_id\n)\n\ngoogle_project_folder = clean_folder_name(project_name)\n\nif not docx_path:\n    report_out_dir = base / \"05_report\"\n    candidates = sorted(\n        report_out_dir.glob(\"Informe_Ciberseguridad_*.docx\"),\n        key=lambda p: p.stat().st_mtime,\n        reverse=True\n    )\n    if candidates:\n        docx_path = str(candidates[0])\n\ndocx = Path(docx_path)\n\nif not docx.exists():\n    raise Exception(f\"No existe el informe DOCX: {docx}\")\n\nquestionnaire_file = (\n    data.get(\"sources\", {}).get(\"questionnaire_file\")\n    or pack.get(\"sources\", {}).get(\"questionnaire_file\")\n    or str(base / \"01_originales\" / \"cuestionario.xlsx\")\n)\n\nquestionnaire = Path(questionnaire_file)\n\nif not questionnaire.exists():\n    raise Exception(f\"No existe el cuestionario original: {questionnaire}\")\n\nupload_pack = {\n    \"case_id\": case_id,\n    \"created_at\": datetime.now().isoformat(timespec=\"seconds\"),\n    \"google_drive_base_folder\": \"TFM\",\n    \"google_drive_project_folder\": google_project_folder,\n    \"google_drive_project_path\": f\"TFM/{google_project_folder}\",\n    \"project_name\": project_name,\n    \"files\": [\n        {\n            \"kind\": \"report\",\n            \"file_path\": str(docx),\n            \"file_name\": docx.name,\n            \"mime_type\": \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\"\n        },\n        {\n            \"kind\": \"questionnaire\",\n            \"file_path\": str(questionnaire),\n            \"file_name\": questionnaire.name,\n            \"mime_type\": \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\"\n        }\n    ]\n}\n\nout_path = report_dir / \"google_drive_upload_pack.json\"\nout_path.write_text(\n    json.dumps(upload_pack, ensure_ascii=False, indent=2),\n    encoding=\"utf-8\"\n)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"status\": \"GOOGLE_DRIVE_UPLOAD_PACK_READY\",\n    \"google_drive_base_folder\": upload_pack[\"google_drive_base_folder\"],\n    \"google_drive_project_folder\": upload_pack[\"google_drive_project_folder\"],\n    \"google_drive_project_path\": upload_pack[\"google_drive_project_path\"],\n    \"project_name\": project_name,\n    \"docx_path\": str(docx),\n    \"questionnaire_path\": str(questionnaire),\n    \"upload_pack_path\": str(out_path),\n    \"files\": upload_pack[\"files\"]\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        4848,
+        224
+      ],
+      "id": "e80e835b-c765-47e3-8064-c3a0013f7e02",
+      "name": "Execute Command13"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = String($json.stdout || \"\").trim();\n\nfunction extractJson(text) {\n  try {\n    return JSON.parse(text);\n  } catch (e) {}\n\n  const first = text.indexOf(\"{\");\n  const last = text.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON válido en stdout: \" + text);\n  }\n\n  return JSON.parse(text.slice(first, last + 1));\n}\n\nconst parsed = extractJson(stdout);\n\nreturn {\n  json: {\n    ...$json,\n    ...parsed\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5056,
+        224
+      ],
+      "id": "b71f26bc-c9d9-4d44-81d4-792172b781f4",
+      "name": "Code in JavaScript12"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{$json.google_drive_project_folder}}",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{$json.google_drive_root_folder_id}}",
+            "mode": "id"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5440,
+        224
+      ],
+      "id": "851d7e08-e011-4671-96b0-81e61ee32d09",
+      "name": "Search files and folders",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "SJZ3er4SF6kUEheN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0a21676c-984b-4635-8b72-69729ca30a19",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5616,
+        224
+      ],
+      "id": "cf733012-9fb0-4f6c-9f46-ac3524c9b76a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{$node[\"Code - Parse Google Drive upload pack\"].json.google_drive_project_folder}}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{$node[\"Code - Parse Google Drive upload pack\"].json.google_drive_root_folder_id}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5824,
+        320
+      ],
+      "id": "e2da6ee9-2439-499e-9bdd-cdbaf69059b0",
+      "name": "Create folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "SJZ3er4SF6kUEheN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  json: {\n    ...$json,\n    google_drive_root_folder_id: \"1QsMLUBuF-5GhP1BJDR5AId_mh3ZQ3alt\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5232,
+        224
+      ],
+      "id": "cde8114e-d6c6-4436-a4f2-7d87a298246d",
+      "name": "Code - Parse Google Drive upload pack"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pack = $items(\"Code - Parse Google Drive upload pack\")[0].json;\n\nlet folderId = \"\";\n\nif ($json.id) {\n  folderId = $json.id;\n} else if ($json.fileId) {\n  folderId = $json.fileId;\n}\n\nif (!folderId) {\n  throw new Error(\"No se pudo determinar el ID de la carpeta del proyecto en Google Drive.\");\n}\n\nreturn {\n  json: {\n    ...pack,\n    google_drive_project_folder_id: folderId\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6032,
+        320
+      ],
+      "id": "1c1f9716-b815-4c3b-9b11-7a3a1f95d651",
+      "name": "Code in JavaScript13"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pack = $json;\n\nreturn pack.files.map(file => ({\n  json: {\n    case_id: pack.case_id,\n    project_name: pack.project_name,\n    google_drive_project_folder: pack.google_drive_project_folder,\n    google_drive_project_folder_id: pack.google_drive_project_folder_id,\n    file_kind: file.kind,\n    file_path: file.file_path,\n    file_name: file.file_name,\n    mime_type: file.mime_type\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6240,
+        320
+      ],
+      "id": "fcbb5a2f-0466-4b3c-9407-a5d85b207b62",
+      "name": "Code in JavaScript14"
+    },
+    {
+      "parameters": {
+        "name": "={{$json.file_name}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{$json.google_drive_project_folder_id}}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        7280,
+        320
+      ],
+      "id": "a901dbd6-a676-4ea8-96ea-d2703801bfea",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "SJZ3er4SF6kUEheN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=python3 - <<'PY'\nimport json\nimport shutil\nimport re\nfrom pathlib import Path\n\ncase_id = {{ JSON.stringify($json.case_id || \"\") }}\nproject_name = {{ JSON.stringify($json.project_name || \"\") }}\ngoogle_drive_project_folder = {{ JSON.stringify($json.google_drive_project_folder || \"\") }}\ngoogle_drive_project_folder_id = {{ JSON.stringify($json.google_drive_project_folder_id || \"\") }}\nfile_kind = {{ JSON.stringify($json.file_kind || \"\") }}\nfile_path = {{ JSON.stringify($json.file_path || \"\") }}\nfile_name = {{ JSON.stringify($json.file_name || \"\") }}\nmime_type = {{ JSON.stringify($json.mime_type || \"\") }}\n\nif not case_id:\n    raise Exception(\"case_id vacío\")\n\nif not file_path:\n    raise Exception(\"file_path vacío\")\n\nsrc = Path(file_path)\n\nif not src.exists():\n    raise Exception(f\"No existe el archivo origen: {src}\")\n\nif not file_name:\n    file_name = src.name\n\nsafe_case_id = re.sub(r\"[^A-Za-z0-9_.-]+\", \"_\", case_id).strip(\"_\")\nsafe_file_name = re.sub(r\"[^A-Za-z0-9_.-]+\", \"_\", file_name).strip(\"_\")\n\ntarget_dir = Path(\"/home/node/.n8n-files/google_drive_uploads\") / safe_case_id\ntarget_dir.mkdir(parents=True, exist_ok=True)\n\ntarget_path = target_dir / safe_file_name\n\nshutil.copy2(src, target_path)\n\nprint(json.dumps({\n    \"case_id\": case_id,\n    \"project_name\": project_name,\n    \"google_drive_project_folder\": google_drive_project_folder,\n    \"google_drive_project_folder_id\": google_drive_project_folder_id,\n    \"file_kind\": file_kind,\n    \"original_file_path\": str(src),\n    \"file_path\": str(target_path),\n    \"file_name\": file_name,\n    \"mime_type\": mime_type,\n    \"status\": \"FILE_COPIED_TO_N8N_FILES\"\n}, ensure_ascii=False))\nPY"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        6448,
+        320
+      ],
+      "id": "859c67af-deed-4e46-a013-3c09e6dc8667",
+      "name": "Execute Command14"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const stdout = String($json.stdout || \"\").trim();\n\nfunction extractJson(text) {\n  try {\n    return JSON.parse(text);\n  } catch (e) {}\n\n  const first = text.indexOf(\"{\");\n  const last = text.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\"No se encontró JSON válido en stdout: \" + text);\n  }\n\n  return JSON.parse(text.slice(first, last + 1));\n}\n\nconst parsed = extractJson(stdout);\n\nif (!parsed.file_path) {\n  throw new Error(\"No se recibió file_path después de copiar archivo: \" + stdout);\n}\n\nreturn {\n  json: parsed\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6640,
+        320
+      ],
+      "id": "392c0815-3952-4d68-b026-d41a853dabfd",
+      "name": "Code in JavaScript15"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{$json.file_path}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        6848,
+        320
+      ],
+      "id": "2b1c5f0d-be97-4aff-b206-a32e49964673",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const originalItems = $items(\"Code in JavaScript14\");\n\nconst original = originalItems[$itemIndex]?.json || {};\n\nif (!original.google_drive_project_folder_id) {\n  throw new Error(\n    \"No se encontró google_drive_project_folder_id en Code in JavaScript14 para item \" + $itemIndex\n  );\n}\n\nconst binary = $input.item.binary || {};\n\nreturn {\n  json: {\n    ...original\n  },\n  binary\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7056,
+        320
+      ],
+      "id": "465fa57f-8b4a-4d8a-b646-33d5a83d847f",
+      "name": "Code in JavaScript16"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1872,
+        224
+      ],
+      "id": "1cbb655d-5394-4d36-8684-54620819a6aa",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        2432,
+        896
+      ],
+      "id": "81bcbbbb-a699-429f-9e1b-d857f086681b"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function extractJsonObject(value, rawGroq = {}) {\n  if (value && typeof value === \"object\") {\n    return value;\n  }\n\n  const raw = String(value || \"\").trim();\n\n  if (!raw) {\n    throw new Error(\"Respuesta vacía de Groq en follow-up.\");\n  }\n\n  const finishReason =\n    rawGroq.choices?.[0]?.finish_reason ||\n    rawGroq.choices?.[0]?.finishReason ||\n    \"\";\n\n  let cleaned = raw\n    .replace(/^```json\\s*/i, \"\")\n    .replace(/^```\\s*/i, \"\")\n    .replace(/```$/i, \"\")\n    .trim();\n\n  try {\n    return JSON.parse(cleaned);\n  } catch (e) {\n    // seguimos con extracción por llaves\n  }\n\n  const first = cleaned.indexOf(\"{\");\n  const last = cleaned.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\n      \"No se encontró objeto JSON en la respuesta de Groq follow-up. \" +\n      \"finish_reason=\" + finishReason + \". Respuesta parcial: \" +\n      cleaned.slice(0, 1500)\n    );\n  }\n\n  const candidate = cleaned.slice(first, last + 1);\n\n  try {\n    return JSON.parse(candidate);\n  } catch (e) {\n    const seemsTruncated =\n      finishReason === \"length\" ||\n      !candidate.trim().endsWith(\"}\") ||\n      (candidate.match(/\"/g) || []).length % 2 !== 0;\n\n    if (seemsTruncated) {\n      throw new Error(\n        \"Groq devolvió un JSON incompleto/cortado en follow-up. \" +\n        \"Solución: sube max_completion_tokens a 2000, pon reasoning_effort='low', \" +\n        \"include_reasoning=false, o reduce el batch size de follow-up a 3. \" +\n        \"Error JSON: \" + e.message +\n        \"\\nRespuesta parcial:\\n\" +\n        candidate.slice(0, 2500)\n      );\n    }\n\n    throw new Error(\n      \"Groq devolvió texto en follow-up, pero no se pudo parsear como JSON. Error: \" +\n      e.message +\n      \"\\nRespuesta parcial:\\n\" +\n      candidate.slice(0, 2500)\n    );\n  }\n}\n\nfunction getGroqContent(json) {\n  if (json.choices?.[0]?.message?.content) {\n    return json.choices[0].message.content;\n  }\n\n  if (json.choices?.[0]?.text) {\n    return json.choices[0].text;\n  }\n\n  if (json.output_text) {\n    return json.output_text;\n  }\n\n  if (json.text) {\n    return json.text;\n  }\n\n  if (json.response) {\n    return json.response;\n  }\n\n  if (json.output) {\n    return json.output;\n  }\n\n  if (json.question_evaluations || json.evaluations || json.batch_id || json.case_id) {\n    return json;\n  }\n\n  return \"\";\n}\n\nfunction getPromptItem() {\n  const candidateNodeNames = [\n    \"Code in JavaScript3\",\n    \"Code - Construir prompt follow-up\",\n    \"Code - Construir prompt followup\",\n    \"Code - Construir prompt reanalisis followup\",\n    \"Code - Construir prompt reanálisis followup\"\n  ];\n\n  for (const nodeName of candidateNodeNames) {\n    try {\n      const items = $items(nodeName);\n\n      if (items && items[$itemIndex]?.json) {\n        return items[$itemIndex].json;\n      }\n\n      if (items && items.length === 1 && items[0]?.json) {\n        return items[0].json;\n      }\n    } catch (e) {\n      // probar siguiente\n    }\n  }\n\n  return {};\n}\n\nconst content = getGroqContent($json);\nconst parsed = extractJsonObject(content, $json);\n\nlet promptItem = getPromptItem();\n\nif (!promptItem.case_id && $json.case_id) {\n  promptItem = $json;\n}\n\nconst batchId =\n  promptItem.batch_id ||\n  promptItem.batch_data?.batch_id ||\n  parsed.batch_id ||\n  \"\";\n\nconst caseId =\n  promptItem.case_id ||\n  promptItem.batch_data?.case_id ||\n  parsed.case_id ||\n  \"\";\n\nreturn {\n  json: {\n    ...promptItem,\n\n    case_id: caseId,\n    batch_id: batchId,\n\n    groq_raw_response: $json,\n    groq_content_raw: typeof content === \"string\" ? content : JSON.stringify(content),\n\n    output: JSON.stringify(parsed),\n    text: JSON.stringify(parsed),\n    response: JSON.stringify(parsed),\n    ai_response: JSON.stringify(parsed),\n\n    followup_model_provider: \"groq\",\n    followup_model: $json.model || \"openai/gpt-oss-120b\",\n\n    parsed_followup_response: parsed\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        352
+      ],
+      "id": "43c49072-eea5-4310-af9e-ca266de7eef0",
+      "name": "Code in JavaScript17"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2848,
+        384
+      ],
+      "id": "a5b656ad-a5c3-4f08-9e87-0b7c876a1751",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me1",
+      "typeVersion": 1,
+      "position": [
+        3056,
+        592
+      ],
+      "id": "db29148f-97f5-4ca5-8d08-4ef927750146"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function extractJsonObject(value, rawGroq = {}) {\n  if (value && typeof value === \"object\") {\n    return value;\n  }\n\n  const raw = String(value || \"\").trim();\n\n  if (!raw) {\n    throw new Error(\"Respuesta vacía de Groq en narrativa.\");\n  }\n\n  const finishReason =\n    rawGroq.choices?.[0]?.finish_reason ||\n    rawGroq.choices?.[0]?.finishReason ||\n    \"\";\n\n  let cleaned = raw\n    .replace(/^```json\\s*/i, \"\")\n    .replace(/^```\\s*/i, \"\")\n    .replace(/```$/i, \"\")\n    .trim();\n\n  try {\n    return JSON.parse(cleaned);\n  } catch (e) {\n    // seguimos con extracción por llaves\n  }\n\n  const first = cleaned.indexOf(\"{\");\n  const last = cleaned.lastIndexOf(\"}\");\n\n  if (first === -1 || last === -1 || last <= first) {\n    throw new Error(\n      \"No se encontró objeto JSON en la respuesta de Groq narrativa. \" +\n      \"finish_reason=\" + finishReason + \". Respuesta parcial: \" +\n      cleaned.slice(0, 1500)\n    );\n  }\n\n  const candidate = cleaned.slice(first, last + 1);\n\n  try {\n    return JSON.parse(candidate);\n  } catch (e) {\n    const seemsTruncated =\n      finishReason === \"length\" ||\n      !candidate.trim().endsWith(\"}\") ||\n      (candidate.match(/\"/g) || []).length % 2 !== 0;\n\n    if (seemsTruncated) {\n      throw new Error(\n        \"Groq devolvió un JSON incompleto/cortado en narrativa. \" +\n        \"Solución: sube max_completion_tokens, reduce el prompt del narrador, \" +\n        \"usa reasoning_effort='low' e include_reasoning=false, o cambia a un modelo con más TPM. \" +\n        \"Error JSON: \" + e.message +\n        \"\\nRespuesta parcial:\\n\" +\n        candidate.slice(0, 2500)\n      );\n    }\n\n    throw new Error(\n      \"Groq devolvió texto en narrativa, pero no se pudo parsear como JSON. Error: \" +\n      e.message +\n      \"\\nRespuesta parcial:\\n\" +\n      candidate.slice(0, 2500)\n    );\n  }\n}\n\nfunction getGroqContent(json) {\n  if (json.choices?.[0]?.message?.content) {\n    return json.choices[0].message.content;\n  }\n\n  if (json.choices?.[0]?.text) {\n    return json.choices[0].text;\n  }\n\n  if (json.output_text) {\n    return json.output_text;\n  }\n\n  if (json.text) {\n    return json.text;\n  }\n\n  if (json.response) {\n    return json.response;\n  }\n\n  if (json.output) {\n    return json.output;\n  }\n\n  if (\n    json.contexto_proyecto ||\n    json.caracteristicas_generales ||\n    json.observaciones_revision_humana ||\n    json.case_id\n  ) {\n    return json;\n  }\n\n  return \"\";\n}\n\nfunction getPromptItem() {\n  const candidateNodeNames = [\n    \"Code - Construir prompt redacción informe\",\n    \"Code - Construir prompt redaccion informe\",\n    \"Code in JavaScript18\",\n    \"Code in JavaScript\"\n  ];\n\n  for (const nodeName of candidateNodeNames) {\n    try {\n      const items = $items(nodeName);\n\n      if (items && items[$itemIndex]?.json) {\n        return items[$itemIndex].json;\n      }\n\n      if (items && items.length === 1 && items[0]?.json) {\n        return items[0].json;\n      }\n    } catch (e) {\n      // probar siguiente nombre\n    }\n  }\n\n  return {};\n}\n\nconst content = getGroqContent($json);\nconst parsed = extractJsonObject(content, $json);\n\nlet promptItem = getPromptItem();\n\nif (!promptItem.case_id && $json.case_id) {\n  promptItem = $json;\n}\n\nconst caseId =\n  promptItem.case_id ||\n  promptItem.report_pack?.case_id ||\n  parsed.case_id ||\n  \"\";\n\nreturn {\n  json: {\n    ...promptItem,\n\n    case_id: caseId,\n\n    groq_raw_response: $json,\n    groq_content_raw: typeof content === \"string\" ? content : JSON.stringify(content),\n\n    output: JSON.stringify(parsed),\n    text: JSON.stringify(parsed),\n    response: JSON.stringify(parsed),\n    ai_response: JSON.stringify(parsed),\n\n    narrative_model_provider: \"groq\",\n    narrative_model: $json.model || \"openai/gpt-oss-120b\",\n\n    parsed_narrative_response: parsed\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3744,
+        224
+      ],
+      "id": "039e265c-73a3-40c2-ace2-d06253d9936c",
+      "name": "Code in JavaScript18"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.user_prompt}}",
+        "options": {
+          "systemMessage": "={{$json.system_prompt}}",
+          "maxIterations": 4,
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1984,
+        416
+      ],
+      "id": "43a193bf-4b2e-454a-b5e0-d2b1e9e5a50a",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {
+          "maxOutputTokens": 900,
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        592
+      ],
+      "id": "3cff9ea7-ec10-4a61-bd47-774d664a16aa",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QKx7rGtFyACfwb2Y",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        912
+      ],
+      "id": "0f0c6ce1-e189-4d29-8cf1-befb51e5ce1e",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "gksV5yLY0U1O95vr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {
+          "maxOutputTokens": 16000,
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3392,
+        720
+      ],
+      "id": "c5df5331-e83c-4cd2-814a-bc72db378bf6",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QKx7rGtFyACfwb2Y",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "OBLIGATORIA. Recupera la ficha oficial del catálogo de riesgos para una pregunta concreta.\n\nDebe usarse antes de evaluar o reanalizar cualquier pregunta.\n\nEntrada esperada: string con formato:\nEXACT_QUESTION_ID_Q_XXX Q_XXX texto de la pregunta\n\nDevuelve la ficha oficial con metadata.question_id.",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "tfm_rag_manual_agent",
+          "mode": "list",
+          "cachedResultName": "tfm_rag_manual_agent"
+        },
+        "topK": 1,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        2096,
+        688
+      ],
+      "id": "18430a79-e0c7-4d9a-80d6-bcd04a4041c1",
+      "name": "risk_catalog_search",
+      "credentials": {
+        "qdrantApi": {
+          "id": "wYClCEZtf9ioZHsN",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.user_prompt}}",
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "={{$json.system_prompt}}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        3472,
+        496
+      ],
+      "id": "3a98b2ac-cf3d-4ba7-9c4e-8412afb89ed5",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {
+          "maxOutputTokens": 16000,
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3696,
+        720
+      ],
+      "id": "edf3980c-4319-4ac4-972a-0725538fb4db",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QKx7rGtFyACfwb2Y",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2544,
+        368
+      ],
+      "id": "567d3ba1-0cd9-4743-ba8b-33d4b577c083",
+      "name": "Wait",
+      "webhookId": "7ca65b68-8b66-409b-a230-26b10b76c350"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Command4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Execute Command5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Execute Command6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command7": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command8": {
+      "main": [
+        [
+          {
+            "node": "Execute Command9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command9": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command10": {
+      "main": [
+        [
+          {
+            "node": "Code - Construir prompt redacción informe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command11": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command12": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript8": {
+      "main": [
+        [
+          {
+            "node": "Execute Command10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript9": {
+      "main": [
+        [
+          {
+            "node": "Execute Command12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Construir prompt redacción informe": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Normalizar narrativa informe": {
+      "main": [
+        [
+          {
+            "node": "Execute Command11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript10": {
+      "main": [
+        [
+          {
+            "node": "Execute Command3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript11": {
+      "main": [
+        [
+          {
+            "node": "Execute Command2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "Execute Command13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command13": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript12": {
+      "main": [
+        [
+          {
+            "node": "Code - Parse Google Drive upload pack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Parse Google Drive upload pack": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript13": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript14": {
+      "main": [
+        [
+          {
+            "node": "Execute Command14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command14": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript15",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript15": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript16",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript16": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Execute Command8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript17": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript18": {
+      "main": [
+        [
+          {
+            "node": "Code - Normalizar narrativa informe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "risk_catalog_search",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript17",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "risk_catalog_search": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript18",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Execute Command7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "42910ab4-211f-424c-a7eb-fd2861881b11",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ab1e990902e95383f4a54076b8865c550cd63d72778d0fe5c251c70d680c4dce"
+  },
+  "id": "BH643JfNUpNDxVYp",
+  "tags": []
+}

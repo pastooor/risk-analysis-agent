@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "command": "parse-questionnaire",
+  "case_id": "Codigo_del_proyecto",
+  "output": "/data/cases/Codigo_del_proyecto/02_json/questionnaire.json",
+  "questionnaire_questions": 56,
+  "questions_with_missing_answer": 1,
+  "questions_filled_from_risk_catalog": 0,
+  "questions_read_from_adjacent_column": 18,
+  "provider": {
+    "name": "PROVEEDOR",
+    "platform_name": "PLATAFORMA",
+    "url": "URL",
+    "functional_description": null,
+    "stores_personal_data_raw": "SÍ",
+    "stores_personal_data": true
+  }
+}

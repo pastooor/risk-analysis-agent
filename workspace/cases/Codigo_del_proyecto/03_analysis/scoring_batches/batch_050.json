@@ -1,0 +1,51 @@
+{
+  "batch_id": "batch_050",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_055",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que no existen procedimientos documentados o mecanismos suficientes para la recuperación/extracción de datos desde la nube.",
+      "decision_reason": "La ausencia de procedimientos documentados o mecanismos de recuperación/extracción supone incumplimiento del requisito.",
+      "requires_provider_followup": false,
+      "followup_questions": [
+        "Dado que no existen APIs ni procedimientos de extracción, ¿cómo garantiza el proveedor la portabilidad y recuperación de los datos del cliente ante una finalización del servicio?"
+      ],
+      "requires_human_review": true,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "R_007",
+      "risk_name": "Aprovechamiento de vulnerabilidades",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_055",
+          "chunk_id": "RAG-Q_055",
+          "traceability": "Excel: Análisis SaaS, fila 55",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "",
+      "tiempo_mitigacion": "",
+      "provider_answer": "NO",
+      "provider_details": "Detalle de los mecanismos de integración con los servicios Si la aplicación o plataforma no dispone de un sistema ( web service, una API, etc..) que permita extraer los datos, es un claro inconveniente para no adoptar la aplicación en la nube, ya que no podríamos disponer de los datos de la nube."
+    }
+  ],
+  "batch_validation_notes": [
+    "La herramienta devolvió una ficha para Q_035 en lugar de Q_055, por lo que se aplica score 2 según las instrucciones.",
+    {
+      "type": "manual_review",
+      "description": "No se pudo determinar la severidad para Q_055. Revisar reglas del catálogo.",
+      "question_id": "Q_055",
+      "source": "post_ai_validation"
+    }
+  ]
+}

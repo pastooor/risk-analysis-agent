@@ -1,0 +1,46 @@
+{
+  "batch_id": "batch_031",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_031",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor no ha definido valores concretos de RTO y RPO, indicando que dependen del problema.",
+      "decision_reason": "La respuesta es ambigua y no proporciona los valores técnicos requeridos para evaluar el cumplimiento del control C_054.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "Por favor, proporcione los valores específicos de RTO (Objetivo de Tiempo de Recuperación) y RPO (Objetivo de Punto de Recuperación) definidos para este servicio."
+      ],
+      "generates_finding": true,
+      "requires_human_review": true,
+      "risk_id": "R_006",
+      "risk_name": "Pérdida de disponibilidad",
+      "control_ids": [
+        "C_054"
+      ],
+      "incumplimiento_identificado": "No se ha definido un RTO y RPO.",
+      "controles_asociados": "Se debe asegurar que los valores de RTO y RPO proporcionados por el servicio se ajustan a aquellos requeridos por los BIAS de los procesos de negocio dependientes del mismo.",
+      "amenazas": [
+        "Incumplimiento normativo/regulatorio"
+      ],
+      "mitigation": "Se debe de tener unos párametros de recuperación apropiados para prestar el servicio a EMPRESA.",
+      "mitigation_guide": "Se debe asegurar que los valores de RTO y RPO proporcionados por el servicio se ajustan a aquellos requeridos por los BIAS de los procesos de negocio dependientes del mismo.",
+      "report_context_example": "El proveedor no tiene definido un RTO ni un RPO.",
+      "report_detail_example": "No disponer de un RTO, ni un RPO puede dejar a una organización vulnerable a una serie de riesgos, incluida la pérdida de datos críticos, la interrupción de las operaciones y el incumplimiento normativo. Es fundamental que las organizaciones desarrollen e implementen estas medidas como parte de su estrategia general de gestión de la información y la continuidad del negocio.\nLa falta de un RTO definido por parte del proveedor implica incertidumbre sobre cuánto tiempo llevaría recuperarse de un incidente grave, lo que aumenta el riesgo de prolongadas interrupciones en las operaciones comerciales.\nLa carencia de un RPO establecido indica que el proveedor no ha definido la cantidad máxima de datos que la empresa puede permitirse perder en caso de un fallo, aumentando así el riesgo de pérdida de datos críticos.\nLa falta de definición de RTO y RPO por parte del proveedor aumenta la vulnerabilidad de la empresa ante interrupciones prolongadas, pérdida de datos y posibles consecuencias legales.",
+      "sources": [
+        {
+          "question_id": "Q_031",
+          "chunk_id": "RAG-Q_031",
+          "traceability": "Excel: Análisis SaaS, fila 32",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "Otros",
+      "provider_details": "DEPENDE EN FUNCION DEL PROBLEMA"
+    }
+  ],
+  "batch_validation_notes": []
+}

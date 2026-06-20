@@ -1,0 +1,49 @@
+{
+  "batch_id": "batch_041",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_045",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor confirma la existencia de un entorno, pero la descripción es ambigua y no garantiza la separación lógica/física requerida.",
+      "decision_reason": "La respuesta no aclara si existen entornos diferenciados de desarrollo y pruebas, ni si están aislados del entorno de producción para evitar riesgos de disponibilidad.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿Puede confirmar explícitamente si dispone de un entorno de desarrollo y un entorno de pruebas separados entre sí y del entorno de producción?"
+      ],
+      "generates_finding": true,
+      "requires_human_review": true,
+      "risk_id": "R_006",
+      "risk_name": "Pérdida de disponibilidad",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se debe disponer de entornos específicos para el desarrollo de nuevas funcionalidades o entornos de pruebas para verificar el funcionamiento.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_045",
+          "chunk_id": "RAG-Q_045",
+          "traceability": "Excel: Análisis SaaS, fila 46",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Hay un espacion en el hosting dedicado para esto donde solo acceden en local personas dedicadas a probar nuevas funcionalidades."
+    }
+  ],
+  "batch_validation_notes": [
+    {
+      "type": "manual_review",
+      "description": "No se pudo determinar la severidad para Q_045. Revisar reglas del catálogo.",
+      "question_id": "Q_045",
+      "source": "post_ai_validation"
+    }
+  ]
+}

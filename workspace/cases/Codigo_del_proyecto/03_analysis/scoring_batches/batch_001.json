@@ -1,0 +1,43 @@
+{
+  "batch_id": "batch_001",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_001",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que no existen planes de auditoría y controles internos de seguridad alineados con las normativas legales de tratamiento de datos.",
+      "decision_reason": "Se aplica la observación del catálogo: al existir datos personales y no garantizarse el cumplimiento GDPR, el riesgo se eleva automáticamente a ALTO.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Severidad ajustada por observación del catálogo Q_001: datos personales + GDPR no garantizado = ALTO.",
+      "generates_finding": true,
+      "risk_id": "R_001",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_038"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se debe disponer de unos planes de auditoría y controles internos que aseguren la protección de la información tratada por el servicio prestado a EMPRESA en línea con las normativas legales que apliquen en el proyecto.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_001",
+          "chunk_id": "RAG-Q_001",
+          "traceability": "Excel: Análisis SaaS, fila 2",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar planes de auditorías"
+    }
+  ],
+  "batch_validation_notes": []
+}

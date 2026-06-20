@@ -1,0 +1,29 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_004",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_012",
+      "final_score": 3,
+      "final_score_type": "compliant",
+      "answer_summary": "El proveedor confirma un procedimiento documentado de ABM con responsables, aprobaciones y un plazo de ejecución de bajas inferior a 48 horas laborables.",
+      "decision_reason": "La respuesta detalla el proceso de gestión del ciclo de vida de usuarios, incluyendo autorizaciones, responsables y un plazo definido para las bajas, cumpliendo con el control C_005.",
+      "resolved_by_provider": true
+    }
+  ],
+  "batch_validation_notes": [],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_004\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_012\",\"final_score\":3,\"final_score_type\":\"compliant\",\"answer_summary\":\"El proveedor confirma un procedimiento documentado de ABM con responsables, aprobaciones y un plazo de ejecución de bajas inferior a 48 horas laborables.\",\"decision_reason\":\"La respuesta detalla el proceso de gestión del ciclo de vida de usuarios, incluyendo autorizaciones, responsables y un plazo defin",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_012"
+    ],
+    "normalized_question_ids": [
+      "Q_012"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

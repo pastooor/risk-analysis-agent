@@ -1,0 +1,31 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_005",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_013",
+      "final_score": 3,
+      "final_score_type": "compliant",
+      "answer_summary": "El proveedor confirma la implementación de RBAC con roles predefinidos (estándar, supervisor, administrador) y asignación de permisos según perfil y alcance funcional.",
+      "decision_reason": "La respuesta detalla el modelo de control de acceso basado en roles (RBAC) y la granularidad de los permisos, cumpliendo con el requisito de mínimo privilegio.",
+      "resolved_by_provider": true
+    }
+  ],
+  "batch_validation_notes": [
+    "La herramienta risk_catalog_search no devolvió la ficha específica para Q_013, devolviendo erróneamente la de Q_023 en ambos intentos. Se ha procedido a evaluar Q_013 basándose en la información técnica clara aportada por el proveedor en el follow-up, que satisface los criterios de control de acceso RBAC."
+  ],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_005\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_013\",\"final_score\":3,\"final_score_type\":\"compliant\",\"answer_summary\":\"El proveedor confirma la implementación de RBAC con roles predefinidos (estándar, supervisor, administrador) y asignación de permisos según perfil y alcance funcional.\",\"decision_reason\":\"La respuesta detalla el modelo de control de acceso basado en roles (RBAC) y la granularidad de los permisos, cumpli",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_013"
+    ],
+    "normalized_question_ids": [
+      "Q_013"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

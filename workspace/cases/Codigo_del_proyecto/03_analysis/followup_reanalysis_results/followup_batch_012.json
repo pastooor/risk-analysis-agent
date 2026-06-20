@@ -1,0 +1,31 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_012",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_030",
+      "final_score": 1,
+      "final_score_type": "non_compliance",
+      "answer_summary": "El proveedor describe el proceso de backup, cifrado y retención, pero no aporta evidencia documental ni confirma el cumplimiento de los requisitos de recuperación.",
+      "decision_reason": "Aunque se detalla el proceso, la respuesta sigue siendo insuficiente al no aportar documentación formal ni confirmar los parámetros de recuperación exigidos por el control.",
+      "resolved_by_provider": false
+    }
+  ],
+  "batch_validation_notes": [
+    "La herramienta risk_catalog_search no devolvió la ficha para Q_030, devolvió Q_031. Se procede con score 1 por falta de evidencia suficiente según las reglas de scoring."
+  ],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_012\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_030\",\"final_score\":1,\"final_score_type\":\"non_compliance\",\"answer_summary\":\"El proveedor describe el proceso de backup, cifrado y retención, pero no aporta evidencia documental ni confirma el cumplimiento de los requisitos de recuperación.\",\"decision_reason\":\"Aunque se detalla el proceso, la respuesta sigue siendo insuficiente al no aportar documentación formal ni confirma",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_030"
+    ],
+    "normalized_question_ids": [
+      "Q_030"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

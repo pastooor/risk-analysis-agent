@@ -1,0 +1,46 @@
+# Credenciales y variables de entorno
+.env
+*.env
+.env.*
+*token*
+*secret*
+*credential*
+credentials*
+*.key
+*.pem
+
+# Datos internos de n8n
+n8n_data/
+data/.n8n/
+**/database.sqlite
+**/*.sqlite
+**/*.sqlite3
+**/*.db
+
+# Volúmenes y datos pesados
+ollama_data/
+ollama/
+qdrant/
+volumes/
+storage/
+models/
+
+# Dependencias y entornos virtuales
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Logs y temporales
+*.log
+tmp/
+temp/
+.cache/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Git
+.git/

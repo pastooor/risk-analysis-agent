@@ -1,0 +1,485 @@
+{
+  "batch_id": "batch_018",
+  "case_id": "Codigo_del_proyecto",
+  "case_meta": {
+    "schema_version": "1.0.0",
+    "artifact_type": "case_meta",
+    "case_id": "Codigo_del_proyecto",
+    "case_id_raw": "Codigo_del_proyecto",
+    "tier": 2,
+    "created_at": "2026-06-18T18:39:19",
+    "created_by": "n8n_chat_agent",
+    "status": "ready_for_risk_analysis",
+    "inputs": {
+      "triaje_json": "/data/cases/Codigo_del_proyecto/02_json/triaje.json",
+      "questionnaire_json": "/data/cases/Codigo_del_proyecto/02_json/questionnaire.json"
+    },
+    "summary": {
+      "project_code": "Código del proyecto.",
+      "business_line": "Línea de negocio",
+      "business_area": "Área de negocio",
+      "provider": [
+        "Proveedor"
+      ],
+      "contract_name": "Nombre de la contratación",
+      "solution_type": "SaaS (Software as a Service)",
+      "saas_name": "Sistema de solicitud de calzado especial para los trabajadores de EMPRESA.",
+      "classification": "Confidencial",
+      "personal_data": true,
+      "personal_data_regime": "GDPR",
+      "questionnaire_questions": 56,
+      "questions_with_missing_answer": 1
+    }
+  },
+  "auth_context": {
+    "description": "Contexto común para Q_010-Q_021. La severidad se resuelve con las observaciones del catálogo, no con TIER directo si severity_source=conditional_rules.",
+    "empresa_users_access_question_id": "Q_009",
+    "empresa_users_access_answer": "SI",
+    "empresa_users_access_explanation": "Los que se requiera",
+    "federation_question_id": "Q_010",
+    "federation_supported_or_used_answer": "NO",
+    "federation_supported_or_used_explanation": "Detallar tecnologías de federación",
+    "information_classification": "Confidencial",
+    "tier": 2,
+    "rules_summary": [
+      "Si no hay accesos de usuarios de EMPRESA, normalmente no se levanta riesgo de autenticación.",
+      "Si hay accesos de usuarios de EMPRESA y existe federación corporativa suficiente, los controles alternativos de repositorio, contraseñas, MFA y timeout pueden quedar sin riesgo según catalog_entry.",
+      "Si hay accesos de usuarios de EMPRESA, no hay federación y el control concreto no se cumple, se genera hallazgo aplicando las observaciones del catalog_entry.",
+      "Q_020 MFA: si no hay federación y no hay MFA, MEDIO si información pública y ALTO para Uso Interno o superior.",
+      "Q_011-Q_019: si no hay federación y no cumplen, MEDIO para Uso Interno y ALTO para Confidencial o superior.",
+      "Q_021 timeout: si no hay federación y no cumple, MEDIO."
+    ]
+  },
+  "logging_context": {
+    "description": "Contexto común para Q_037-Q_040. Se evalúan conjuntamente: logs, SIEM propio, integración con SIEM de EMPRESA y alertas.",
+    "tier": 2,
+    "questions": {
+      "Q_037": {
+        "question_id": "Q_037",
+        "question_text": "",
+        "provider_answer": "NO",
+        "provider_explanation": "Detallar los campos de los registros de Logs y el periodo de tiempo de conservación de los mismos.",
+        "answer_missing": false,
+        "raw_question": {
+          "question_id": "Q_037",
+          "block": "SEGURIDAD",
+          "section": "TRAZABILIDAD",
+          "requirement": "Recogida de logs e integración en SIEM o en repositorio externo",
+          "requirement_source": "questionnaire",
+          "question_text": "¿Se recogen Logs en las operaciones y/o accesos realizados por los usuarios finales y operadores del servicio en las distintas infraestructuras involucradas en el servicio (Servidores (web, aplicación, BBDDs), dispositivos de red, …)?",
+          "question_text_source": "questionnaire_description",
+          "answer_raw": "No",
+          "answer": "NO",
+          "answer_missing": false,
+          "explanation": "Detallar los campos de los registros de Logs y el periodo de tiempo de conservación de los mismos.",
+          "source": {
+            "sheet": "Cuestionario Plataforma",
+            "row": 54
+          },
+          "parse_notes": [
+            "answer_normalized"
+          ]
+        }
+      },
+      "Q_038": {
+        "question_id": "Q_038",
+        "question_text": "",
+        "provider_answer": "NO",
+        "provider_explanation": "Detallar el SIEM utilizado. Especificar el tiempo de conservación de los Logs recolectados.",
+        "answer_missing": false,
+        "raw_question": {
+          "question_id": "Q_038",
+          "block": "SEGURIDAD",
+          "section": "TRAZABILIDAD",
+          "requirement": null,
+          "requirement_source": null,
+          "question_text": "¿Se envían los logs recogidos a un SIEM propio del proveedor?",
+          "question_text_source": "questionnaire_description",
+          "answer_raw": "No",
+          "answer": "NO",
+          "answer_missing": false,
+          "explanation": "Detallar el SIEM utilizado. Especificar el tiempo de conservación de los Logs recolectados.",
+          "source": {
+            "sheet": "Cuestionario Plataforma",
+            "row": 55
+          },
+          "parse_notes": [
+            "answer_normalized"
+          ]
+        }
+      },
+      "Q_039": {
+        "question_id": "Q_039",
+        "question_text": "",
+        "provider_answer": "NO",
+        "provider_explanation": "Indicar el mecanismo de integración con un SIEM externo.",
+        "answer_missing": false,
+        "raw_question": {
+          "question_id": "Q_039",
+          "block": "SEGURIDAD",
+          "section": "TRAZABILIDAD",
+          "requirement": null,
+          "requirement_source": null,
+          "question_text": "¿Existe la posibilidad de integrar los logs con el SIEM de EMPRESA?",
+          "question_text_source": "questionnaire_description",
+          "answer_raw": "No",
+          "answer": "NO",
+          "answer_missing": false,
+          "explanation": "Indicar el mecanismo de integración con un SIEM externo.",
+          "source": {
+            "sheet": "Cuestionario Plataforma",
+            "row": 56
+          },
+          "parse_notes": [
+            "answer_normalized"
+          ]
+        }
+      },
+      "Q_040": {
+        "question_id": "Q_040",
+        "question_text": "",
+        "provider_answer": "NO",
+        "provider_explanation": "Detallar el proceso de actuación sobre incidentes a raíz de una alerta generada por el SIEM",
+        "answer_missing": false,
+        "raw_question": {
+          "question_id": "Q_040",
+          "block": "SEGURIDAD",
+          "section": "TRAZABILIDAD",
+          "requirement": null,
+          "requirement_source": null,
+          "question_text": "La recogida de los logs anteriormente mencionados en el SIEM, ¿provoca alertas generadas por éste?",
+          "question_text_source": "questionnaire_description",
+          "answer_raw": "No",
+          "answer": "NO",
+          "answer_missing": false,
+          "explanation": "Detallar el proceso de actuación sobre incidentes a raíz de una alerta generada por el SIEM",
+          "source": {
+            "sheet": "Cuestionario Plataforma",
+            "row": 57
+          },
+          "parse_notes": [
+            "answer_normalized"
+          ]
+        }
+      }
+    },
+    "rules_summary": [
+      "No disponer de SIEM propio no genera riesgo por sí solo si el proveedor permite enviar logs al SIEM de EMPRESA o existe mecanismo equivalente suficiente.",
+      "El objetivo es que haya gestión efectiva de logs y alertas de eventos.",
+      "Si no se recogen logs, sí puede existir hallazgo.",
+      "Si la información sobre logs/SIEM/alertas es insuficiente, score=2 y follow-up."
+    ]
+  },
+  "triaje_summary": {
+    "contract": {
+      "contract_name": "Nombre de la contratación",
+      "short_description": "La gestión del calzado de seguridad especial se integra dentro de la contratación del calzado de seguridad.",
+      "providers": [
+        "Proveedor"
+      ],
+      "business_activity": "Actividad de Negocio: incluye tratamiento y/o intercambio de información. Esta actividad es gestionada por compras del Negocio",
+      "procurement_model": "Licitación competitiva entre varios proveedores",
+      "contract_duration": "Por ahora se ha adjudicado por un año, con renovaciones anuales con un máximo de 3.",
+      "award_date_expected": "Ya está adjudicado el contrato de calzado de seguridad.",
+      "language": [
+        "Castellano"
+      ],
+      "responsible_person": "Responsable de la contratación",
+      "project_code": "Código del proyecto.",
+      "business_line": "Línea de negocio",
+      "business_area": "Área de negocio"
+    },
+    "solution": {
+      "solution_type": "SaaS (Software as a Service)",
+      "saas_name": "Sistema de solicitud de calzado especial para los trabajadores de EMPRESA.",
+      "saas_functionality": "Es una aplicación para la gestión de las solicitudes y base de datos de usuarios de calzado de seguridad especial.",
+      "user_types": [
+        "Usuarios internos",
+        "Usuarios externos (proveedores y colaboradores)"
+      ],
+      "connection_with_company": false,
+      "involves_ai": false
+    },
+    "information": {
+      "classification": "Confidencial",
+      "classification_detail": "Información de los trabajadores incluyendo información médica para la gestión del calzado especial.",
+      "personal_data": true,
+      "personal_data_regime": "GDPR",
+      "personal_data_types": [
+        "Datos identificativos y personales (CIF, DNI, firma, edad, sexo, ubicación, etc.) "
+      ],
+      "personal_data_volume": "Entre 20 y 100.000",
+      "processing_location": "En la infraestructura del proveedor"
+    },
+    "provider_interaction": {
+      "provider_access_to_company_infrastructure": false,
+      "provider_access_detail": "No acceden a los sistemas/infraestructura de EMPRESA",
+      "systems_interaction": "No acceden a los sistemas/infraestructura de EMPRESA"
+    },
+    "risk_context": {
+      "service_is_critical": false
+    },
+    "derived_flags": {
+      "has_personal_data": true,
+      "is_saas": true,
+      "has_provider_internal_access": false,
+      "involves_ai": false
+    }
+  },
+  "questionnaire_provider": {
+    "name": "PROVEEDOR",
+    "platform_name": "PLATAFORMA",
+    "url": "URL",
+    "functional_description": null,
+    "stores_personal_data_raw": "SÍ",
+    "stores_personal_data": true
+  },
+  "units": [
+    {
+      "unit_type": "single_with_group_context",
+      "group_id": "AUTHENTICATION_FEDERATION_DEPENDENCIES",
+      "group_reason": "Pregunta de autenticación evaluada individualmente, pero con contexto común de acceso de usuarios de EMPRESA y federación.",
+      "shared_context": {
+        "description": "Contexto común para Q_010-Q_021. La severidad se resuelve con las observaciones del catálogo, no con TIER directo si severity_source=conditional_rules.",
+        "empresa_users_access_question_id": "Q_009",
+        "empresa_users_access_answer": "SI",
+        "empresa_users_access_explanation": "Los que se requiera",
+        "federation_question_id": "Q_010",
+        "federation_supported_or_used_answer": "NO",
+        "federation_supported_or_used_explanation": "Detallar tecnologías de federación",
+        "information_classification": "Confidencial",
+        "tier": 2,
+        "rules_summary": [
+          "Si no hay accesos de usuarios de EMPRESA, normalmente no se levanta riesgo de autenticación.",
+          "Si hay accesos de usuarios de EMPRESA y existe federación corporativa suficiente, los controles alternativos de repositorio, contraseñas, MFA y timeout pueden quedar sin riesgo según catalog_entry.",
+          "Si hay accesos de usuarios de EMPRESA, no hay federación y el control concreto no se cumple, se genera hallazgo aplicando las observaciones del catalog_entry.",
+          "Q_020 MFA: si no hay federación y no hay MFA, MEDIO si información pública y ALTO para Uso Interno o superior.",
+          "Q_011-Q_019: si no hay federación y no cumplen, MEDIO para Uso Interno y ALTO para Confidencial o superior.",
+          "Q_021 timeout: si no hay federación y no cumple, MEDIO."
+        ]
+      },
+      "questions": [
+        {
+          "question_id": "Q_018",
+          "question_text": "",
+          "provider_answer": "NO",
+          "provider_explanation": "Detallar",
+          "answer_missing": false,
+          "raw_question": {
+            "question_id": "Q_018",
+            "block": "SEGURIDAD",
+            "section": "ACCESOS",
+            "requirement": null,
+            "requirement_source": null,
+            "question_text": "Política de contraseñas: ¿Se fuerza el cambio de la contraseña inicial?",
+            "question_text_source": "questionnaire_adjacent_column",
+            "answer_raw": "NO",
+            "answer": "NO",
+            "answer_missing": false,
+            "explanation": "Detallar",
+            "source": {
+              "sheet": "Cuestionario Plataforma",
+              "row": 35
+            },
+            "parse_notes": [
+              "question_text_read_from_adjacent_column_due_to_merged_layout"
+            ]
+          },
+          "catalog_entry": {
+            "doc_type": "risk_catalog_question",
+            "chunk_id": "RAG-Q_018",
+            "question_id": "Q_018",
+            "question_number": 18,
+            "dimension": "Autenticación",
+            "bloque": "SEGURIDAD",
+            "apartado": "ACCESOS",
+            "requisito": "Gestión de usuarios",
+            "question_text": "Política de contraseñas: ¿Se fuerza el cambio de la contraseña inicial?",
+            "control_id": "C_007",
+            "control_ids": [
+              "C_007"
+            ],
+            "control_text": "Las cuentas de los usuarios tienen que contar con una política de contraseñas robusta",
+            "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+            "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+            "amenazas": [
+              "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+              "Acceso no autorizado debido a una mala configuración",
+              "Compromiso de credenciales",
+              "Compromiso de datos"
+            ],
+            "risk_id": "R_002",
+            "risk_name": "Acceso no autorizado",
+            "risk_description": "No disponer de una política robusta de contraseñas puede conllevar un acceso no autorizado debido a una mala gestión de la cuenta de los usuarios",
+            "severity_by_tier": {
+              "TIER 1": "N/A",
+              "TIER 2": "N/A",
+              "TIER 3": "N/A"
+            },
+            "severity_source": "conditional_rules",
+            "evaluation_group": "AUTHENTICATION",
+            "severity_logic": "AUTHENTICATION_FEDERATION_DEPENDENCY",
+            "depends_on_questions": [
+              "Q_009",
+              "Q_010"
+            ],
+            "conditional_severity_logic": "AUTHENTICATION_FEDERATION_DEPENDENCY",
+            "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+            "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Obligación de cambio de contraseña la primera vez",
+            "conditional_rules": [
+              "Si hay acceso de usuario de EMPRESA y cumplen con la federación: NINGUNO",
+              "Si hay acceso de usuarios de EMPRESA y NO tienen federación y NO lo cumplen: MEDIO para Uso Interno. ALTO para superior.",
+              "Si NO hay accesos de EMPRESA: NINGUNO"
+            ],
+            "raw_observations": "* Si hay acceso de usuario de EMPRESA y cumplen con la federación: NINGUNO\n* Si hay acceso de usuarios de EMPRESA y NO tienen federación y NO lo cumplen: MEDIO para Uso Interno. ALTO para superior.\n* Si NO hay accesos de EMPRESA: NINGUNO",
+            "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+            "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+            "traceability": "Excel: Análisis SaaS, fila 19",
+            "evaluation": {
+              "group_id": "AUTHENTICATION_FEDERATION_DEPENDENCIES",
+              "evaluation_mode": "single_with_group_context",
+              "group_questions": [
+                "Q_010",
+                "Q_011",
+                "Q_012",
+                "Q_013",
+                "Q_014",
+                "Q_015",
+                "Q_016",
+                "Q_017",
+                "Q_018",
+                "Q_019",
+                "Q_020",
+                "Q_021"
+              ],
+              "group_reason": "La pregunta se evalúa individualmente, pero su severidad depende de Q_009 acceso de usuarios de EMPRESA, Q_010 federación y clasificación de información.",
+              "applies_to_saas_default": true,
+              "has_direct_tier_severity": false,
+              "has_conditional_severity_rules": true,
+              "is_informational_or_na": false,
+              "requires_human_review_if_no_rag_match": true,
+              "requires_human_review_if_missing_core_catalog_fields": false,
+              "severity_logic": "AUTHENTICATION_FEDERATION_DEPENDENCY"
+            }
+          },
+          "retrieval": {
+            "status": "FOUND_LOCAL_FALLBACK",
+            "method": "local_catalog_question_id",
+            "collection": "tfm_rag_manual"
+          }
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "question_id": "Q_018",
+      "question_text": "",
+      "provider_answer": "NO",
+      "provider_explanation": "Detallar",
+      "answer_missing": false,
+      "raw_question": {
+        "question_id": "Q_018",
+        "block": "SEGURIDAD",
+        "section": "ACCESOS",
+        "requirement": null,
+        "requirement_source": null,
+        "question_text": "Política de contraseñas: ¿Se fuerza el cambio de la contraseña inicial?",
+        "question_text_source": "questionnaire_adjacent_column",
+        "answer_raw": "NO",
+        "answer": "NO",
+        "answer_missing": false,
+        "explanation": "Detallar",
+        "source": {
+          "sheet": "Cuestionario Plataforma",
+          "row": 35
+        },
+        "parse_notes": [
+          "question_text_read_from_adjacent_column_due_to_merged_layout"
+        ]
+      },
+      "catalog_entry": {
+        "doc_type": "risk_catalog_question",
+        "chunk_id": "RAG-Q_018",
+        "question_id": "Q_018",
+        "question_number": 18,
+        "dimension": "Autenticación",
+        "bloque": "SEGURIDAD",
+        "apartado": "ACCESOS",
+        "requisito": "Gestión de usuarios",
+        "question_text": "Política de contraseñas: ¿Se fuerza el cambio de la contraseña inicial?",
+        "control_id": "C_007",
+        "control_ids": [
+          "C_007"
+        ],
+        "control_text": "Las cuentas de los usuarios tienen que contar con una política de contraseñas robusta",
+        "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+        "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+        "amenazas": [
+          "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+          "Acceso no autorizado debido a una mala configuración",
+          "Compromiso de credenciales",
+          "Compromiso de datos"
+        ],
+        "risk_id": "R_002",
+        "risk_name": "Acceso no autorizado",
+        "risk_description": "No disponer de una política robusta de contraseñas puede conllevar un acceso no autorizado debido a una mala gestión de la cuenta de los usuarios",
+        "severity_by_tier": {
+          "TIER 1": "N/A",
+          "TIER 2": "N/A",
+          "TIER 3": "N/A"
+        },
+        "severity_source": "conditional_rules",
+        "evaluation_group": "AUTHENTICATION",
+        "severity_logic": "AUTHENTICATION_FEDERATION_DEPENDENCY",
+        "depends_on_questions": [
+          "Q_009",
+          "Q_010"
+        ],
+        "conditional_severity_logic": "AUTHENTICATION_FEDERATION_DEPENDENCY",
+        "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+        "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Obligación de cambio de contraseña la primera vez",
+        "conditional_rules": [
+          "Si hay acceso de usuario de EMPRESA y cumplen con la federación: NINGUNO",
+          "Si hay acceso de usuarios de EMPRESA y NO tienen federación y NO lo cumplen: MEDIO para Uso Interno. ALTO para superior.",
+          "Si NO hay accesos de EMPRESA: NINGUNO"
+        ],
+        "raw_observations": "* Si hay acceso de usuario de EMPRESA y cumplen con la federación: NINGUNO\n* Si hay acceso de usuarios de EMPRESA y NO tienen federación y NO lo cumplen: MEDIO para Uso Interno. ALTO para superior.\n* Si NO hay accesos de EMPRESA: NINGUNO",
+        "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+        "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+        "traceability": "Excel: Análisis SaaS, fila 19",
+        "evaluation": {
+          "group_id": "AUTHENTICATION_FEDERATION_DEPENDENCIES",
+          "evaluation_mode": "single_with_group_context",
+          "group_questions": [
+            "Q_010",
+            "Q_011",
+            "Q_012",
+            "Q_013",
+            "Q_014",
+            "Q_015",
+            "Q_016",
+            "Q_017",
+            "Q_018",
+            "Q_019",
+            "Q_020",
+            "Q_021"
+          ],
+          "group_reason": "La pregunta se evalúa individualmente, pero su severidad depende de Q_009 acceso de usuarios de EMPRESA, Q_010 federación y clasificación de información.",
+          "applies_to_saas_default": true,
+          "has_direct_tier_severity": false,
+          "has_conditional_severity_rules": true,
+          "is_informational_or_na": false,
+          "requires_human_review_if_no_rag_match": true,
+          "requires_human_review_if_missing_core_catalog_fields": false,
+          "severity_logic": "AUTHENTICATION_FEDERATION_DEPENDENCY"
+        }
+      },
+      "retrieval": {
+        "status": "FOUND_LOCAL_FALLBACK",
+        "method": "local_catalog_question_id",
+        "collection": "tfm_rag_manual"
+      }
+    }
+  ]
+}

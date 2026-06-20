@@ -1,0 +1,49 @@
+{
+  "batch_id": "batch_015",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_015",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor indica gestión mediante cadenas aleatorias de 128 bits, pero no confirma explícitamente la existencia de una política de contraseñas robusta.",
+      "decision_reason": "La respuesta es ambigua respecto a si existen reglas de complejidad aplicables a usuarios, ya que se refiere a una gestión técnica interna del proveedor.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿Existe una política de contraseñas definida para los usuarios que acceden a la plataforma? Por favor, detalle los requisitos de complejidad (longitud, caracteres, rotación)."
+      ],
+      "generates_finding": true,
+      "requires_human_review": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Complejidad: incluir mayúsculas, minúsculas, números y caracteres especiales",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_015",
+          "chunk_id": "RAG-Q_015",
+          "traceability": "Excel: Análisis SaaS, fila 16",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "SI",
+      "provider_details": "LA GESTIONA EL PROVEEDOR BASADA EN CADENAS ALEATORIAS DE 128BITS"
+    }
+  ],
+  "batch_validation_notes": []
+}

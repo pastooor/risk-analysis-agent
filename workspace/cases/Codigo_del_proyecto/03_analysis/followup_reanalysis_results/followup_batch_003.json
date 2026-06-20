@@ -1,0 +1,29 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_003",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_011",
+      "final_score": 1,
+      "final_score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que utiliza una base de datos local y no dispone de integración con sistemas de gestión centralizada de identidades.",
+      "decision_reason": "El control C_009 exige un repositorio centralizado. El proveedor admite explícitamente que no existe integración con LDAP, AD, IDP o IAM, incumpliendo el requisito.",
+      "resolved_by_provider": false
+    }
+  ],
+  "batch_validation_notes": [],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_003\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_011\",\"final_score\":1,\"final_score_type\":\"non_compliance\",\"answer_summary\":\"El proveedor confirma que utiliza una base de datos local y no dispone de integración con sistemas de gestión centralizada de identidades.\",\"decision_reason\":\"El control C_009 exige un repositorio centralizado. El proveedor admite explícitamente que no existe integración con LDAP, AD, IDP o IAM, in",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_011"
+    ],
+    "normalized_question_ids": [
+      "Q_011"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

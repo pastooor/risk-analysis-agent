@@ -1,0 +1,10 @@
+{
+  "case_id": "",
+  "status": "READY_FOR_FINAL_ANALYSIS",
+  "updated_at": "2026-06-06T17:45:33",
+  "has_followups": false,
+  "followup_count": 0,
+  "total_batches": 0,
+  "total_evaluations": 0,
+  "scoring_batches_dir": "/data/cases/03_analysis/scoring_batches"
+}

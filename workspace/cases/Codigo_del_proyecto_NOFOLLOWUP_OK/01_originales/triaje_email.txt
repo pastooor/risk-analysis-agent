@@ -1,0 +1,42 @@
+Hola,
+Muchas gracias por completar el formulario de evaluación preliminar de riesgos de ciberseguridad.
+Próximamente, contactaremos para informarle de los siguientes pasos.
+A continuación, se detallan las respuestas a las preguntas:
+-Módulo 2: Características de la actividad
+
+ 1. Nombre de la contratación: Nombre de la contratación
+ 2. Descripción breve de la contratación: La gestión del calzado de seguridad especial se integra dentro de la contratación del calzado de seguridad.
+ 3. Proveedor/es: Proveedor
+ 4. La actividad conlleva IA: No
+ 5. Características de la actividad: Actividad de Negocio: incluye tratamiento y/o intercambio de información. Esta actividad es gestionada por compras del Negocio
+-Módulo 4: Solución tecnológica
+8.Solución tecnológica: SaaS (Software as a Service)
+-Módulo 5: Solución propuesta por el proveedor
+9.Nombre del SaaS: Sistema de solicitud de calzado especial para los trabajadores de EMPRESA.
+10. Funcionalidad del SaaS: Es una aplicación para la gestión de las solicitudes y base de datos de usuarios de calzado de seguridad especial.
+11. Tipos de usuarios que acceden al SaaS: ["Usuarios internos","Usuarios externos (proveedores y colaboradores)"]
+12. Conexión del SaaS con EMPRESA: No
+-Módulo 6: Identificación del tipo de información
+
+ 1. Tipo de información: Confidencial
+16.Detalle del tipo de información: Información de los trabajadores incluyendo información médica para la gestión del calzado especial.
+17.Datos de carácter personal: Sí se manejará datos de carácter personal, sujeto a GDPR (Reglamento General de Protección de Datos).
+ 2. Tipos de datos de carácter personal: ["Datos identificativos y personales (CIF, DNI, firma, edad, sexo, ubicación, etc.) "]
+ 3. Volumen de datos personales que se va a tratar: Entre 20 y 100.000
+ 4. Lugar donde se realiza el tratamiento de la información: En la infraestructura del proveedor
+-Módulo 7: Interacción de los usuarios del proveedor con la infraestructura de EMPRESA
+22.Número de usuarios del proveedor que acceden a EMPRESA: No acceden a los sistemas/infraestructura de EMPRESA
+23.Con qué sistemas/plataformas de EMPRESA interactua el proveedor: No acceden a los sistemas/infraestructura de EMPRESA
+-Módulo 8: Riesgos introducidos
+24.El servicio, proyecto o solución es critico: No
+-Módulo 9: Datos generales de la contratación
+25.Codigo del proyecto: Código del proyecto.
+26.Línea de negocio: Línea de negocio
+27. Área de negocio: Área de negocio
+28.Responsable de la contratación: Responsable de la contratación
+29.Gestión de la contratación: Licitación competitiva entre varios proveedores
+30.Duración del contrato: Por ahora se ha adjudicado por un año, con renovaciones anuales con un máximo de 3.
+31. Fecha prevista de adjudicación: Ya está adjudicado el contrato de calzado de seguridad.
+32. Idioma de la contratación: ["Castellano"]
+Un saludo
+Equipo SeguridadInformación

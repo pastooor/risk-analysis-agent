@@ -1,0 +1,29 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_016",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_036",
+      "final_score": 3,
+      "final_score_type": "compliant",
+      "answer_summary": "El proveedor detalla formatos de exportación (CSV, XLSX, ZIP), validación de integridad mediante hash y un plazo definido de 10 días laborables para la entrega.",
+      "decision_reason": "La respuesta proporciona el detalle técnico requerido sobre formatos, integridad y plazos, cumpliendo con el requisito de un proceso estandarizado para la devolución de datos.",
+      "resolved_by_provider": true
+    }
+  ],
+  "batch_validation_notes": [],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_016\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_036\",\"final_score\":3,\"final_score_type\":\"compliant\",\"answer_summary\":\"El proveedor detalla formatos de exportación (CSV, XLSX, ZIP), validación de integridad mediante hash y un plazo definido de 10 días laborables para la entrega.\",\"decision_reason\":\"La respuesta proporciona el detalle técnico requerido sobre formatos, integridad y plazos, cumpliendo con el requisito de u",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_036"
+    ],
+    "normalized_question_ids": [
+      "Q_036"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

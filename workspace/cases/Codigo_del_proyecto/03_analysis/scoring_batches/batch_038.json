@@ -1,0 +1,41 @@
+{
+  "batch_id": "batch_038",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_042",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que la aplicación es responsive, lo cual no confirma ni descarta la existencia de una aplicación móvil nativa o híbrida.",
+      "decision_reason": "La respuesta es ambigua. Una web responsive no es una aplicación móvil. Se requiere aclarar si existe una app instalable (nativa/híbrida) o solo web.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_042",
+          "chunk_id": "RAG-Q_042",
+          "traceability": "Excel: Análisis SaaS, fila 43",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "SI",
+      "provider_details": "La aplicaion esta hecha en php responsive"
+    }
+  ],
+  "batch_validation_notes": []
+}

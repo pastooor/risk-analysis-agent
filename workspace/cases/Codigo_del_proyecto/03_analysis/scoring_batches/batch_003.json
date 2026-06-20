@@ -1,0 +1,50 @@
+{
+  "batch_id": "batch_003",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_003",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "La respuesta indica que existe o podría existir acceso a datos desde países fuera de la Unión Europea.",
+      "decision_reason": "Existe o podría existir acceso desde fuera de la UE. Requiere validar garantías GDPR, países y condiciones.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿Podéis aportar evidencia o aclaración adicional que permita confirmar si el control está implantado y cuál es su alcance?"
+      ],
+      "requires_human_review": true,
+      "validation_warning": "Score ajustado por regla determinista legal Q_002/Q_003.",
+      "generates_finding": true,
+      "risk_id": "R_009",
+      "risk_name": "Incumplimiento normativo",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_003",
+          "chunk_id": "RAG-Q_003",
+          "traceability": "Excel: Análisis SaaS, fila 4",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "",
+      "tiempo_mitigacion": "",
+      "provider_answer": "NO",
+      "provider_details": "Especificar países"
+    }
+  ],
+  "batch_validation_notes": [
+    {
+      "type": "manual_review",
+      "description": "No se pudo determinar la severidad para Q_003. Revisar reglas del catálogo.",
+      "question_id": "Q_003",
+      "source": "post_ai_validation"
+    }
+  ]
+}

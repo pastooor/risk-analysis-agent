@@ -1,0 +1,3122 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "status": "REPORT_DATA_READY",
+  "created_at": "2026-06-18T13:27:25",
+  "summary": {
+    "total_evaluations": 56,
+    "total_findings": 22,
+    "critical_or_high": 8,
+    "medium": 10,
+    "low": 2,
+    "sin_nivel": 2,
+    "resolved_by_followup": 14,
+    "not_resolved_by_followup": 4
+  },
+  "findings": [
+    {
+      "question_id": "Q_001",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que no existen planes de auditoría y controles internos de seguridad alineados con las normativas legales de tratamiento de datos.",
+      "decision_reason": "Se aplica la observación del catálogo: al existir datos personales y no garantizarse el cumplimiento GDPR, el riesgo se eleva automáticamente a ALTO.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Severidad ajustada por observación del catálogo Q_001: datos personales + GDPR no garantizado = ALTO.",
+      "generates_finding": true,
+      "risk_id": "R_001",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_038"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se debe disponer de unos planes de auditoría y controles internos que aseguren la protección de la información tratada por el servicio prestado a EMPRESA en línea con las normativas legales que apliquen en el proyecto.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_001",
+          "chunk_id": "RAG-Q_001",
+          "traceability": "Excel: Análisis SaaS, fila 2",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar planes de auditorías",
+      "_source_batch": "batch_001.json"
+    },
+    {
+      "question_id": "Q_005",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que nunca se realizan ejercicios de seguridad sobre el servicio.",
+      "decision_reason": "La respuesta 'Nunca' implica incumplimiento del requisito de realizar ejercicios o revisiones de seguridad con periodicidad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "",
+      "risk_name": "Demora en la detección de vulnerabilidades",
+      "control_ids": [
+        "C_024"
+      ],
+      "incumplimiento_identificado": "No se realizan ejercicios de Red/Blue Team",
+      "controles_asociados": "Se deben realizar ejercicios de Red/Blue Team",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Recopilación de información",
+        "Inyección de código",
+        "Vulnerabilidades en dependencias"
+      ],
+      "mitigation": "Se deben realizar ejercicios de Red Team / Blue Team o en su defecto, ejercicios similares en los que se obtengan resultados similares a los anteriores",
+      "mitigation_guide": "Se deben realizar ejercicios de Red/Blue Team, al menos una vez al año.",
+      "report_context_example": "El proveedor indica que no realiza ejercicios de Red/Blue Team.",
+      "report_detail_example": "No se realizan ejercicios de Red/Blue Team, dejando en el aire y sin solucionar vulnerabilidades. Esto deriva a que se facilite a los atacantes el aprovechamiento de vulnerabilidades para que puedan entrar y obtener el poder del sistema.\nLos simulacros de Red Team, que emulan ataques externos, desempeñan un papel crucial al identificar posibles vulnerabilidades y explorar debilidades en la seguridad de un sistema o red. Por otro lado, el Blue Team se encarga de detectar, prevenir y responder a los ataques simulados del Red Team. Fortaleciendo las defensas del sistema, identificando brechas de seguridad y mejorando la postura general de seguridad.\nLa ausencia de estos ejercicios supone un riesgo en la pérdida de integridad, confidencialidad y disponibilidad de los datos de la herramienta, así como de los sistemas del proveedor. Pudiendo resultar en la explotación de vulnerabilidades no identificadas por parte de atacantes, a lo que se sumaría la falta de preparación para incidentes de seguridad y la incapacidad para detectar y mitigar proactivamente debilidades de la herramienta. Estos ejercicios, permiten una evaluación exhaustiva de la infraestructura digital, asegurando así la robustez y la preparación del sistema frente a amenazas reales.",
+      "sources": [
+        {
+          "question_id": "Q_005",
+          "chunk_id": "RAG-Q_005",
+          "traceability": "Excel: Análisis SaaS, fila 6",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "BAJO",
+      "tiempo_mitigacion": "Pte.",
+      "provider_answer": "Nunca",
+      "provider_details": "Detallar el proceso, alcance y periodicidad de los ejercicios",
+      "_source_batch": "batch_005.json"
+    },
+    {
+      "question_id": "Q_006",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que nunca se realizan tests de intrusión.",
+      "decision_reason": "La respuesta 'Nunca' implica incumplimiento del requisito de realizar pruebas de intrusión o validaciones de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "R_004",
+      "risk_name": "Demora en la detección de vulnerabilidades",
+      "control_ids": [
+        "C_025"
+      ],
+      "incumplimiento_identificado": "No se realizan test de intrusión o pentesting",
+      "controles_asociados": "Se deben realizar test de intrusión o pentesting",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Recopilación de información",
+        "Inyección de código",
+        "Vulnerabilidades en dependencias"
+      ],
+      "mitigation": "Se deben realizar test de intrusión o en su defecto, ejercicios similares en los que se obtengan resultados similares a los anteriores",
+      "mitigation_guide": "Se debe realizar tests de intrusión, al menos una vez al año.",
+      "report_context_example": "El proveedor indica que no realiza test de intrusión.",
+      "report_detail_example": "No realizar test de intrusión puede suponer una demora en la detección de las vulnerabilidades que un atacante podría aprovechar para abrir una brecha de seguridad\nLa ausencia de estos ejercicios supone un riesgo en la pérdida de integridad, confidencialidad y disponibilidad de los datos de la herramienta, así como de los sistemas del proveedor. Pudiendo resultar en la explotación de vulnerabilidades no identificadas por parte de atacantes, a lo que se sumaría la falta de preparación para incidentes de seguridad y la incapacidad para detectar y mitigar proactivamente debilidades de la herramienta. Estos ejercicios, permiten una evaluación exhaustiva de la infraestructura digital, asegurando así la robustez y la preparación del sistema frente a amenazas reales",
+      "sources": [
+        {
+          "question_id": "Q_006",
+          "chunk_id": "RAG-Q_006",
+          "traceability": "Excel: Análisis SaaS, fila 7",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "Nunca",
+      "provider_details": "Detallar el proceso, alcance y periodicidad de los tests de intrusión",
+      "_source_batch": "batch_006.json"
+    },
+    {
+      "question_id": "Q_008",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor describe un modelo de permisos basado en perfiles y revisión periódica, pero no detalla el proceso técnico o herramienta de gestión de roles.",
+      "decision_reason": "La respuesta sigue siendo genérica. No se describe el proceso, herramienta o procedimiento específico para identificar y gestionar los roles de administración, incumpliendo el requisito de detalle técnico.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "requires_human_review": false,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se debe tener identificados a todos los usuarios que tienen permisos o roles de administración sobre la plataforma que se ofrece a EMPRESA.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_008",
+          "chunk_id": "RAG-Q_008",
+          "traceability": "Excel: Análisis SaaS, fila 9",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "SI",
+      "provider_details": "",
+      "_source_batch": "batch_008.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": false,
+        "answer_summary": "El proveedor describe un modelo de permisos basado en perfiles y revisión periódica, pero no detalla el proceso técnico o herramienta de gestión de roles.",
+        "decision_reason": "La respuesta sigue siendo genérica. No se describe el proceso, herramienta o procedimiento específico para identificar y gestionar los roles de administración, incumpliendo el requisito de detalle técnico.",
+        "source_reanalysis_file": "followup_batch_002.json"
+      }
+    },
+    {
+      "question_id": "Q_010",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no soporta federación de usuarios.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_012"
+      ],
+      "incumplimiento_identificado": "No se soporta la federación contra el IdP de EMPRESA, PingOne",
+      "controles_asociados": "Se debe soportar la federación de usuarios contra el IdP corporativo, PingOne, mediante el uso de protocolos como SAML u OAuth.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe disponer de un sistema de federación de identidades contra el IDP de EMPRESA, para ello deberá poder soportar o tener capacidad de utilizar el protocolo seguro SAML v2 u Oauth",
+      "mitigation_guide": "Se debe soportar la federación de usuarios contra el IdP corporativo, PingOne, mediante el uso de protocolos como SAML u OAuth.",
+      "report_context_example": "En el cuestionario el proveedor menciona que aunque soporta tecnologías de federación mediante SAML v2, esta tecnología no se utiliza actualmente, de tal manera que la gestión de los usuarios no recaiga en el proveedor y se utilicen las identidades del AD de EMPRESA para el acceso a la plataforma.",
+      "report_detail_example": "No contar con autenticación mediante federación de identidades supone un riesgo debido a que, sin federación, garantizar que el acceso a la información alojada en el entorno de un tercero es realizado por un usuario de confianza, es más complicado. Por ejemplo, si no se cuenta con federación, en el caso de que un empleado de la empresa salga de ésta, es más difícil detectar que esa persona se ha ido y eliminar su usuario, dando pie a que durante un tiempo ese usuario pueda seguir activo a pesar de que la persona no se encuentre en la empresa. Esto puede llevar a que se realicen accesos no autorizados a la plataforma. // Cuando se trata de ENTRA ID: A pesar de que la plataforma soporta la federación contra EntraID, dicho acceso federado no está alineado con los estándares de seguridad vigentes en EMPRESA, por ello, se debe regularizar el acceso federado a la plataforma a través de Ping Federate, como IdP corporativo.",
+      "sources": [
+        {
+          "question_id": "Q_010",
+          "chunk_id": "RAG-Q_010",
+          "traceability": "Excel: Análisis SaaS, fila 11",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar tecnologías de federación",
+      "_source_batch": "batch_010.json"
+    },
+    {
+      "question_id": "Q_011",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que utiliza una base de datos local y no dispone de integración con sistemas de gestión centralizada de identidades.",
+      "decision_reason": "El control C_009 exige un repositorio centralizado. El proveedor admite explícitamente que no existe integración con LDAP, AD, IDP o IAM, incumpliendo el requisito.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "requires_human_review": false,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_009"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "Debe utilizarse un repositorio central para gestión de identidades, restringiéndose al mínimo y excepcionalmente la gestión de usuarios locales.",
+      "amenazas": [],
+      "mitigation": "En caso de no poder implementar el sistema de federación contra el IDP de EMPRESA, es necesario tener un repositorio centralizado de las cuentas de los usuarios que acceden a la plataforma.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_011",
+          "chunk_id": "RAG-Q_011",
+          "traceability": "Excel: Análisis SaaS, fila 12",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "SI",
+      "provider_details": "El repositorio se encuentra en una base de datos SQL y esta cifrada",
+      "_source_batch": "batch_011.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": false,
+        "answer_summary": "El proveedor confirma que utiliza una base de datos local y no dispone de integración con sistemas de gestión centralizada de identidades.",
+        "decision_reason": "El control C_009 exige un repositorio centralizado. El proveedor admite explícitamente que no existe integración con LDAP, AD, IDP o IAM, incumpliendo el requisito.",
+        "source_reanalysis_file": "followup_batch_003.json"
+      }
+    },
+    {
+      "question_id": "Q_014",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que no existe una longitud mínima definida por ellos, delegando la gestión sin confirmar el cumplimiento de políticas robustas.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Longitud mínima de 12 caracteres",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_014",
+          "chunk_id": "RAG-Q_014",
+          "traceability": "Excel: Análisis SaaS, fila 15",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "LO GESTIONA EL PROVEEDOR",
+      "_source_batch": "batch_014.json"
+    },
+    {
+      "question_id": "Q_016",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no existe un diccionario de palabras prohibidas para las contraseñas.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Incluir diccionario de palabras prohibidas",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_016",
+          "chunk_id": "RAG-Q_016",
+          "traceability": "Excel: Análisis SaaS, fila 17",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "DEFINIDO POR EL PROVEEDOR",
+      "_source_batch": "batch_016.json"
+    },
+    {
+      "question_id": "Q_017",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no existe un número máximo de intentos permitidos antes de bloquear la cuenta.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Bloqueo de la cuenta tras 5 intentos fallidos",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_017",
+          "chunk_id": "RAG-Q_017",
+          "traceability": "Excel: Análisis SaaS, fila 18",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar",
+      "_source_batch": "batch_017.json"
+    },
+    {
+      "question_id": "Q_018",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no se fuerza el cambio de la contraseña inicial.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Obligación de cambio de contraseña la primera vez",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_018",
+          "chunk_id": "RAG-Q_018",
+          "traceability": "Excel: Análisis SaaS, fila 19",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar",
+      "_source_batch": "batch_018.json"
+    },
+    {
+      "question_id": "Q_020",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no dispone de mecanismos de autenticación multifactor (MFA/2FA).",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_010"
+      ],
+      "incumplimiento_identificado": "No utiliza MFA",
+      "controles_asociados": "Se debe utilizar MFA en los procesos de autenticación, como por ejemplo PingID",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "En caso de no poder integrar, el sistema de federación contra el IDP de EMPRESA, la plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella.",
+      "mitigation_guide": "Se debe utilizar MFA en los procesos de autenticación, como por ejemplo PingID",
+      "report_context_example": "El proveedor menciona que no se utiliza un 2FA al acceder al servicio utilizado. La autenticación tiene que disponer de un segundo factor de autenticación.",
+      "report_detail_example": "No contar con autenticación mediante tecnologías de 2FA o MFA supone un riesgo debido a que, sin MFA, garantizar que el acceso a la información alojada en el entorno de un tercero es realizado por un usuario de confianza, es más complicado. Por ejemplo, si no se cuenta con MFA, no nos permite garantizar la confidencialidad y disponibilidad de la información en un proveedor externo, debido a la correcta realización de la gestión del ciclo de vida de la identidad.",
+      "sources": [
+        {
+          "question_id": "Q_020",
+          "chunk_id": "RAG-Q_020",
+          "traceability": "Excel: Análisis SaaS, fila 21",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar mecanismos de autenticación multifactor",
+      "_source_batch": "batch_020.json"
+    },
+    {
+      "question_id": "Q_024",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que el protocolo HSTS no está habilitado.",
+      "decision_reason": "El control C_059 requiere explícitamente la habilitación de HSTS. La respuesta negativa del proveedor constituye un incumplimiento directo del requisito de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_059"
+      ],
+      "incumplimiento_identificado": "No está habilitado el HSTS",
+      "controles_asociados": "Se debe habilitar el HSTS en HTTPS.",
+      "amenazas": [
+        "Acceso no autorizado",
+        "Intercepción de comunicaciones",
+        "Manipulación no autorizada de las comunicaciones",
+        "Compromiso de datos",
+        "Compromiso de credenciales",
+        "Robo de información",
+        "Exposicion de información sensible",
+        "Incumplimiento normativo"
+      ],
+      "mitigation": "Se debe tener habilitado el protocolo HSTS.",
+      "mitigation_guide": "Se debe habilitar el HSTS en HTTPS.",
+      "report_context_example": "La plataforma no tiene habilitado el HSTS",
+      "report_detail_example": "La ausencia de HSTS en HTTPS expone a los usuarios al riesgo de ataques de tipo SSL stripping, en los cuales un atacante puede forzar la degradación de la conexión a HTTP, protocolo inseguro que transmite la información en texto plano, permitiendo la interceptación o modificación de datos sensibles durante su transmisión, como credenciales.\nEsta situación incrementa significativamente la probabilidad de acceso no autorizado, robo, fuga y/o divulgación de la información, hecho de llegar a producirse podría derivar en incumplimiento normativo y, posteriormente, sanciones legales, pérdida económica y/o reputacional.",
+      "sources": [
+        {
+          "question_id": "Q_024",
+          "chunk_id": "RAG-Q_024",
+          "traceability": "Excel: Análisis SaaS, fila 25",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar comunicaciones",
+      "_source_batch": "batch_024.json"
+    },
+    {
+      "question_id": "Q_025",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no ha deshabilitado los algoritmos RC4.",
+      "decision_reason": "El uso de RC4 es una vulnerabilidad crítica de seguridad. La respuesta negativa del proveedor confirma el incumplimiento directo del control C_060.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_001",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_060"
+      ],
+      "incumplimiento_identificado": "Las comunicaciones pueden realizarse mediante protocolos y cifrados vulnerables",
+      "controles_asociados": "Se deben deshabilitar los algoritmos RC4 en HTTPS.",
+      "amenazas": [
+        "Denegación de Servicio",
+        "Intercepción de comunicaciones",
+        "Manipulación no autorizada de las comunicaciones"
+      ],
+      "mitigation": "Se debe tener deshabilitado el algoritmo RC4 debido a que es un algoritmo obselota e inseguro.",
+      "mitigation_guide": "Se debe deshabilitar el uso del cifrado RC4",
+      "report_context_example": "El proveedor indica la posibilidad de establecer comunicaciones HSTS con el algoritmo de cifrado RC4.",
+      "report_detail_example": "Es necesario deshabilitar el uso del algoritmo RC4 para asegurar una comunicación segura. Este algoritmo es vulnerable a ataques de intercepcción y Man-in-the-Middle, comprometiendo la seguridad de la conexión. Además, es más fácil para los atacantes descifrar la información transmitida a través de las conexiones cifradas utilizando el algoritmo RC4.\nEl uso del algoritmo RC4, plantea riesgos adicionales, como la susceptibilidad a ataques de flujo nulo y la posibilidad de recuperar partes de la clave original, lo que podría comprometer la confidencialidad de la información transmitida.",
+      "sources": [
+        {
+          "question_id": "Q_025",
+          "chunk_id": "RAG-Q_025",
+          "traceability": "Excel: Análisis SaaS, fila 26",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar comunicaciones",
+      "_source_batch": "batch_025.json"
+    },
+    {
+      "question_id": "Q_030",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor describe el proceso de backup, cifrado y retención, pero no aporta evidencia documental ni confirma el cumplimiento de los requisitos de recuperación.",
+      "decision_reason": "Aunque se detalla el proceso, la respuesta sigue siendo insuficiente al no aportar documentación formal ni confirmar los parámetros de recuperación exigidos por el control.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "requires_human_review": false,
+      "risk_id": "R_006",
+      "risk_name": "Pérdida de disponibilidad",
+      "control_ids": [
+        "C_053"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "Se debe realizar copia de respaldo de los datos con una frecuencia menor de 24 horas.",
+      "amenazas": [
+        "Incumplimiento normativo/regulatorio"
+      ],
+      "mitigation": "",
+      "mitigation_guide": "Se debe realizar copia de respaldo de los datos con una frecuencia menor de 24 horas.",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_030",
+          "chunk_id": "RAG-Q_030",
+          "traceability": "Excel: Análisis SaaS, fila 31",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "DIARIA",
+      "_source_batch": "batch_030.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": false,
+        "answer_summary": "El proveedor describe el proceso de backup, cifrado y retención, pero no aporta evidencia documental ni confirma el cumplimiento de los requisitos de recuperación.",
+        "decision_reason": "Aunque se detalla el proceso, la respuesta sigue siendo insuficiente al no aportar documentación formal ni confirmar los parámetros de recuperación exigidos por el control.",
+        "source_reanalysis_file": "followup_batch_012.json"
+      }
+    },
+    {
+      "question_id": "Q_032",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "La política de retención está en proceso de formalización y pendiente de aprobación definitiva, por lo que no existe una política documentada y aprobada actualmente.",
+      "decision_reason": "El proveedor confirma que la política no está aprobada ni formalizada, incumpliendo el requisito de disponer de una política de retención documentada y aprobada.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "requires_human_review": false,
+      "risk_id": "R_006",
+      "risk_name": "Pérdida de disponibilidad",
+      "control_ids": [
+        "C_056"
+      ],
+      "incumplimiento_identificado": "No se tiene formalizado una política de retención del dato",
+      "controles_asociados": "Se debe asegurar la existencia y la implementación de una política de retención del dato de acuerdo con las normativas, leyes, regulaciones y a las necesidades de negocio.",
+      "amenazas": [
+        "Incumplimiento normativo/regulatorio"
+      ],
+      "mitigation": "Se debe disponer de una política de retención de dato documentada, en la cual se deben tratar como mínimo los puntos de cuánto tiempo",
+      "mitigation_guide": "Se debe asegurar la existencia y la implementación de una política de retención del dato de acuerdo con las normativas, leyes, regulaciones y a las necesidades de negocio.",
+      "report_context_example": "El proveedor indica que no cuenta con una política de retención de datos.",
+      "report_detail_example": "No disponer de una política de retención de datos puede dejar a una organización vulnerable a una serie de riesgos, incluida la pérdida de datos críticos, la interrupción de las operaciones y el incumplimiento normativo. Es fundamental que las organizaciones desarrollen e implementen estas medidas como parte de su estrategia general de gestión de la información y la continuidad del negocio.",
+      "sources": [
+        {
+          "question_id": "Q_032",
+          "chunk_id": "RAG-Q_032",
+          "traceability": "Excel: Análisis SaaS, fila 33",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "BAJO",
+      "tiempo_mitigacion": "Pte.",
+      "provider_answer": "Otros",
+      "provider_details": "Tiempo por establecer, Si, El proveedor",
+      "_source_batch": "batch_032.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": false,
+        "answer_summary": "La política de retención está en proceso de formalización y pendiente de aprobación definitiva, por lo que no existe una política documentada y aprobada actualmente.",
+        "decision_reason": "El proveedor confirma que la política no está aprobada ni formalizada, incumpliendo el requisito de disponer de una política de retención documentada y aprobada.",
+        "source_reanalysis_file": "followup_batch_014.json"
+      }
+    },
+    {
+      "question_id": "Q_035",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma explícitamente que no dispone de un mecanismo de destrucción a bajo nivel de los datos.",
+      "decision_reason": "La respuesta es negativa y confirma el incumplimiento del control de destrucción de datos requerido en la ficha técnica para la finalización del servicio.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_006",
+      "risk_name": "Robo de información",
+      "control_ids": [],
+      "incumplimiento_identificado": "El proveedor no dispone de un mecanismo de destrucción a bajo nivel de los datos",
+      "controles_asociados": "Se debe disponer mecanismo de destrucción de bajo nivel de los datos en caso de finalización de servicio.",
+      "amenazas": [
+        "Pérdida de información",
+        "Exposición indebida de información",
+        "Fuga de datos",
+        "Robo de información"
+      ],
+      "mitigation": "El proveedor debe tener un mecanismo de destrucción a bajo nivel de los datos",
+      "mitigation_guide": "Se debe disponer de un mecanismo de destrucción de bajo nivel de los datos en caso de finalización de servicio.",
+      "report_context_example": "El proveedor no dispone de un mecanismo de destrucción a bajo nivel de los datos",
+      "report_detail_example": "La falta de un mecanismo de destrucción a bajo nivel de los datos tras la terminación del servicio, puede suponer un riesgo de seguridad, por acceso no autorizado a la información de EMPRESA por parte de usuarios del proveedor o por parte de un atacante, pudiendo derivar en robo, exfiltración y/o divulgación de información sensible, confidencial, estratégica y/o afectada por normativa, hecho que de llegar a producirse podría implicar el incumplimiento normativo, sanciones legales y pérdida reputacional y económica.",
+      "sources": [
+        {
+          "question_id": "Q_035",
+          "chunk_id": "RAG-Q_035",
+          "traceability": "Excel: Análisis SaaS, fila 36",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Puesto que los datos estan en el servidor de hosting",
+      "_source_batch": "batch_035.json"
+    },
+    {
+      "question_id": "Q_048",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma explícitamente que no dispone de sistemas de filtrado de tráfico IPS/IDS ni firewall de capa 7.",
+      "decision_reason": "La respuesta negativa del proveedor constituye un incumplimiento directo del control de seguridad perimetral requerido (C_061/C_062), exponiendo la plataforma a riesgos de intrusión.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_010",
+      "risk_name": "Demora en la detección de intrusiones",
+      "control_ids": [
+        "C_061/C_062"
+      ],
+      "incumplimiento_identificado": "El proveedor no dispone de equipos de filtrado de tráfico IPS/IDS y/o firewall de capa 7",
+      "controles_asociados": "Se debe disponer de IPS/IDS y/o un firewall de capa 7",
+      "amenazas": [
+        "Denegación de Servicio",
+        "Manipulación no autorizada de la API de servicios",
+        "Compromiso de credenciales",
+        "Inyección de código"
+      ],
+      "mitigation": "Se debe contar con ciertos componentes (IPS/IDS y/o firewall de capa 7, etc.)que garanticen la seguridad perimetral que rodea a la arquitectura que dispone el proveedor para dar el servicio a EMPRESA.",
+      "mitigation_guide": "Se debe implementar de manera integral y efectiva sistemas avanzados de prevención y detección de intrusiones (IPS/IDS), o en su defecto un WAF.",
+      "report_context_example": "El proveedor indica que actualmente no filtran el tráfico mediante IPS/IDS y/o firewall de capa 7.",
+      "report_detail_example": "El proveedor indica que no dispone de IDS/IPS o WAF. La detección temprana y la prevención activa son críticas para salvaguardar la integridad, confidencialidad y disponibilidad de la información en el sistema, lo cual puede exponer a la infraestructura a un mayor riesgo en el compromiso de seguridad.\nEstos sistemas desempeñan un papel crucial al monitorear y analizar el tráfico de red en busca de actividades maliciosas o patrones anómalos. La falta de un IPS deja a la red vulnerable a ataques avanzados, como intrusiones y exploits, que podrían pasar desapercibidos. Por otro lado, la carencia de un IDS significa que la organización no cuenta con una capa efectiva de detección temprana, lo que impide la identificación oportuna de posibles amenazas. Adicionalmente, un WAF añade seguridad a la capa de aplicación proporcionando protección ante vulnerabilidades web y ataques de denegación de servicio. Por ello, aseguran la plataforma con estos sistemas, puede haber un riesgo de la pérdida de integridad y disponibilidad.",
+      "sources": [
+        {
+          "question_id": "Q_048",
+          "chunk_id": "RAG-Q_048",
+          "traceability": "Excel: Análisis SaaS, fila 49",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar",
+      "_source_batch": "batch_044.json"
+    },
+    {
+      "question_id": "Q_055",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que no existen procedimientos documentados o mecanismos suficientes para la recuperación/extracción de datos desde la nube.",
+      "decision_reason": "La ausencia de procedimientos documentados o mecanismos de recuperación/extracción supone incumplimiento del requisito.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": true,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "R_007",
+      "risk_name": "Aprovechamiento de vulnerabilidades",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_055",
+          "chunk_id": "RAG-Q_055",
+          "traceability": "Excel: Análisis SaaS, fila 55",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "",
+      "tiempo_mitigacion": "",
+      "provider_answer": "NO",
+      "provider_details": "Detalle de los mecanismos de integración con los servicios Si la aplicación o plataforma no dispone de un sistema ( web service, una API, etc..) que permita extraer los datos, es un claro inconveniente para no adoptar la aplicación en la nube, ya que no podríamos disponer de los datos de la nube.",
+      "_source_batch": "batch_050.json"
+    },
+    {
+      "question_id": "Q_037",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no recoge logs de operaciones ni accesos en las infraestructuras del servicio.",
+      "decision_reason": "El proveedor responde negativamente a la recogida de logs, incumpliendo el control C_030 y generando un riesgo de demora en la detección de incidentes.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_030"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se deben recoger Logs en las operaciones y/o accesos realizados por los usuarios finales y operadores del servicio en las distintas infraestructuras involucradas en el servicio (Servidores (web, aplicación, BBDDs), dispositivos de red, …).",
+      "mitigation_guide": "",
+      "report_context_example": "El proveedor indica que no genera logs en las operaciones y/o accesos realizados por los usuarios finales y operadores del servicio en las distintas infraestructuras involucradas en el servicio",
+      "report_detail_example": "No generar y recoger logs de las operaciones y/o accesos de los usuarios finales y los operadores del servicio de las infraestructuras involucradas, puede suponer un riesgo debido a la demora en la detección de incidentes.",
+      "sources": [
+        {
+          "question_id": "Q_037",
+          "chunk_id": "RAG-Q_037",
+          "traceability": "Excel: Análisis SaaS, fila 38",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar los campos de los registros de Logs y el periodo de tiempo de conservación de los mismos.",
+      "_source_batch": "batch_053.json"
+    },
+    {
+      "question_id": "Q_038",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no dispone de un SIEM propio para el envío de logs.",
+      "decision_reason": "Al no recoger logs (Q_037) ni disponer de SIEM, se incumple el control C_031, aumentando el riesgo de falta de visibilidad y detección de incidentes.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_031"
+      ],
+      "incumplimiento_identificado": "El proveedor no dispone de un SIEM al que enviar los logs que recoge",
+      "controles_asociados": "Se debe disponer de su propio SIEM u ofrecer la posibilidad de enviar los logs al SIEM de EMPRESA",
+      "amenazas": [
+        "Manipulación no autorizada de la API de servicios",
+        "Recopilación de información"
+      ],
+      "mitigation": "Se deben enviar los logs a un sistema tipo SIEM o similar.",
+      "mitigation_guide": "Se debe disponer de una herramienta capaz de centralizar los logs.",
+      "report_context_example": "El proveedor indica que genera logs, pero, sin embargo, estos no son almacenados en un SIEM, o cuentan con la posibilidad de enviarlos al de EMPRESA, ni generan alertas de seguridad.",
+      "report_detail_example": "No disponer de una herramienta de análisis con la que poder centralizar los logs de los distintos sistemas involucrados y en la que establecer reglas y configurar alarmas en el caso de darse algún incidente de seguridad en los sistemas, además de no generar alertas mediante los logs, puede derivar en una detección tardía de una incidencia grave dentro del sistema al no haber un proceso que permita escalar dichos incidentes.",
+      "sources": [
+        {
+          "question_id": "Q_038",
+          "chunk_id": "RAG-Q_038",
+          "traceability": "Excel: Análisis SaaS, fila 39",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar el SIEM utilizado. Especificar el tiempo de conservación de los Logs recolectados.",
+      "_source_batch": "batch_053.json"
+    },
+    {
+      "question_id": "Q_039",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no ofrece la posibilidad de integrar los logs con el SIEM de EMPRESA.",
+      "decision_reason": "La negativa a integrar logs con el SIEM de EMPRESA incumple el control C_032, impidiendo la centralización y monitorización de eventos de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_032"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "En caso de que el proveedor no sea capaz de provocar alertas sobre incidentes de seguridad, debe ser capaz de enviar los logs recogidos al SIEM de EMPRESA.",
+      "mitigation_guide": "Se deben exportar los logs al SIEM de EMPRESA",
+      "report_context_example": "El proveedor indica que genera logs, pero, sin embargo, no cuenta con la posibilidad de enviarlos al de EMPRESA, ni generan alertas de seguridad.",
+      "report_detail_example": "No disponer de una herramienta de análisis con la que poder centralizar los logs de los distintos sistemas involucrados y en la que establecer reglas y configurar alarmas en el caso de darse algún incidente de seguridad en los sistemas, además de no generar alertas mediante los logs, puede derivar en una detección tardía de una incidencia grave dentro del sistema al no haber un proceso que permita escalar dichos incidentes.",
+      "sources": [
+        {
+          "question_id": "Q_039",
+          "chunk_id": "RAG-Q_039",
+          "traceability": "Excel: Análisis SaaS, fila 40",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Indicar el mecanismo de integración con un SIEM externo.",
+      "_source_batch": "batch_053.json"
+    },
+    {
+      "question_id": "Q_040",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no genera alertas de seguridad a partir de los logs.",
+      "decision_reason": "La ausencia de generación de alertas (C_033) junto con la falta de logs y SIEM, impide la detección temprana de incidentes de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_033"
+      ],
+      "incumplimiento_identificado": "El proveedor no genera alertas de seguridad",
+      "controles_asociados": "Se debe disponer de un sistema o solución que permita levantar alertas de seguridad para identificar posibles incidentes de seguridad (p.e. SIEM). Estas alertas deben poder ser puestas a disposición de EMPRESA para un posible análisis por parte del SOC.",
+      "amenazas": [
+        "Manipulación no autorizada de la API de servicios",
+        "Recopilación de información"
+      ],
+      "mitigation": "En caso de no poder enviar los logs al SIEM de EMPRESA, se debe tener la capacidad de provocar alertas generadas por el sistema de recogida de logs del proveedor.",
+      "mitigation_guide": "Se debe tener la capacidad de provocar alertas generadas por el sistema de recogida de logs del proveedor.",
+      "report_context_example": "",
+      "report_detail_example": "La ausencia de generación de alertas de seguridad en el SIEM del proveedor representa un riesgo de seguridad significativo para la capacidad de detección temprana de incidentes. Si no se levantan de forma automática alertas ante eventos relevantes, se pierde visibilidad sobre cualquier actividad anómala o maliciosa dentro de la infraestructura, hecho que impide realizar un seguimiento adecuado de posibles incidentes de seguridad. Esta falta de visibilidad puede derivar en una detección tardía de amenazas, comprometiendo la capacidad de respuesta oportuna y efectiva por parte del equipo de respuesta ante incidentes, así como provocar un aumento potencial del impacto, alcance y duración de una brecha de seguridad.",
+      "sources": [
+        {
+          "question_id": "Q_040",
+          "chunk_id": "RAG-Q_040",
+          "traceability": "Excel: Análisis SaaS, fila 41",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar el proceso de actuación sobre incidentes a raíz de una alerta generada por el SIEM",
+      "_source_batch": "batch_053.json"
+    }
+  ],
+  "question_evaluations": [
+    {
+      "question_id": "Q_001",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que no existen planes de auditoría y controles internos de seguridad alineados con las normativas legales de tratamiento de datos.",
+      "decision_reason": "Se aplica la observación del catálogo: al existir datos personales y no garantizarse el cumplimiento GDPR, el riesgo se eleva automáticamente a ALTO.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Severidad ajustada por observación del catálogo Q_001: datos personales + GDPR no garantizado = ALTO.",
+      "generates_finding": true,
+      "risk_id": "R_001",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_038"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se debe disponer de unos planes de auditoría y controles internos que aseguren la protección de la información tratada por el servicio prestado a EMPRESA en línea con las normativas legales que apliquen en el proyecto.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_001",
+          "chunk_id": "RAG-Q_001",
+          "traceability": "Excel: Análisis SaaS, fila 2",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar planes de auditorías",
+      "_source_batch": "batch_001.json"
+    },
+    {
+      "question_id": "Q_002",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor indica que los CPDs principales y de respaldo se encuentran dentro de la Unión Europea.",
+      "decision_reason": "Los CPDs se encuentran dentro de la Unión Europea o la respuesta indica cumplimiento del requisito.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista legal Q_002/Q_003.",
+      "generates_finding": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_002",
+          "chunk_id": "RAG-Q_002",
+          "traceability": "Excel: Análisis SaaS, fila 3",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "provider_answer": "SI",
+      "provider_details": "España",
+      "_source_batch": "batch_002.json"
+    },
+    {
+      "question_id": "Q_003",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor indica que no se accede a los datos desde países fuera de la Unión Europea.",
+      "decision_reason": "El proveedor indica que no se accede a los datos desde países fuera de la Unión Europea.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista legal Q_002/Q_003.",
+      "generates_finding": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_003",
+          "chunk_id": "RAG-Q_003",
+          "traceability": "Excel: Análisis SaaS, fila 4",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "provider_answer": "NO",
+      "provider_details": "Especificar países",
+      "_source_batch": "batch_003.json"
+    },
+    {
+      "question_id": "Q_004",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que los activos son subcontratados (hosting y dominio), pero no detalla qué terceros prestan el servicio ni cómo se gestiona la seguridad.",
+      "decision_reason": "La respuesta es incompleta. Se requiere identificar a los proveedores de servicios subcontratados para evaluar el riesgo de la cadena de suministro.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_004",
+          "chunk_id": "RAG-Q_004",
+          "traceability": "Excel: Análisis SaaS, fila 5",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "SUBCONTRATADOS",
+      "provider_details": "LOADING SERVICIOS DE HOSTING Y DOMINIO WEB",
+      "_source_batch": "batch_004.json"
+    },
+    {
+      "question_id": "Q_005",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que nunca se realizan ejercicios de seguridad sobre el servicio.",
+      "decision_reason": "La respuesta 'Nunca' implica incumplimiento del requisito de realizar ejercicios o revisiones de seguridad con periodicidad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "",
+      "risk_name": "Demora en la detección de vulnerabilidades",
+      "control_ids": [
+        "C_024"
+      ],
+      "incumplimiento_identificado": "No se realizan ejercicios de Red/Blue Team",
+      "controles_asociados": "Se deben realizar ejercicios de Red/Blue Team",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Recopilación de información",
+        "Inyección de código",
+        "Vulnerabilidades en dependencias"
+      ],
+      "mitigation": "Se deben realizar ejercicios de Red Team / Blue Team o en su defecto, ejercicios similares en los que se obtengan resultados similares a los anteriores",
+      "mitigation_guide": "Se deben realizar ejercicios de Red/Blue Team, al menos una vez al año.",
+      "report_context_example": "El proveedor indica que no realiza ejercicios de Red/Blue Team.",
+      "report_detail_example": "No se realizan ejercicios de Red/Blue Team, dejando en el aire y sin solucionar vulnerabilidades. Esto deriva a que se facilite a los atacantes el aprovechamiento de vulnerabilidades para que puedan entrar y obtener el poder del sistema.\nLos simulacros de Red Team, que emulan ataques externos, desempeñan un papel crucial al identificar posibles vulnerabilidades y explorar debilidades en la seguridad de un sistema o red. Por otro lado, el Blue Team se encarga de detectar, prevenir y responder a los ataques simulados del Red Team. Fortaleciendo las defensas del sistema, identificando brechas de seguridad y mejorando la postura general de seguridad.\nLa ausencia de estos ejercicios supone un riesgo en la pérdida de integridad, confidencialidad y disponibilidad de los datos de la herramienta, así como de los sistemas del proveedor. Pudiendo resultar en la explotación de vulnerabilidades no identificadas por parte de atacantes, a lo que se sumaría la falta de preparación para incidentes de seguridad y la incapacidad para detectar y mitigar proactivamente debilidades de la herramienta. Estos ejercicios, permiten una evaluación exhaustiva de la infraestructura digital, asegurando así la robustez y la preparación del sistema frente a amenazas reales.",
+      "sources": [
+        {
+          "question_id": "Q_005",
+          "chunk_id": "RAG-Q_005",
+          "traceability": "Excel: Análisis SaaS, fila 6",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "BAJO",
+      "tiempo_mitigacion": "Pte.",
+      "provider_answer": "Nunca",
+      "provider_details": "Detallar el proceso, alcance y periodicidad de los ejercicios",
+      "_source_batch": "batch_005.json"
+    },
+    {
+      "question_id": "Q_006",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que nunca se realizan tests de intrusión.",
+      "decision_reason": "La respuesta 'Nunca' implica incumplimiento del requisito de realizar pruebas de intrusión o validaciones de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "R_004",
+      "risk_name": "Demora en la detección de vulnerabilidades",
+      "control_ids": [
+        "C_025"
+      ],
+      "incumplimiento_identificado": "No se realizan test de intrusión o pentesting",
+      "controles_asociados": "Se deben realizar test de intrusión o pentesting",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Recopilación de información",
+        "Inyección de código",
+        "Vulnerabilidades en dependencias"
+      ],
+      "mitigation": "Se deben realizar test de intrusión o en su defecto, ejercicios similares en los que se obtengan resultados similares a los anteriores",
+      "mitigation_guide": "Se debe realizar tests de intrusión, al menos una vez al año.",
+      "report_context_example": "El proveedor indica que no realiza test de intrusión.",
+      "report_detail_example": "No realizar test de intrusión puede suponer una demora en la detección de las vulnerabilidades que un atacante podría aprovechar para abrir una brecha de seguridad\nLa ausencia de estos ejercicios supone un riesgo en la pérdida de integridad, confidencialidad y disponibilidad de los datos de la herramienta, así como de los sistemas del proveedor. Pudiendo resultar en la explotación de vulnerabilidades no identificadas por parte de atacantes, a lo que se sumaría la falta de preparación para incidentes de seguridad y la incapacidad para detectar y mitigar proactivamente debilidades de la herramienta. Estos ejercicios, permiten una evaluación exhaustiva de la infraestructura digital, asegurando así la robustez y la preparación del sistema frente a amenazas reales",
+      "sources": [
+        {
+          "question_id": "Q_006",
+          "chunk_id": "RAG-Q_006",
+          "traceability": "Excel: Análisis SaaS, fila 7",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "Nunca",
+      "provider_details": "Detallar el proceso, alcance y periodicidad de los tests de intrusión",
+      "_source_batch": "batch_006.json"
+    },
+    {
+      "question_id": "Q_007",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma el uso de identificadores únicos (ID interno y correo electrónico) y prohíbe explícitamente el uso de cuentas compartidas.",
+      "decision_reason": "La respuesta aclara el mecanismo técnico de unicidad y confirma la ausencia de cuentas compartidas, cumpliendo con el requisito de identificación unívoca.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_007",
+          "chunk_id": "RAG-Q_007",
+          "traceability": "Excel: Análisis SaaS, fila 8",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Mediante un registro con roles de usuario",
+      "_source_batch": "batch_007.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma el uso de identificadores únicos (ID interno y correo electrónico) y prohíbe explícitamente el uso de cuentas compartidas.",
+        "decision_reason": "La respuesta aclara el mecanismo técnico de unicidad y confirma la ausencia de cuentas compartidas, cumpliendo con el requisito de identificación unívoca.",
+        "source_reanalysis_file": "followup_batch_001.json"
+      }
+    },
+    {
+      "question_id": "Q_008",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor describe un modelo de permisos basado en perfiles y revisión periódica, pero no detalla el proceso técnico o herramienta de gestión de roles.",
+      "decision_reason": "La respuesta sigue siendo genérica. No se describe el proceso, herramienta o procedimiento específico para identificar y gestionar los roles de administración, incumpliendo el requisito de detalle técnico.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "requires_human_review": false,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se debe tener identificados a todos los usuarios que tienen permisos o roles de administración sobre la plataforma que se ofrece a EMPRESA.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_008",
+          "chunk_id": "RAG-Q_008",
+          "traceability": "Excel: Análisis SaaS, fila 9",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "SI",
+      "provider_details": "",
+      "_source_batch": "batch_008.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": false,
+        "answer_summary": "El proveedor describe un modelo de permisos basado en perfiles y revisión periódica, pero no detalla el proceso técnico o herramienta de gestión de roles.",
+        "decision_reason": "La respuesta sigue siendo genérica. No se describe el proceso, herramienta o procedimiento específico para identificar y gestionar los roles de administración, incumpliendo el requisito de detalle técnico.",
+        "source_reanalysis_file": "followup_batch_002.json"
+      }
+    },
+    {
+      "question_id": "Q_009",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor confirma el acceso de usuarios de EMPRESA, pero la explicación es genérica y carece de detalle técnico sobre el alcance.",
+      "decision_reason": "La respuesta es afirmativa, pero la explicación 'Los que se requiera' es insuficiente para evaluar el alcance, tipo de usuarios o criticidad del acceso.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_009",
+          "chunk_id": "RAG-Q_009",
+          "traceability": "Excel: Análisis SaaS, fila 10",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "SI",
+      "provider_details": "Los que se requiera",
+      "_source_batch": "batch_009.json"
+    },
+    {
+      "question_id": "Q_010",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no soporta federación de usuarios.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_012"
+      ],
+      "incumplimiento_identificado": "No se soporta la federación contra el IdP de EMPRESA, PingOne",
+      "controles_asociados": "Se debe soportar la federación de usuarios contra el IdP corporativo, PingOne, mediante el uso de protocolos como SAML u OAuth.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe disponer de un sistema de federación de identidades contra el IDP de EMPRESA, para ello deberá poder soportar o tener capacidad de utilizar el protocolo seguro SAML v2 u Oauth",
+      "mitigation_guide": "Se debe soportar la federación de usuarios contra el IdP corporativo, PingOne, mediante el uso de protocolos como SAML u OAuth.",
+      "report_context_example": "En el cuestionario el proveedor menciona que aunque soporta tecnologías de federación mediante SAML v2, esta tecnología no se utiliza actualmente, de tal manera que la gestión de los usuarios no recaiga en el proveedor y se utilicen las identidades del AD de EMPRESA para el acceso a la plataforma.",
+      "report_detail_example": "No contar con autenticación mediante federación de identidades supone un riesgo debido a que, sin federación, garantizar que el acceso a la información alojada en el entorno de un tercero es realizado por un usuario de confianza, es más complicado. Por ejemplo, si no se cuenta con federación, en el caso de que un empleado de la empresa salga de ésta, es más difícil detectar que esa persona se ha ido y eliminar su usuario, dando pie a que durante un tiempo ese usuario pueda seguir activo a pesar de que la persona no se encuentre en la empresa. Esto puede llevar a que se realicen accesos no autorizados a la plataforma. // Cuando se trata de ENTRA ID: A pesar de que la plataforma soporta la federación contra EntraID, dicho acceso federado no está alineado con los estándares de seguridad vigentes en EMPRESA, por ello, se debe regularizar el acceso federado a la plataforma a través de Ping Federate, como IdP corporativo.",
+      "sources": [
+        {
+          "question_id": "Q_010",
+          "chunk_id": "RAG-Q_010",
+          "traceability": "Excel: Análisis SaaS, fila 11",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar tecnologías de federación",
+      "_source_batch": "batch_010.json"
+    },
+    {
+      "question_id": "Q_011",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que utiliza una base de datos local y no dispone de integración con sistemas de gestión centralizada de identidades.",
+      "decision_reason": "El control C_009 exige un repositorio centralizado. El proveedor admite explícitamente que no existe integración con LDAP, AD, IDP o IAM, incumpliendo el requisito.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "requires_human_review": false,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_009"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "Debe utilizarse un repositorio central para gestión de identidades, restringiéndose al mínimo y excepcionalmente la gestión de usuarios locales.",
+      "amenazas": [],
+      "mitigation": "En caso de no poder implementar el sistema de federación contra el IDP de EMPRESA, es necesario tener un repositorio centralizado de las cuentas de los usuarios que acceden a la plataforma.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_011",
+          "chunk_id": "RAG-Q_011",
+          "traceability": "Excel: Análisis SaaS, fila 12",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "SI",
+      "provider_details": "El repositorio se encuentra en una base de datos SQL y esta cifrada",
+      "_source_batch": "batch_011.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": false,
+        "answer_summary": "El proveedor confirma que utiliza una base de datos local y no dispone de integración con sistemas de gestión centralizada de identidades.",
+        "decision_reason": "El control C_009 exige un repositorio centralizado. El proveedor admite explícitamente que no existe integración con LDAP, AD, IDP o IAM, incumpliendo el requisito.",
+        "source_reanalysis_file": "followup_batch_003.json"
+      }
+    },
+    {
+      "question_id": "Q_012",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma un procedimiento documentado de ABM con responsables, aprobaciones y un plazo de ejecución de bajas inferior a 48 horas laborables.",
+      "decision_reason": "La respuesta detalla el proceso de gestión del ciclo de vida de usuarios, incluyendo autorizaciones, responsables y un plazo definido para las bajas, cumpliendo con el control C_005.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_012",
+          "chunk_id": "RAG-Q_012",
+          "traceability": "Excel: Análisis SaaS, fila 13",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Hay un gestion de usuarios por parte del proveedor",
+      "_source_batch": "batch_012.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma un procedimiento documentado de ABM con responsables, aprobaciones y un plazo de ejecución de bajas inferior a 48 horas laborables.",
+        "decision_reason": "La respuesta detalla el proceso de gestión del ciclo de vida de usuarios, incluyendo autorizaciones, responsables y un plazo definido para las bajas, cumpliendo con el control C_005.",
+        "source_reanalysis_file": "followup_batch_004.json"
+      }
+    },
+    {
+      "question_id": "Q_013",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma la implementación de RBAC con roles predefinidos (estándar, supervisor, administrador) y asignación de permisos según perfil y alcance funcional.",
+      "decision_reason": "La respuesta detalla el modelo de control de acceso basado en roles (RBAC) y la granularidad de los permisos, cumpliendo con el requisito de mínimo privilegio.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_013",
+          "chunk_id": "RAG-Q_013",
+          "traceability": "Excel: Análisis SaaS, fila 14",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Hay un gestion de usuarios por parte del proveedor",
+      "_source_batch": "batch_013.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma la implementación de RBAC con roles predefinidos (estándar, supervisor, administrador) y asignación de permisos según perfil y alcance funcional.",
+        "decision_reason": "La respuesta detalla el modelo de control de acceso basado en roles (RBAC) y la granularidad de los permisos, cumpliendo con el requisito de mínimo privilegio.",
+        "source_reanalysis_file": "followup_batch_005.json"
+      }
+    },
+    {
+      "question_id": "Q_014",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que no existe una longitud mínima definida por ellos, delegando la gestión sin confirmar el cumplimiento de políticas robustas.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Longitud mínima de 12 caracteres",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_014",
+          "chunk_id": "RAG-Q_014",
+          "traceability": "Excel: Análisis SaaS, fila 15",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "LO GESTIONA EL PROVEEDOR",
+      "_source_batch": "batch_014.json"
+    },
+    {
+      "question_id": "Q_015",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma la implementación de una política de contraseñas robusta que incluye longitud, complejidad, bloqueo por intentos fallidos y restricciones de seguridad.",
+      "decision_reason": "La respuesta adicional aclara satisfactoriamente que existe una política de contraseñas para usuarios nominativos, diferenciándola de las credenciales técnicas, cumpliendo así con el control C_007.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_015",
+          "chunk_id": "RAG-Q_015",
+          "traceability": "Excel: Análisis SaaS, fila 16",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "LA GESTIONA EL PROVEEDOR BASADA EN CADENAS ALEATORIAS DE 128BITS",
+      "_source_batch": "batch_015.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma la implementación de una política de contraseñas robusta que incluye longitud, complejidad, bloqueo por intentos fallidos y restricciones de seguridad.",
+        "decision_reason": "La respuesta adicional aclara satisfactoriamente que existe una política de contraseñas para usuarios nominativos, diferenciándola de las credenciales técnicas, cumpliendo así con el control C_007.",
+        "source_reanalysis_file": "followup_batch_006.json"
+      }
+    },
+    {
+      "question_id": "Q_016",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no existe un diccionario de palabras prohibidas para las contraseñas.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Incluir diccionario de palabras prohibidas",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_016",
+          "chunk_id": "RAG-Q_016",
+          "traceability": "Excel: Análisis SaaS, fila 17",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "DEFINIDO POR EL PROVEEDOR",
+      "_source_batch": "batch_016.json"
+    },
+    {
+      "question_id": "Q_017",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no existe un número máximo de intentos permitidos antes de bloquear la cuenta.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Bloqueo de la cuenta tras 5 intentos fallidos",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_017",
+          "chunk_id": "RAG-Q_017",
+          "traceability": "Excel: Análisis SaaS, fila 18",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar",
+      "_source_batch": "batch_017.json"
+    },
+    {
+      "question_id": "Q_018",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no se fuerza el cambio de la contraseña inicial.",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_007"
+      ],
+      "incumplimiento_identificado": "No se dispone de política de contraseña robustas",
+      "controles_asociados": "Se debe seguir los estándares de contraseñas de EMPRESA.",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "Se debe almacenar la contraseña cifrada con un algoritmo seguro, como mínimo AES-256.",
+      "mitigation_guide": "La plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella y disponer de una política de contraseñas robusta:\n• Obligación de cambio de contraseña la primera vez",
+      "report_context_example": "El proveedor no dispone de una política de contraseñas robusta que siga los estándares de EMPRESA.",
+      "report_detail_example": "No contar con una política de contraseñas robusta supone un riesgo debido a que, sin una política adecuada, puede llevar a que se realicen accesos no autorizados a la plataforma.",
+      "sources": [
+        {
+          "question_id": "Q_018",
+          "chunk_id": "RAG-Q_018",
+          "traceability": "Excel: Análisis SaaS, fila 19",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar",
+      "_source_batch": "batch_018.json"
+    },
+    {
+      "question_id": "Q_019",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma el uso de hash seguro con bcrypt y salt único, cumpliendo con los estándares de seguridad requeridos.",
+      "decision_reason": "La respuesta detalla el uso de bcrypt y salt único, lo cual es un mecanismo robusto y equivalente a los estándares de seguridad exigidos.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_019",
+          "chunk_id": "RAG-Q_019",
+          "traceability": "Excel: Análisis SaaS, fila 20",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Detallar",
+      "_source_batch": "batch_019.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma el uso de hash seguro con bcrypt y salt único, cumpliendo con los estándares de seguridad requeridos.",
+        "decision_reason": "La respuesta detalla el uso de bcrypt y salt único, lo cual es un mecanismo robusto y equivalente a los estándares de seguridad exigidos.",
+        "source_reanalysis_file": "followup_batch_007.json"
+      }
+    },
+    {
+      "question_id": "Q_020",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no dispone de mecanismos de autenticación multifactor (MFA/2FA).",
+      "decision_reason": "Hay acceso de usuarios de EMPRESA, no existe federación corporativa suficiente y el control concreto no se cumple.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista de autenticación.",
+      "generates_finding": true,
+      "risk_id": "R_002",
+      "risk_name": "Acceso no autorizado",
+      "control_ids": [
+        "C_010"
+      ],
+      "incumplimiento_identificado": "No utiliza MFA",
+      "controles_asociados": "Se debe utilizar MFA en los procesos de autenticación, como por ejemplo PingID",
+      "amenazas": [
+        "Acceso no autorizado a través de la explotación de una vulnerabilidad",
+        "Acceso no autorizado debido a una mala configuración",
+        "Compromiso de credenciales",
+        "Compromiso de datos"
+      ],
+      "mitigation": "En caso de no poder integrar, el sistema de federación contra el IDP de EMPRESA, la plataforma debe disponer de doble factor de autenticación para los usuarios que acceden a ella.",
+      "mitigation_guide": "Se debe utilizar MFA en los procesos de autenticación, como por ejemplo PingID",
+      "report_context_example": "El proveedor menciona que no se utiliza un 2FA al acceder al servicio utilizado. La autenticación tiene que disponer de un segundo factor de autenticación.",
+      "report_detail_example": "No contar con autenticación mediante tecnologías de 2FA o MFA supone un riesgo debido a que, sin MFA, garantizar que el acceso a la información alojada en el entorno de un tercero es realizado por un usuario de confianza, es más complicado. Por ejemplo, si no se cuenta con MFA, no nos permite garantizar la confidencialidad y disponibilidad de la información en un proveedor externo, debido a la correcta realización de la gestión del ciclo de vida de la identidad.",
+      "sources": [
+        {
+          "question_id": "Q_020",
+          "chunk_id": "RAG-Q_020",
+          "traceability": "Excel: Análisis SaaS, fila 21",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar mecanismos de autenticación multifactor",
+      "_source_batch": "batch_020.json"
+    },
+    {
+      "question_id": "Q_021",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma que el tiempo de inactividad es configurable, permitiendo reducirlo a valores seguros (ej. 30 min) para todos los usuarios.",
+      "decision_reason": "La respuesta confirma la capacidad de configurar el timeout de sesión, cumpliendo con el control de seguridad al permitir ajustes según los estándares del cliente.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_021",
+          "chunk_id": "RAG-Q_021",
+          "traceability": "Excel: Análisis SaaS, fila 22",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Una duracion de 60 minutos",
+      "_source_batch": "batch_021.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma que el tiempo de inactividad es configurable, permitiendo reducirlo a valores seguros (ej. 30 min) para todos los usuarios.",
+        "decision_reason": "La respuesta confirma la capacidad de configurar el timeout de sesión, cumpliendo con el control de seguridad al permitir ajustes según los estándares del cliente.",
+        "source_reanalysis_file": "followup_batch_008.json"
+      }
+    },
+    {
+      "question_id": "Q_022",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor indica que no se soportan versiones SSL v3 o inferiores.",
+      "decision_reason": "Si no se soportan versiones SSL v3 o inferiores, el requisito se considera cumplido.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_022",
+          "chunk_id": "RAG-Q_022",
+          "traceability": "Excel: Análisis SaaS, fila 23",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "provider_answer": "No se soporta ninguno",
+      "provider_details": "Detallar comunicaciones",
+      "_source_batch": "batch_022.json"
+    },
+    {
+      "question_id": "Q_023",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma el soporte exclusivo de TLS 1.2 y 1.3, con SSLv2, SSLv3, TLS 1.0 y 1.1 deshabilitados en los endpoints.",
+      "decision_reason": "La respuesta cumple con el control C_058 al confirmar el uso de versiones seguras (TLS 1.2/1.3) y la deshabilitación explícita de versiones inseguras.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_023",
+          "chunk_id": "RAG-Q_023",
+          "traceability": "Excel: Análisis SaaS, fila 24",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "",
+      "provider_details": "Detallar comunicaciones",
+      "_source_batch": "batch_023.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma el soporte exclusivo de TLS 1.2 y 1.3, con SSLv2, SSLv3, TLS 1.0 y 1.1 deshabilitados en los endpoints.",
+        "decision_reason": "La respuesta cumple con el control C_058 al confirmar el uso de versiones seguras (TLS 1.2/1.3) y la deshabilitación explícita de versiones inseguras.",
+        "source_reanalysis_file": "followup_batch_009.json"
+      }
+    },
+    {
+      "question_id": "Q_024",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que el protocolo HSTS no está habilitado.",
+      "decision_reason": "El control C_059 requiere explícitamente la habilitación de HSTS. La respuesta negativa del proveedor constituye un incumplimiento directo del requisito de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_059"
+      ],
+      "incumplimiento_identificado": "No está habilitado el HSTS",
+      "controles_asociados": "Se debe habilitar el HSTS en HTTPS.",
+      "amenazas": [
+        "Acceso no autorizado",
+        "Intercepción de comunicaciones",
+        "Manipulación no autorizada de las comunicaciones",
+        "Compromiso de datos",
+        "Compromiso de credenciales",
+        "Robo de información",
+        "Exposicion de información sensible",
+        "Incumplimiento normativo"
+      ],
+      "mitigation": "Se debe tener habilitado el protocolo HSTS.",
+      "mitigation_guide": "Se debe habilitar el HSTS en HTTPS.",
+      "report_context_example": "La plataforma no tiene habilitado el HSTS",
+      "report_detail_example": "La ausencia de HSTS en HTTPS expone a los usuarios al riesgo de ataques de tipo SSL stripping, en los cuales un atacante puede forzar la degradación de la conexión a HTTP, protocolo inseguro que transmite la información en texto plano, permitiendo la interceptación o modificación de datos sensibles durante su transmisión, como credenciales.\nEsta situación incrementa significativamente la probabilidad de acceso no autorizado, robo, fuga y/o divulgación de la información, hecho de llegar a producirse podría derivar en incumplimiento normativo y, posteriormente, sanciones legales, pérdida económica y/o reputacional.",
+      "sources": [
+        {
+          "question_id": "Q_024",
+          "chunk_id": "RAG-Q_024",
+          "traceability": "Excel: Análisis SaaS, fila 25",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar comunicaciones",
+      "_source_batch": "batch_024.json"
+    },
+    {
+      "question_id": "Q_025",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que no ha deshabilitado los algoritmos RC4.",
+      "decision_reason": "El uso de RC4 es una vulnerabilidad crítica de seguridad. La respuesta negativa del proveedor confirma el incumplimiento directo del control C_060.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_001",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_060"
+      ],
+      "incumplimiento_identificado": "Las comunicaciones pueden realizarse mediante protocolos y cifrados vulnerables",
+      "controles_asociados": "Se deben deshabilitar los algoritmos RC4 en HTTPS.",
+      "amenazas": [
+        "Denegación de Servicio",
+        "Intercepción de comunicaciones",
+        "Manipulación no autorizada de las comunicaciones"
+      ],
+      "mitigation": "Se debe tener deshabilitado el algoritmo RC4 debido a que es un algoritmo obselota e inseguro.",
+      "mitigation_guide": "Se debe deshabilitar el uso del cifrado RC4",
+      "report_context_example": "El proveedor indica la posibilidad de establecer comunicaciones HSTS con el algoritmo de cifrado RC4.",
+      "report_detail_example": "Es necesario deshabilitar el uso del algoritmo RC4 para asegurar una comunicación segura. Este algoritmo es vulnerable a ataques de intercepcción y Man-in-the-Middle, comprometiendo la seguridad de la conexión. Además, es más fácil para los atacantes descifrar la información transmitida a través de las conexiones cifradas utilizando el algoritmo RC4.\nEl uso del algoritmo RC4, plantea riesgos adicionales, como la susceptibilidad a ataques de flujo nulo y la posibilidad de recuperar partes de la clave original, lo que podría comprometer la confidencialidad de la información transmitida.",
+      "sources": [
+        {
+          "question_id": "Q_025",
+          "chunk_id": "RAG-Q_025",
+          "traceability": "Excel: Análisis SaaS, fila 26",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar comunicaciones",
+      "_source_batch": "batch_025.json"
+    },
+    {
+      "question_id": "Q_026",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica exportación a Excel y PDF.",
+      "decision_reason": "La respuesta es insuficiente. No detalla si existen APIs, exportaciones masivas o mecanismos automatizados para extraer la totalidad de la información en cualquier momento.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_026",
+          "chunk_id": "RAG-Q_026",
+          "traceability": "Excel: Análisis SaaS, fila 27",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "SI",
+      "provider_details": "Exportacioones a excel y pdf",
+      "_source_batch": "batch_026.json"
+    },
+    {
+      "question_id": "Q_027",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma el cifrado de datos en reposo utilizando AES-256, cumpliendo con el requisito de algoritmo robusto.",
+      "decision_reason": "La respuesta confirma el uso de AES-256, lo cual satisface el control C_050 definido en la ficha técnica para el cifrado de datos en reposo.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_027",
+          "chunk_id": "RAG-Q_027",
+          "traceability": "Excel: Análisis SaaS, fila 28",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "provider_answer": "SI",
+      "provider_details": "Encripcion con base AES-256 CBC",
+      "_source_batch": "batch_027.json"
+    },
+    {
+      "question_id": "Q_028",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma el uso de cifrado AES-256 para los backups, con gestión de claves segura y acceso restringido.",
+      "decision_reason": "La respuesta especifica el algoritmo AES-256, cumpliendo con el requisito de cifrado robusto definido en el control C_051.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_028",
+          "chunk_id": "RAG-Q_028",
+          "traceability": "Excel: Análisis SaaS, fila 29",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Algoritmo utilizado por el hosting",
+      "_source_batch": "batch_028.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma el uso de cifrado AES-256 para los backups, con gestión de claves segura y acceso restringido.",
+        "decision_reason": "La respuesta especifica el algoritmo AES-256, cumpliendo con el requisito de cifrado robusto definido en el control C_051.",
+        "source_reanalysis_file": "followup_batch_010.json"
+      }
+    },
+    {
+      "question_id": "Q_029",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma el uso de HTTPS con TLS 1.2 o superior, deshabilitando protocolos inseguros (SSL, TLS 1.0/1.1) y forzando el cifrado en el acceso.",
+      "decision_reason": "La respuesta cumple con el requisito de cifrado robusto (TLS 1.2+) y confirma la deshabilitación de protocolos obsoletos, mitigando el riesgo de robo de información.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_029",
+          "chunk_id": "RAG-Q_029",
+          "traceability": "Excel: Análisis SaaS, fila 30",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "SSL",
+      "_source_batch": "batch_029.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma el uso de HTTPS con TLS 1.2 o superior, deshabilitando protocolos inseguros (SSL, TLS 1.0/1.1) y forzando el cifrado en el acceso.",
+        "decision_reason": "La respuesta cumple con el requisito de cifrado robusto (TLS 1.2+) y confirma la deshabilitación de protocolos obsoletos, mitigando el riesgo de robo de información.",
+        "source_reanalysis_file": "followup_batch_011.json"
+      }
+    },
+    {
+      "question_id": "Q_030",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor describe el proceso de backup, cifrado y retención, pero no aporta evidencia documental ni confirma el cumplimiento de los requisitos de recuperación.",
+      "decision_reason": "Aunque se detalla el proceso, la respuesta sigue siendo insuficiente al no aportar documentación formal ni confirmar los parámetros de recuperación exigidos por el control.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "requires_human_review": false,
+      "risk_id": "R_006",
+      "risk_name": "Pérdida de disponibilidad",
+      "control_ids": [
+        "C_053"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "Se debe realizar copia de respaldo de los datos con una frecuencia menor de 24 horas.",
+      "amenazas": [
+        "Incumplimiento normativo/regulatorio"
+      ],
+      "mitigation": "",
+      "mitigation_guide": "Se debe realizar copia de respaldo de los datos con una frecuencia menor de 24 horas.",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_030",
+          "chunk_id": "RAG-Q_030",
+          "traceability": "Excel: Análisis SaaS, fila 31",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "DIARIA",
+      "_source_batch": "batch_030.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": false,
+        "answer_summary": "El proveedor describe el proceso de backup, cifrado y retención, pero no aporta evidencia documental ni confirma el cumplimiento de los requisitos de recuperación.",
+        "decision_reason": "Aunque se detalla el proceso, la respuesta sigue siendo insuficiente al no aportar documentación formal ni confirmar los parámetros de recuperación exigidos por el control.",
+        "source_reanalysis_file": "followup_batch_012.json"
+      }
+    },
+    {
+      "question_id": "Q_031",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor ha definido valores concretos de RTO (8 horas) y RPO (24 horas) para el servicio SaaS.",
+      "decision_reason": "La respuesta adicional proporciona los valores técnicos requeridos (RTO y RPO) cumpliendo con el control C_054, eliminando la ambigüedad inicial.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_031",
+          "chunk_id": "RAG-Q_031",
+          "traceability": "Excel: Análisis SaaS, fila 32",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "Otros",
+      "provider_details": "DEPENDE EN FUNCION DEL PROBLEMA",
+      "_source_batch": "batch_031.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor ha definido valores concretos de RTO (8 horas) y RPO (24 horas) para el servicio SaaS.",
+        "decision_reason": "La respuesta adicional proporciona los valores técnicos requeridos (RTO y RPO) cumpliendo con el control C_054, eliminando la ambigüedad inicial.",
+        "source_reanalysis_file": "followup_batch_013.json"
+      }
+    },
+    {
+      "question_id": "Q_032",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "La política de retención está en proceso de formalización y pendiente de aprobación definitiva, por lo que no existe una política documentada y aprobada actualmente.",
+      "decision_reason": "El proveedor confirma que la política no está aprobada ni formalizada, incumpliendo el requisito de disponer de una política de retención documentada y aprobada.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "requires_human_review": false,
+      "risk_id": "R_006",
+      "risk_name": "Pérdida de disponibilidad",
+      "control_ids": [
+        "C_056"
+      ],
+      "incumplimiento_identificado": "No se tiene formalizado una política de retención del dato",
+      "controles_asociados": "Se debe asegurar la existencia y la implementación de una política de retención del dato de acuerdo con las normativas, leyes, regulaciones y a las necesidades de negocio.",
+      "amenazas": [
+        "Incumplimiento normativo/regulatorio"
+      ],
+      "mitigation": "Se debe disponer de una política de retención de dato documentada, en la cual se deben tratar como mínimo los puntos de cuánto tiempo",
+      "mitigation_guide": "Se debe asegurar la existencia y la implementación de una política de retención del dato de acuerdo con las normativas, leyes, regulaciones y a las necesidades de negocio.",
+      "report_context_example": "El proveedor indica que no cuenta con una política de retención de datos.",
+      "report_detail_example": "No disponer de una política de retención de datos puede dejar a una organización vulnerable a una serie de riesgos, incluida la pérdida de datos críticos, la interrupción de las operaciones y el incumplimiento normativo. Es fundamental que las organizaciones desarrollen e implementen estas medidas como parte de su estrategia general de gestión de la información y la continuidad del negocio.",
+      "sources": [
+        {
+          "question_id": "Q_032",
+          "chunk_id": "RAG-Q_032",
+          "traceability": "Excel: Análisis SaaS, fila 33",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "BAJO",
+      "tiempo_mitigacion": "Pte.",
+      "provider_answer": "Otros",
+      "provider_details": "Tiempo por establecer, Si, El proveedor",
+      "_source_batch": "batch_032.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": false,
+        "answer_summary": "La política de retención está en proceso de formalización y pendiente de aprobación definitiva, por lo que no existe una política documentada y aprobada actualmente.",
+        "decision_reason": "El proveedor confirma que la política no está aprobada ni formalizada, incumpliendo el requisito de disponer de una política de retención documentada y aprobada.",
+        "source_reanalysis_file": "followup_batch_014.json"
+      }
+    },
+    {
+      "question_id": "Q_033",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma el despliegue de antivirus y una frecuencia de actualización diaria, cumpliendo con el requisito de actualización continua.",
+      "decision_reason": "La respuesta confirma explícitamente el despliegue de la solución y una periodicidad de actualización diaria, lo cual satisface el control C_001 de protección contra malware.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_033",
+          "chunk_id": "RAG-Q_033",
+          "traceability": "Excel: Análisis SaaS, fila 34",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "provider_answer": "SI",
+      "provider_details": "Diariamente",
+      "_source_batch": "batch_033.json"
+    },
+    {
+      "question_id": "Q_034",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma la existencia de un proceso documentado que incluye notificación, validación, exportación de datos, revocación de accesos y eliminación segura de datos.",
+      "decision_reason": "La respuesta detalla un proceso estandarizado que cubre los aspectos clave requeridos para la finalización y baja del servicio, cumpliendo con el control exigido.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_034",
+          "chunk_id": "RAG-Q_034",
+          "traceability": "Excel: Análisis SaaS, fila 35",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "Otros",
+      "provider_details": "A cunsultar con Cliente (EMPRESA)",
+      "_source_batch": "batch_034.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma la existencia de un proceso documentado que incluye notificación, validación, exportación de datos, revocación de accesos y eliminación segura de datos.",
+        "decision_reason": "La respuesta detalla un proceso estandarizado que cubre los aspectos clave requeridos para la finalización y baja del servicio, cumpliendo con el control exigido.",
+        "source_reanalysis_file": "followup_batch_015.json"
+      }
+    },
+    {
+      "question_id": "Q_035",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma explícitamente que no dispone de un mecanismo de destrucción a bajo nivel de los datos.",
+      "decision_reason": "La respuesta es negativa y confirma el incumplimiento del control de destrucción de datos requerido en la ficha técnica para la finalización del servicio.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_006",
+      "risk_name": "Robo de información",
+      "control_ids": [],
+      "incumplimiento_identificado": "El proveedor no dispone de un mecanismo de destrucción a bajo nivel de los datos",
+      "controles_asociados": "Se debe disponer mecanismo de destrucción de bajo nivel de los datos en caso de finalización de servicio.",
+      "amenazas": [
+        "Pérdida de información",
+        "Exposición indebida de información",
+        "Fuga de datos",
+        "Robo de información"
+      ],
+      "mitigation": "El proveedor debe tener un mecanismo de destrucción a bajo nivel de los datos",
+      "mitigation_guide": "Se debe disponer de un mecanismo de destrucción de bajo nivel de los datos en caso de finalización de servicio.",
+      "report_context_example": "El proveedor no dispone de un mecanismo de destrucción a bajo nivel de los datos",
+      "report_detail_example": "La falta de un mecanismo de destrucción a bajo nivel de los datos tras la terminación del servicio, puede suponer un riesgo de seguridad, por acceso no autorizado a la información de EMPRESA por parte de usuarios del proveedor o por parte de un atacante, pudiendo derivar en robo, exfiltración y/o divulgación de información sensible, confidencial, estratégica y/o afectada por normativa, hecho que de llegar a producirse podría implicar el incumplimiento normativo, sanciones legales y pérdida reputacional y económica.",
+      "sources": [
+        {
+          "question_id": "Q_035",
+          "chunk_id": "RAG-Q_035",
+          "traceability": "Excel: Análisis SaaS, fila 36",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Puesto que los datos estan en el servidor de hosting",
+      "_source_batch": "batch_035.json"
+    },
+    {
+      "question_id": "Q_036",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor detalla formatos de exportación (CSV, XLSX, ZIP), validación de integridad mediante hash y un plazo definido de 10 días laborables para la entrega.",
+      "decision_reason": "La respuesta proporciona el detalle técnico requerido sobre formatos, integridad y plazos, cumpliendo con el requisito de un proceso estandarizado para la devolución de datos.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_036",
+          "chunk_id": "RAG-Q_036",
+          "traceability": "Excel: Análisis SaaS, fila 37",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Si, se recuperaria del hosting",
+      "_source_batch": "batch_036.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor detalla formatos de exportación (CSV, XLSX, ZIP), validación de integridad mediante hash y un plazo definido de 10 días laborables para la entrega.",
+        "decision_reason": "La respuesta proporciona el detalle técnico requerido sobre formatos, integridad y plazos, cumpliendo con el requisito de un proceso estandarizado para la devolución de datos.",
+        "source_reanalysis_file": "followup_batch_016.json"
+      }
+    },
+    {
+      "question_id": "Q_041",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "La respuesta es demasiado genérica (hosting, PHP, SQL) y no detalla la arquitectura base necesaria para una evaluación técnica adecuada.",
+      "decision_reason": "La información proporcionada carece de detalles técnicos específicos sobre servidores, sistemas operativos y versiones, impidiendo una evaluación de riesgos de arquitectura efectiva.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_041",
+          "chunk_id": "RAG-Q_041",
+          "traceability": "Excel: Análisis SaaS, fila 42",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "SI",
+      "provider_details": "Alojamiento en hosting, PHP, SQL",
+      "_source_batch": "batch_037.json"
+    },
+    {
+      "question_id": "Q_042",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que la aplicación es responsive, lo cual no confirma ni descarta la existencia de una aplicación móvil nativa o híbrida.",
+      "decision_reason": "La respuesta es ambigua. Una web responsive no es una aplicación móvil. Se requiere aclarar si existe una app instalable (nativa/híbrida) o solo web.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_042",
+          "chunk_id": "RAG-Q_042",
+          "traceability": "Excel: Análisis SaaS, fila 43",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "SI",
+      "provider_details": "La aplicaion esta hecha en php responsive",
+      "_source_batch": "batch_038.json"
+    },
+    {
+      "question_id": "Q_043",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor confirma que la arquitectura no es multi-tenant.",
+      "decision_reason": "La pregunta es informativa y el proveedor ha respondido claramente a la consulta sobre la naturaleza de la arquitectura.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_043",
+          "chunk_id": "RAG-Q_043",
+          "traceability": "Excel: Análisis SaaS, fila 44",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "NO",
+      "provider_details": "Detallar información sobre el nivel de personalización para cada cliente en caso de arquitectura multi-tenant",
+      "_source_batch": "batch_039.json"
+    },
+    {
+      "question_id": "Q_044",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma que los sistemas de almacenamiento están aislados y no se comparten con otros clientes.",
+      "decision_reason": "La respuesta del proveedor garantiza el aislamiento lógico de la información, cumpliendo con el requisito de evitar el almacenamiento compartido con terceros.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_044",
+          "chunk_id": "RAG-Q_044",
+          "traceability": "Excel: Análisis SaaS, fila 45",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "provider_answer": "Separada (Isolated)",
+      "provider_details": "No se comparte con ningun otro cliente",
+      "_source_batch": "batch_040.json"
+    },
+    {
+      "question_id": "Q_045",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma entornos lógicamente separados, credenciales diferenciadas y uso de datos anonimizados en entornos de desarrollo/pruebas.",
+      "decision_reason": "La respuesta aclara el aislamiento lógico, la gestión independiente de accesos y el tratamiento seguro de datos, cumpliendo con los requisitos de mitigación del riesgo.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_045",
+          "chunk_id": "RAG-Q_045",
+          "traceability": "Excel: Análisis SaaS, fila 46",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Hay un espacion en el hosting dedicado para esto donde solo acceden en local personas dedicadas a probar nuevas funcionalidades.",
+      "_source_batch": "batch_041.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma entornos lógicamente separados, credenciales diferenciadas y uso de datos anonimizados en entornos de desarrollo/pruebas.",
+        "decision_reason": "La respuesta aclara el aislamiento lógico, la gestión independiente de accesos y el tratamiento seguro de datos, cumpliendo con los requisitos de mitigación del riesgo.",
+        "source_reanalysis_file": "followup_batch_017.json"
+      }
+    },
+    {
+      "question_id": "Q_046",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "La respuesta es insuficiente.",
+      "decision_reason": "La respuesta 'Plataforma del hosting' es genérica y no detalla cómo se garantiza técnicamente el aislamiento lógico o físico entre entornos (desarrollo, preproducción, producción).",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_046",
+          "chunk_id": "RAG-Q_046",
+          "traceability": "Excel: Análisis SaaS, fila 47",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "SI",
+      "provider_details": "Plataforma del hosting",
+      "_source_batch": "batch_042.json"
+    },
+    {
+      "question_id": "Q_047",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor indica que el servicio se despliega siguiendo una arquitectura de red por capas.",
+      "decision_reason": "La respuesta afirmativa indica cumplimiento del requisito de arquitectura por capas.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_047",
+          "chunk_id": "RAG-Q_047",
+          "traceability": "Excel: Análisis SaaS, fila 48",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "provider_answer": "SI",
+      "provider_details": "Se encuentra en el hosting",
+      "_source_batch": "batch_043.json"
+    },
+    {
+      "question_id": "Q_048",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma explícitamente que no dispone de sistemas de filtrado de tráfico IPS/IDS ni firewall de capa 7.",
+      "decision_reason": "La respuesta negativa del proveedor constituye un incumplimiento directo del control de seguridad perimetral requerido (C_061/C_062), exponiendo la plataforma a riesgos de intrusión.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_010",
+      "risk_name": "Demora en la detección de intrusiones",
+      "control_ids": [
+        "C_061/C_062"
+      ],
+      "incumplimiento_identificado": "El proveedor no dispone de equipos de filtrado de tráfico IPS/IDS y/o firewall de capa 7",
+      "controles_asociados": "Se debe disponer de IPS/IDS y/o un firewall de capa 7",
+      "amenazas": [
+        "Denegación de Servicio",
+        "Manipulación no autorizada de la API de servicios",
+        "Compromiso de credenciales",
+        "Inyección de código"
+      ],
+      "mitigation": "Se debe contar con ciertos componentes (IPS/IDS y/o firewall de capa 7, etc.)que garanticen la seguridad perimetral que rodea a la arquitectura que dispone el proveedor para dar el servicio a EMPRESA.",
+      "mitigation_guide": "Se debe implementar de manera integral y efectiva sistemas avanzados de prevención y detección de intrusiones (IPS/IDS), o en su defecto un WAF.",
+      "report_context_example": "El proveedor indica que actualmente no filtran el tráfico mediante IPS/IDS y/o firewall de capa 7.",
+      "report_detail_example": "El proveedor indica que no dispone de IDS/IPS o WAF. La detección temprana y la prevención activa son críticas para salvaguardar la integridad, confidencialidad y disponibilidad de la información en el sistema, lo cual puede exponer a la infraestructura a un mayor riesgo en el compromiso de seguridad.\nEstos sistemas desempeñan un papel crucial al monitorear y analizar el tráfico de red en busca de actividades maliciosas o patrones anómalos. La falta de un IPS deja a la red vulnerable a ataques avanzados, como intrusiones y exploits, que podrían pasar desapercibidos. Por otro lado, la carencia de un IDS significa que la organización no cuenta con una capa efectiva de detección temprana, lo que impide la identificación oportuna de posibles amenazas. Adicionalmente, un WAF añade seguridad a la capa de aplicación proporcionando protección ante vulnerabilidades web y ataques de denegación de servicio. Por ello, aseguran la plataforma con estos sistemas, puede haber un riesgo de la pérdida de integridad y disponibilidad.",
+      "sources": [
+        {
+          "question_id": "Q_048",
+          "chunk_id": "RAG-Q_048",
+          "traceability": "Excel: Análisis SaaS, fila 49",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "ALTO",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar",
+      "_source_batch": "batch_044.json"
+    },
+    {
+      "question_id": "Q_049",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica un modelo de implementación privado.",
+      "decision_reason": "La respuesta identifica el modelo de implementación. Según la ficha, la evaluación es ad-hoc bajo criterio del evaluador de arquitectura, siendo el riesgo de nivel INFO.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_049",
+          "chunk_id": "RAG-Q_049",
+          "traceability": "Excel: Análisis SaaS, fila 50",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "Privado (Private)",
+      "provider_details": "La aplicaion estaria bajo el dominio de PANTER.ES/ lo que corresponda",
+      "_source_batch": "batch_045.json"
+    },
+    {
+      "question_id": "Q_050",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que no existen integraciones Cloud-to-Cloud.",
+      "decision_reason": "La pregunta es informativa (INFO_OR_NA). Al confirmar que no existen integraciones, se considera cumplido el requisito de reporte de métodos de integración.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_050",
+          "chunk_id": "RAG-Q_050",
+          "traceability": "Excel: Análisis SaaS, fila 51",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "NO",
+      "provider_details": "Detallar mecanismos de integración Cloud-to-Cloud",
+      "_source_batch": "batch_046.json"
+    },
+    {
+      "question_id": "Q_051",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que no existe integración Cloud-OnPremise, pero no proporciona detalles técnicos sobre la arquitectura de red o los mecanismos de seguridad implementados.",
+      "decision_reason": "La respuesta es insuficiente. Aunque indica que no hay integración, se requiere confirmar si existen túneles VPN, firewalls o APIs expuestas que requieran validación de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_051",
+          "chunk_id": "RAG-Q_051",
+          "traceability": "Excel: Análisis SaaS, fila 52",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "NO",
+      "provider_details": "Detallar mecanismos de integración Cloud-to-OnPremise",
+      "_source_batch": "batch_047.json"
+    },
+    {
+      "question_id": "Q_052",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "La solución SaaS no requiere integración con CyberArk al ser una solución externa, conforme a las reglas condicionales del catálogo.",
+      "decision_reason": "El catálogo especifica que el control de integración con CyberArk para cuentas de servicio solo aplica a soluciones internas y no a soluciones SaaS.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_052",
+          "chunk_id": "RAG-Q_052",
+          "traceability": "Excel: Análisis SaaS, fila 53",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "NO",
+      "provider_details": "Detallar",
+      "_source_batch": "batch_048.json"
+    },
+    {
+      "question_id": "Q_054",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que no dispone de APIs o no proporciona la información solicitada.",
+      "decision_reason": "La respuesta es negativa y no aporta la configuración ni el método de publicación de las APIs, incumpliendo el requisito de seguridad de la plataforma.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_054",
+          "chunk_id": "RAG-Q_054",
+          "traceability": "Excel: Análisis SaaS, fila 54",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "NO",
+      "provider_details": "Especificar APIs",
+      "_source_batch": "batch_049.json"
+    },
+    {
+      "question_id": "Q_055",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor indica que no existen procedimientos documentados o mecanismos suficientes para la recuperación/extracción de datos desde la nube.",
+      "decision_reason": "La ausencia de procedimientos documentados o mecanismos de recuperación/extracción supone incumplimiento del requisito.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": true,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "R_007",
+      "risk_name": "Aprovechamiento de vulnerabilidades",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_055",
+          "chunk_id": "RAG-Q_055",
+          "traceability": "Excel: Análisis SaaS, fila 55",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "",
+      "tiempo_mitigacion": "",
+      "provider_answer": "NO",
+      "provider_details": "Detalle de los mecanismos de integración con los servicios Si la aplicación o plataforma no dispone de un sistema ( web service, una API, etc..) que permita extraer los datos, es un claro inconveniente para no adoptar la aplicación en la nube, ya que no podríamos disponer de los datos de la nube.",
+      "_source_batch": "batch_050.json"
+    },
+    {
+      "question_id": "Q_056",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor indica que los procesos se pueden generar, pero no confirma su existencia actual ni aporta documentación.",
+      "decision_reason": "La respuesta es insuficiente al no confirmar la existencia de procesos documentados actuales, limitándose a una posibilidad futura.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_056",
+          "chunk_id": "RAG-Q_056",
+          "traceability": "Excel: Análisis SaaS, fila 56",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "Otros",
+      "provider_details": "Se puede generar",
+      "_source_batch": "batch_051.json"
+    },
+    {
+      "question_id": "Q_057",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor confirma la existencia de un procedimiento formalizado que incluye canales, responsables, criterios de severidad, tiempos de escalado y comunicación al cliente.",
+      "decision_reason": "La respuesta detalla los elementos clave requeridos (canales, responsables, criterios, tiempos) para el procedimiento de comunicación y escalado de incidentes, cumpliendo con el control.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_057",
+          "chunk_id": "RAG-Q_057",
+          "traceability": "Excel: Análisis SaaS, fila 57",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "SIN RIESGO",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Por especificar",
+      "_source_batch": "batch_052.json",
+      "followup_resolution": {
+        "followup_round": 1,
+        "resolved_by_provider": true,
+        "answer_summary": "El proveedor confirma la existencia de un procedimiento formalizado que incluye canales, responsables, criterios de severidad, tiempos de escalado y comunicación al cliente.",
+        "decision_reason": "La respuesta detalla los elementos clave requeridos (canales, responsables, criterios, tiempos) para el procedimiento de comunicación y escalado de incidentes, cumpliendo con el control.",
+        "source_reanalysis_file": "followup_batch_018.json"
+      }
+    },
+    {
+      "question_id": "Q_037",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no recoge logs de operaciones ni accesos en las infraestructuras del servicio.",
+      "decision_reason": "El proveedor responde negativamente a la recogida de logs, incumpliendo el control C_030 y generando un riesgo de demora en la detección de incidentes.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_030"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se deben recoger Logs en las operaciones y/o accesos realizados por los usuarios finales y operadores del servicio en las distintas infraestructuras involucradas en el servicio (Servidores (web, aplicación, BBDDs), dispositivos de red, …).",
+      "mitigation_guide": "",
+      "report_context_example": "El proveedor indica que no genera logs en las operaciones y/o accesos realizados por los usuarios finales y operadores del servicio en las distintas infraestructuras involucradas en el servicio",
+      "report_detail_example": "No generar y recoger logs de las operaciones y/o accesos de los usuarios finales y los operadores del servicio de las infraestructuras involucradas, puede suponer un riesgo debido a la demora en la detección de incidentes.",
+      "sources": [
+        {
+          "question_id": "Q_037",
+          "chunk_id": "RAG-Q_037",
+          "traceability": "Excel: Análisis SaaS, fila 38",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar los campos de los registros de Logs y el periodo de tiempo de conservación de los mismos.",
+      "_source_batch": "batch_053.json"
+    },
+    {
+      "question_id": "Q_038",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no dispone de un SIEM propio para el envío de logs.",
+      "decision_reason": "Al no recoger logs (Q_037) ni disponer de SIEM, se incumple el control C_031, aumentando el riesgo de falta de visibilidad y detección de incidentes.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_031"
+      ],
+      "incumplimiento_identificado": "El proveedor no dispone de un SIEM al que enviar los logs que recoge",
+      "controles_asociados": "Se debe disponer de su propio SIEM u ofrecer la posibilidad de enviar los logs al SIEM de EMPRESA",
+      "amenazas": [
+        "Manipulación no autorizada de la API de servicios",
+        "Recopilación de información"
+      ],
+      "mitigation": "Se deben enviar los logs a un sistema tipo SIEM o similar.",
+      "mitigation_guide": "Se debe disponer de una herramienta capaz de centralizar los logs.",
+      "report_context_example": "El proveedor indica que genera logs, pero, sin embargo, estos no son almacenados en un SIEM, o cuentan con la posibilidad de enviarlos al de EMPRESA, ni generan alertas de seguridad.",
+      "report_detail_example": "No disponer de una herramienta de análisis con la que poder centralizar los logs de los distintos sistemas involucrados y en la que establecer reglas y configurar alarmas en el caso de darse algún incidente de seguridad en los sistemas, además de no generar alertas mediante los logs, puede derivar en una detección tardía de una incidencia grave dentro del sistema al no haber un proceso que permita escalar dichos incidentes.",
+      "sources": [
+        {
+          "question_id": "Q_038",
+          "chunk_id": "RAG-Q_038",
+          "traceability": "Excel: Análisis SaaS, fila 39",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar el SIEM utilizado. Especificar el tiempo de conservación de los Logs recolectados.",
+      "_source_batch": "batch_053.json"
+    },
+    {
+      "question_id": "Q_039",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no ofrece la posibilidad de integrar los logs con el SIEM de EMPRESA.",
+      "decision_reason": "La negativa a integrar logs con el SIEM de EMPRESA incumple el control C_032, impidiendo la centralización y monitorización de eventos de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_032"
+      ],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "En caso de que el proveedor no sea capaz de provocar alertas sobre incidentes de seguridad, debe ser capaz de enviar los logs recogidos al SIEM de EMPRESA.",
+      "mitigation_guide": "Se deben exportar los logs al SIEM de EMPRESA",
+      "report_context_example": "El proveedor indica que genera logs, pero, sin embargo, no cuenta con la posibilidad de enviarlos al de EMPRESA, ni generan alertas de seguridad.",
+      "report_detail_example": "No disponer de una herramienta de análisis con la que poder centralizar los logs de los distintos sistemas involucrados y en la que establecer reglas y configurar alarmas en el caso de darse algún incidente de seguridad en los sistemas, además de no generar alertas mediante los logs, puede derivar en una detección tardía de una incidencia grave dentro del sistema al no haber un proceso que permita escalar dichos incidentes.",
+      "sources": [
+        {
+          "question_id": "Q_039",
+          "chunk_id": "RAG-Q_039",
+          "traceability": "Excel: Análisis SaaS, fila 40",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Indicar el mecanismo de integración con un SIEM externo.",
+      "_source_batch": "batch_053.json"
+    },
+    {
+      "question_id": "Q_040",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no genera alertas de seguridad a partir de los logs.",
+      "decision_reason": "La ausencia de generación de alertas (C_033) junto con la falta de logs y SIEM, impide la detección temprana de incidentes de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "R_003",
+      "risk_name": "Demora en la detección de incidentes",
+      "control_ids": [
+        "C_033"
+      ],
+      "incumplimiento_identificado": "El proveedor no genera alertas de seguridad",
+      "controles_asociados": "Se debe disponer de un sistema o solución que permita levantar alertas de seguridad para identificar posibles incidentes de seguridad (p.e. SIEM). Estas alertas deben poder ser puestas a disposición de EMPRESA para un posible análisis por parte del SOC.",
+      "amenazas": [
+        "Manipulación no autorizada de la API de servicios",
+        "Recopilación de información"
+      ],
+      "mitigation": "En caso de no poder enviar los logs al SIEM de EMPRESA, se debe tener la capacidad de provocar alertas generadas por el sistema de recogida de logs del proveedor.",
+      "mitigation_guide": "Se debe tener la capacidad de provocar alertas generadas por el sistema de recogida de logs del proveedor.",
+      "report_context_example": "",
+      "report_detail_example": "La ausencia de generación de alertas de seguridad en el SIEM del proveedor representa un riesgo de seguridad significativo para la capacidad de detección temprana de incidentes. Si no se levantan de forma automática alertas ante eventos relevantes, se pierde visibilidad sobre cualquier actividad anómala o maliciosa dentro de la infraestructura, hecho que impide realizar un seguimiento adecuado de posibles incidentes de seguridad. Esta falta de visibilidad puede derivar en una detección tardía de amenazas, comprometiendo la capacidad de respuesta oportuna y efectiva por parte del equipo de respuesta ante incidentes, así como provocar un aumento potencial del impacto, alcance y duración de una brecha de seguridad.",
+      "sources": [
+        {
+          "question_id": "Q_040",
+          "chunk_id": "RAG-Q_040",
+          "traceability": "Excel: Análisis SaaS, fila 41",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar el proceso de actuación sobre incidentes a raíz de una alerta generada por el SIEM",
+      "_source_batch": "batch_053.json"
+    }
+  ],
+  "metadata": {
+    "source": "scoring_preliminary.json + followup_reanalysis_results",
+    "followup_round": 1,
+    "max_followup_rounds": 1,
+    "followup_updates_applied": [
+      "Q_007",
+      "Q_008",
+      "Q_011",
+      "Q_012",
+      "Q_013",
+      "Q_015",
+      "Q_019",
+      "Q_021",
+      "Q_023",
+      "Q_028",
+      "Q_029",
+      "Q_030",
+      "Q_031",
+      "Q_032",
+      "Q_034",
+      "Q_036",
+      "Q_045",
+      "Q_057"
+    ],
+    "reanalysis_files_read": [
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_001.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_002.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_003.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_004.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_005.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_006.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_007.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_008.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_009.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_010.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_011.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_012.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_013.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_014.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_015.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_016.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_017.json",
+      "/data/cases/Codigo_del_proyecto/03_analysis/followup_reanalysis_results/followup_batch_018.json"
+    ]
+  }
+}

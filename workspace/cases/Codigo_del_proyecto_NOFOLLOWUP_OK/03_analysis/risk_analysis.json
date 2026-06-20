@@ -1,0 +1,396 @@
+{
+  "case_id": "Codigo_del_proyecto_NOFOLLOWUP_OK",
+  "status": "RISK_ANALYSIS_READY",
+  "created_at": "2026-06-10T13:21:09",
+  "summary": {
+    "total_evaluations": 56,
+    "total_findings": 6,
+    "alto": 2,
+    "medio": 3,
+    "bajo": 1,
+    "sin_nivel": 0,
+    "sin_riesgo": 50
+  },
+  "findings": [
+    {
+      "question_id": "Q_001",
+      "question_text": "¿El proveedor garantiza el cumplimiento GDPR cuando se tratan datos personales?",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El servicio trata datos personales y no aporta garantías suficientes de cumplimiento normativo.",
+      "decision_reason": "No se garantiza de forma suficiente el cumplimiento GDPR pese a tratar datos personales.",
+      "requires_provider_followup": false,
+      "requires_human_review": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "level": "ALTO",
+      "risk_id": "R-LEGAL-001",
+      "risk_name": "Incumplimiento normativo en protección de datos",
+      "control_ids": [
+        "C-GDPR-001"
+      ],
+      "incumplimiento_identificado": "No se garantiza de forma suficiente el cumplimiento GDPR pese a tratar datos personales.",
+      "controles_asociados": "Cumplimiento GDPR, tratamiento de datos personales y garantías contractuales.",
+      "amenazas": [
+        "Sanciones regulatorias",
+        "Tratamiento indebido de datos personales"
+      ],
+      "mitigation": "El proveedor debe acreditar cumplimiento GDPR, base jurídica, DPA, ubicación del tratamiento y medidas aplicables.",
+      "mitigation_guide": "Solicitar evidencias contractuales y técnicas del cumplimiento GDPR antes de la puesta en producción.",
+      "report_context_example": "El servicio trata datos personales y no aporta garantías suficientes de cumplimiento normativo.",
+      "report_detail_example": "La ausencia de garantías GDPR puede exponer a la organización a incumplimientos regulatorios.",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "No",
+      "provider_details": "No se aporta confirmación formal de cumplimiento GDPR."
+    },
+    {
+      "question_id": "Q_005",
+      "question_text": "¿Existe un proceso de gestión de vulnerabilidades?",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "No consta un proceso suficientemente documentado para gestionar vulnerabilidades.",
+      "decision_reason": "No se evidencia un proceso formal de gestión y corrección de vulnerabilidades web.",
+      "requires_provider_followup": false,
+      "requires_human_review": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "level": "MEDIO",
+      "risk_id": "R-WEB-001",
+      "risk_name": "Exposición a vulnerabilidades web",
+      "control_ids": [
+        "C-WEB-001"
+      ],
+      "incumplimiento_identificado": "No se evidencia un proceso formal de gestión y corrección de vulnerabilidades web.",
+      "controles_asociados": "Gestión de vulnerabilidades, pruebas de seguridad y revisión periódica.",
+      "amenazas": [
+        "Explotación de vulnerabilidades",
+        "Compromiso del servicio SaaS"
+      ],
+      "mitigation": "Definir y evidenciar un proceso periódico de identificación, priorización y corrección de vulnerabilidades.",
+      "mitigation_guide": "Aportar informes de análisis de vulnerabilidades, planificación de remediación y seguimiento.",
+      "report_context_example": "No consta un proceso suficientemente documentado para gestionar vulnerabilidades.",
+      "report_detail_example": "La falta de gestión formal puede retrasar la corrección de fallos explotables.",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "No",
+      "provider_details": "No existe proceso formal documentado."
+    },
+    {
+      "question_id": "Q_006",
+      "question_text": "¿Se realizan pruebas de seguridad periódicas?",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor no evidencia pruebas de seguridad periódicas.",
+      "decision_reason": "No se realizan pruebas de seguridad periódicas sobre la plataforma.",
+      "requires_provider_followup": false,
+      "requires_human_review": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "level": "MEDIO",
+      "risk_id": "R-WEB-002",
+      "risk_name": "Ausencia de pruebas de seguridad periódicas",
+      "control_ids": [
+        "C-WEB-002"
+      ],
+      "incumplimiento_identificado": "No se realizan pruebas de seguridad periódicas sobre la plataforma.",
+      "controles_asociados": "Pentest, análisis dinámico, análisis estático y revisión de seguridad.",
+      "amenazas": [
+        "Vulnerabilidades no detectadas",
+        "Explotación de fallos de aplicación"
+      ],
+      "mitigation": "Realizar pruebas de seguridad periódicas y documentar resultados y planes de remediación.",
+      "mitigation_guide": "Establecer una periodicidad mínima anual o tras cambios relevantes.",
+      "report_context_example": "El proveedor no evidencia pruebas de seguridad periódicas.",
+      "report_detail_example": "La ausencia de pruebas reduce la capacidad de detectar vulnerabilidades antes de su explotación.",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "No",
+      "provider_details": "No se han realizado pruebas de seguridad recientes."
+    },
+    {
+      "question_id": "Q_020",
+      "question_text": "¿Existe autenticación multifactor?",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El servicio permite autenticación sin MFA.",
+      "decision_reason": "No se dispone de MFA para accesos de usuarios o administradores.",
+      "requires_provider_followup": false,
+      "requires_human_review": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "level": "ALTO",
+      "risk_id": "R-IAM-001",
+      "risk_name": "Ausencia de autenticación multifactor",
+      "control_ids": [
+        "C-IAM-020"
+      ],
+      "incumplimiento_identificado": "No se dispone de MFA para accesos de usuarios o administradores.",
+      "controles_asociados": "Autenticación robusta, MFA y control de accesos privilegiados.",
+      "amenazas": [
+        "Robo de credenciales",
+        "Acceso no autorizado"
+      ],
+      "mitigation": "Implantar MFA para usuarios y administradores, especialmente en accesos privilegiados.",
+      "mitigation_guide": "Priorizar MFA en cuentas administrativas y accesos remotos.",
+      "report_context_example": "El servicio permite autenticación sin MFA.",
+      "report_detail_example": "La ausencia de MFA incrementa el riesgo de acceso no autorizado ante credenciales comprometidas.",
+      "tiempo_mitigacion": "3 meses",
+      "provider_answer": "No",
+      "provider_details": "No se encuentra habilitado MFA."
+    },
+    {
+      "question_id": "Q_028",
+      "question_text": "¿Los datos en reposo se cifran con algoritmo robusto?",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "No se acredita cifrado robusto de datos en reposo.",
+      "decision_reason": "No se confirma cifrado robusto de datos en reposo.",
+      "requires_provider_followup": false,
+      "requires_human_review": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "level": "MEDIO",
+      "risk_id": "R-CRYPTO-001",
+      "risk_name": "Cifrado insuficiente de datos en reposo",
+      "control_ids": [
+        "C-CRYPTO-028"
+      ],
+      "incumplimiento_identificado": "No se confirma cifrado robusto de datos en reposo.",
+      "controles_asociados": "Cifrado de datos, gestión de claves y protección de información almacenada.",
+      "amenazas": [
+        "Exposición de datos",
+        "Acceso no autorizado a información almacenada"
+      ],
+      "mitigation": "Implantar cifrado robusto para datos en reposo y documentar algoritmo, alcance y gestión de claves.",
+      "mitigation_guide": "Acreditar cifrado AES-256 o equivalente y controles de gestión de claves.",
+      "report_context_example": "No se acredita cifrado robusto de datos en reposo.",
+      "report_detail_example": "La falta de cifrado robusto puede aumentar el impacto de accesos indebidos a almacenamiento.",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "No",
+      "provider_details": "No se confirma algoritmo ni alcance del cifrado."
+    },
+    {
+      "question_id": "Q_037",
+      "question_text": "¿Se recogen y monitorizan logs de seguridad?",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "La plataforma no evidencia monitorización suficiente de eventos.",
+      "decision_reason": "No se evidencia una monitorización suficiente de logs y eventos de seguridad.",
+      "requires_provider_followup": false,
+      "requires_human_review": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "level": "BAJO",
+      "risk_id": "R-LOG-001",
+      "risk_name": "Monitorización insuficiente de eventos de seguridad",
+      "control_ids": [
+        "C-LOG-037"
+      ],
+      "incumplimiento_identificado": "No se evidencia una monitorización suficiente de logs y eventos de seguridad.",
+      "controles_asociados": "Registro de logs, monitorización, alertas y capacidad de detección.",
+      "amenazas": [
+        "Detección tardía de incidentes",
+        "Falta de trazabilidad"
+      ],
+      "mitigation": "Centralizar logs relevantes y configurar alertas de seguridad para eventos críticos.",
+      "mitigation_guide": "Definir alcance de logs, retención, alertas y procedimiento de revisión.",
+      "report_context_example": "La plataforma no evidencia monitorización suficiente de eventos.",
+      "report_detail_example": "La falta de monitorización dificulta la detección temprana de incidentes.",
+      "tiempo_mitigacion": "Pte.",
+      "provider_answer": "No",
+      "provider_details": "No se dispone de SIEM ni alertas configuradas."
+    }
+  ],
+  "findings_by_level": {
+    "ALTO": [
+      {
+        "question_id": "Q_001",
+        "question_text": "¿El proveedor garantiza el cumplimiento GDPR cuando se tratan datos personales?",
+        "score": 1,
+        "score_type": "non_compliance",
+        "answer_summary": "El servicio trata datos personales y no aporta garantías suficientes de cumplimiento normativo.",
+        "decision_reason": "No se garantiza de forma suficiente el cumplimiento GDPR pese a tratar datos personales.",
+        "requires_provider_followup": false,
+        "requires_human_review": false,
+        "followup_questions": [],
+        "generates_finding": true,
+        "level": "ALTO",
+        "risk_id": "R-LEGAL-001",
+        "risk_name": "Incumplimiento normativo en protección de datos",
+        "control_ids": [
+          "C-GDPR-001"
+        ],
+        "incumplimiento_identificado": "No se garantiza de forma suficiente el cumplimiento GDPR pese a tratar datos personales.",
+        "controles_asociados": "Cumplimiento GDPR, tratamiento de datos personales y garantías contractuales.",
+        "amenazas": [
+          "Sanciones regulatorias",
+          "Tratamiento indebido de datos personales"
+        ],
+        "mitigation": "El proveedor debe acreditar cumplimiento GDPR, base jurídica, DPA, ubicación del tratamiento y medidas aplicables.",
+        "mitigation_guide": "Solicitar evidencias contractuales y técnicas del cumplimiento GDPR antes de la puesta en producción.",
+        "report_context_example": "El servicio trata datos personales y no aporta garantías suficientes de cumplimiento normativo.",
+        "report_detail_example": "La ausencia de garantías GDPR puede exponer a la organización a incumplimientos regulatorios.",
+        "tiempo_mitigacion": "3 meses",
+        "provider_answer": "No",
+        "provider_details": "No se aporta confirmación formal de cumplimiento GDPR."
+      },
+      {
+        "question_id": "Q_020",
+        "question_text": "¿Existe autenticación multifactor?",
+        "score": 1,
+        "score_type": "non_compliance",
+        "answer_summary": "El servicio permite autenticación sin MFA.",
+        "decision_reason": "No se dispone de MFA para accesos de usuarios o administradores.",
+        "requires_provider_followup": false,
+        "requires_human_review": false,
+        "followup_questions": [],
+        "generates_finding": true,
+        "level": "ALTO",
+        "risk_id": "R-IAM-001",
+        "risk_name": "Ausencia de autenticación multifactor",
+        "control_ids": [
+          "C-IAM-020"
+        ],
+        "incumplimiento_identificado": "No se dispone de MFA para accesos de usuarios o administradores.",
+        "controles_asociados": "Autenticación robusta, MFA y control de accesos privilegiados.",
+        "amenazas": [
+          "Robo de credenciales",
+          "Acceso no autorizado"
+        ],
+        "mitigation": "Implantar MFA para usuarios y administradores, especialmente en accesos privilegiados.",
+        "mitigation_guide": "Priorizar MFA en cuentas administrativas y accesos remotos.",
+        "report_context_example": "El servicio permite autenticación sin MFA.",
+        "report_detail_example": "La ausencia de MFA incrementa el riesgo de acceso no autorizado ante credenciales comprometidas.",
+        "tiempo_mitigacion": "3 meses",
+        "provider_answer": "No",
+        "provider_details": "No se encuentra habilitado MFA."
+      }
+    ],
+    "MEDIO": [
+      {
+        "question_id": "Q_005",
+        "question_text": "¿Existe un proceso de gestión de vulnerabilidades?",
+        "score": 1,
+        "score_type": "non_compliance",
+        "answer_summary": "No consta un proceso suficientemente documentado para gestionar vulnerabilidades.",
+        "decision_reason": "No se evidencia un proceso formal de gestión y corrección de vulnerabilidades web.",
+        "requires_provider_followup": false,
+        "requires_human_review": false,
+        "followup_questions": [],
+        "generates_finding": true,
+        "level": "MEDIO",
+        "risk_id": "R-WEB-001",
+        "risk_name": "Exposición a vulnerabilidades web",
+        "control_ids": [
+          "C-WEB-001"
+        ],
+        "incumplimiento_identificado": "No se evidencia un proceso formal de gestión y corrección de vulnerabilidades web.",
+        "controles_asociados": "Gestión de vulnerabilidades, pruebas de seguridad y revisión periódica.",
+        "amenazas": [
+          "Explotación de vulnerabilidades",
+          "Compromiso del servicio SaaS"
+        ],
+        "mitigation": "Definir y evidenciar un proceso periódico de identificación, priorización y corrección de vulnerabilidades.",
+        "mitigation_guide": "Aportar informes de análisis de vulnerabilidades, planificación de remediación y seguimiento.",
+        "report_context_example": "No consta un proceso suficientemente documentado para gestionar vulnerabilidades.",
+        "report_detail_example": "La falta de gestión formal puede retrasar la corrección de fallos explotables.",
+        "tiempo_mitigacion": "12 meses",
+        "provider_answer": "No",
+        "provider_details": "No existe proceso formal documentado."
+      },
+      {
+        "question_id": "Q_006",
+        "question_text": "¿Se realizan pruebas de seguridad periódicas?",
+        "score": 1,
+        "score_type": "non_compliance",
+        "answer_summary": "El proveedor no evidencia pruebas de seguridad periódicas.",
+        "decision_reason": "No se realizan pruebas de seguridad periódicas sobre la plataforma.",
+        "requires_provider_followup": false,
+        "requires_human_review": false,
+        "followup_questions": [],
+        "generates_finding": true,
+        "level": "MEDIO",
+        "risk_id": "R-WEB-002",
+        "risk_name": "Ausencia de pruebas de seguridad periódicas",
+        "control_ids": [
+          "C-WEB-002"
+        ],
+        "incumplimiento_identificado": "No se realizan pruebas de seguridad periódicas sobre la plataforma.",
+        "controles_asociados": "Pentest, análisis dinámico, análisis estático y revisión de seguridad.",
+        "amenazas": [
+          "Vulnerabilidades no detectadas",
+          "Explotación de fallos de aplicación"
+        ],
+        "mitigation": "Realizar pruebas de seguridad periódicas y documentar resultados y planes de remediación.",
+        "mitigation_guide": "Establecer una periodicidad mínima anual o tras cambios relevantes.",
+        "report_context_example": "El proveedor no evidencia pruebas de seguridad periódicas.",
+        "report_detail_example": "La ausencia de pruebas reduce la capacidad de detectar vulnerabilidades antes de su explotación.",
+        "tiempo_mitigacion": "12 meses",
+        "provider_answer": "No",
+        "provider_details": "No se han realizado pruebas de seguridad recientes."
+      },
+      {
+        "question_id": "Q_028",
+        "question_text": "¿Los datos en reposo se cifran con algoritmo robusto?",
+        "score": 1,
+        "score_type": "non_compliance",
+        "answer_summary": "No se acredita cifrado robusto de datos en reposo.",
+        "decision_reason": "No se confirma cifrado robusto de datos en reposo.",
+        "requires_provider_followup": false,
+        "requires_human_review": false,
+        "followup_questions": [],
+        "generates_finding": true,
+        "level": "MEDIO",
+        "risk_id": "R-CRYPTO-001",
+        "risk_name": "Cifrado insuficiente de datos en reposo",
+        "control_ids": [
+          "C-CRYPTO-028"
+        ],
+        "incumplimiento_identificado": "No se confirma cifrado robusto de datos en reposo.",
+        "controles_asociados": "Cifrado de datos, gestión de claves y protección de información almacenada.",
+        "amenazas": [
+          "Exposición de datos",
+          "Acceso no autorizado a información almacenada"
+        ],
+        "mitigation": "Implantar cifrado robusto para datos en reposo y documentar algoritmo, alcance y gestión de claves.",
+        "mitigation_guide": "Acreditar cifrado AES-256 o equivalente y controles de gestión de claves.",
+        "report_context_example": "No se acredita cifrado robusto de datos en reposo.",
+        "report_detail_example": "La falta de cifrado robusto puede aumentar el impacto de accesos indebidos a almacenamiento.",
+        "tiempo_mitigacion": "12 meses",
+        "provider_answer": "No",
+        "provider_details": "No se confirma algoritmo ni alcance del cifrado."
+      }
+    ],
+    "BAJO": [
+      {
+        "question_id": "Q_037",
+        "question_text": "¿Se recogen y monitorizan logs de seguridad?",
+        "score": 1,
+        "score_type": "non_compliance",
+        "answer_summary": "La plataforma no evidencia monitorización suficiente de eventos.",
+        "decision_reason": "No se evidencia una monitorización suficiente de logs y eventos de seguridad.",
+        "requires_provider_followup": false,
+        "requires_human_review": false,
+        "followup_questions": [],
+        "generates_finding": true,
+        "level": "BAJO",
+        "risk_id": "R-LOG-001",
+        "risk_name": "Monitorización insuficiente de eventos de seguridad",
+        "control_ids": [
+          "C-LOG-037"
+        ],
+        "incumplimiento_identificado": "No se evidencia una monitorización suficiente de logs y eventos de seguridad.",
+        "controles_asociados": "Registro de logs, monitorización, alertas y capacidad de detección.",
+        "amenazas": [
+          "Detección tardía de incidentes",
+          "Falta de trazabilidad"
+        ],
+        "mitigation": "Centralizar logs relevantes y configurar alertas de seguridad para eventos críticos.",
+        "mitigation_guide": "Definir alcance de logs, retención, alertas y procedimiento de revisión.",
+        "report_context_example": "La plataforma no evidencia monitorización suficiente de eventos.",
+        "report_detail_example": "La falta de monitorización dificulta la detección temprana de incidentes.",
+        "tiempo_mitigacion": "Pte.",
+        "provider_answer": "No",
+        "provider_details": "No se dispone de SIEM ni alertas configuradas."
+      }
+    ]
+  }
+}

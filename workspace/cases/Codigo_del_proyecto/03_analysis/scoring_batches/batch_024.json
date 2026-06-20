@@ -1,0 +1,50 @@
+{
+  "batch_id": "batch_024",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_024",
+      "score": 1,
+      "score_type": "non_compliance",
+      "answer_summary": "El proveedor confirma que el protocolo HSTS no está habilitado.",
+      "decision_reason": "El control C_059 requiere explícitamente la habilitación de HSTS. La respuesta negativa del proveedor constituye un incumplimiento directo del requisito de seguridad.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": true,
+      "risk_id": "",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_059"
+      ],
+      "incumplimiento_identificado": "No está habilitado el HSTS",
+      "controles_asociados": "Se debe habilitar el HSTS en HTTPS.",
+      "amenazas": [
+        "Acceso no autorizado",
+        "Intercepción de comunicaciones",
+        "Manipulación no autorizada de las comunicaciones",
+        "Compromiso de datos",
+        "Compromiso de credenciales",
+        "Robo de información",
+        "Exposicion de información sensible",
+        "Incumplimiento normativo"
+      ],
+      "mitigation": "Se debe tener habilitado el protocolo HSTS.",
+      "mitigation_guide": "Se debe habilitar el HSTS en HTTPS.",
+      "report_context_example": "La plataforma no tiene habilitado el HSTS",
+      "report_detail_example": "La ausencia de HSTS en HTTPS expone a los usuarios al riesgo de ataques de tipo SSL stripping, en los cuales un atacante puede forzar la degradación de la conexión a HTTP, protocolo inseguro que transmite la información en texto plano, permitiendo la interceptación o modificación de datos sensibles durante su transmisión, como credenciales.\nEsta situación incrementa significativamente la probabilidad de acceso no autorizado, robo, fuga y/o divulgación de la información, hecho de llegar a producirse podría derivar en incumplimiento normativo y, posteriormente, sanciones legales, pérdida económica y/o reputacional.",
+      "sources": [
+        {
+          "question_id": "Q_024",
+          "chunk_id": "RAG-Q_024",
+          "traceability": "Excel: Análisis SaaS, fila 25",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "NO",
+      "provider_details": "Detallar comunicaciones"
+    }
+  ],
+  "batch_validation_notes": []
+}

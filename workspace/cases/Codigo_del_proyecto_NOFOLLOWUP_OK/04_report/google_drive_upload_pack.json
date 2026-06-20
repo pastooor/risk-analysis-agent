@@ -1,0 +1,23 @@
+{
+  "case_id": "Codigo_del_proyecto_NOFOLLOWUP_OK",
+  "created_at": "2026-06-10T13:32:14",
+  "google_drive_base_folder": "TFM",
+  "google_drive_project_folder": "Codigo_del_proyecto_NOFOLLOWUP_OK",
+  "google_drive_project_path": "TFM/Codigo_del_proyecto_NOFOLLOWUP_OK",
+  "project_name": "Código del proyecto.",
+  "folder_name_source": "case_id",
+  "files": [
+    {
+      "kind": "report",
+      "file_path": "/data/cases/Codigo_del_proyecto_NOFOLLOWUP_OK/05_report/Informe_Ciberseguridad_Codigo_del_proyecto_NOFOLLOWUP_OK.docx",
+      "file_name": "Informe_Ciberseguridad_Codigo_del_proyecto_NOFOLLOWUP_OK.docx",
+      "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "kind": "questionnaire",
+      "file_path": "/data/cases/Codigo_del_proyecto_NOFOLLOWUP_OK/01_originales/cuestionario.xlsx",
+      "file_name": "cuestionario.xlsx",
+      "mime_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    }
+  ]
+}

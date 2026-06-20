@@ -1,0 +1,49 @@
+{
+  "batch_id": "batch_023",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_023",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "No se especifican claramente las versiones TLS soportadas.",
+      "decision_reason": "Se requiere confirmar si únicamente se soporta TLS 1.2 o superior y si TLS 1.0/1.1/SSL están deshabilitados.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿Qué versiones de TLS están habilitadas en sus servicios? Por favor, confirme que solo se soportan TLS 1.2 y superiores."
+      ],
+      "requires_human_review": true,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": true,
+      "risk_id": "R_001",
+      "risk_name": "Robo de información",
+      "control_ids": [
+        "C_058"
+      ],
+      "incumplimiento_identificado": "Se tiene configurado TLS 1.0 y superiores",
+      "controles_asociados": "Se debe configurar únicamente versiones de TLS igual o superiores a TLS 1.2.",
+      "amenazas": [
+        "Denegación de Servicio",
+        "Intercepción de comunicaciones",
+        "Manipulación no autorizada de las comunicaciones"
+      ],
+      "mitigation": "Se debe dejar de dar soporte a las versiones inseguras del protocolo TLS, solo se puede soportar TLS 1.2 y superiores.",
+      "mitigation_guide": "Se debe configurar únicamente versiones de TLS igual o superiores a TLS 1.2.",
+      "report_context_example": "La plataforma tiene habilitado TLS 1.0 y superiores.",
+      "report_detail_example": "Tener habilitado TLS 1.0 y 1.1 representa un riesgo de robo de información, ya que se trata de protocolos obsoletos, los cuales presentan vulnerabilidades que pueden ser aprovechadas por los atacantes para interceptar, descifrar o manipular datos sensibles en tránsito, afectando a la confidencialidad de los datos y al cumplimiento normativo y provocando ataques de Man-in-the-Middle, comprometiendo la seguridad de la conexión.",
+      "sources": [
+        {
+          "question_id": "Q_023",
+          "chunk_id": "RAG-Q_023",
+          "traceability": "Excel: Análisis SaaS, fila 24",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "MEDIO",
+      "tiempo_mitigacion": "12 meses",
+      "provider_answer": "",
+      "provider_details": "Detallar comunicaciones"
+    }
+  ],
+  "batch_validation_notes": []
+}

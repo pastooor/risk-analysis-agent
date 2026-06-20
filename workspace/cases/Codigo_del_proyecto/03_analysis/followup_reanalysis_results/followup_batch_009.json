@@ -1,0 +1,29 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_009",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_023",
+      "final_score": 3,
+      "final_score_type": "compliant",
+      "answer_summary": "El proveedor confirma el soporte exclusivo de TLS 1.2 y 1.3, con SSLv2, SSLv3, TLS 1.0 y 1.1 deshabilitados en los endpoints.",
+      "decision_reason": "La respuesta cumple con el control C_058 al confirmar el uso de versiones seguras (TLS 1.2/1.3) y la deshabilitación explícita de versiones inseguras.",
+      "resolved_by_provider": true
+    }
+  ],
+  "batch_validation_notes": [],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_009\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_023\",\"final_score\":3,\"final_score_type\":\"compliant\",\"answer_summary\":\"El proveedor confirma el soporte exclusivo de TLS 1.2 y 1.3, con SSLv2, SSLv3, TLS 1.0 y 1.1 deshabilitados en los endpoints.\",\"decision_reason\":\"La respuesta cumple con el control C_058 al confirmar el uso de versiones seguras (TLS 1.2/1.3) y la deshabilitación explícita de versiones inseguras.\",\"resol",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_023"
+    ],
+    "normalized_question_ids": [
+      "Q_023"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

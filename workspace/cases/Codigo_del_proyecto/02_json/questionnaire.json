@@ -1,0 +1,1175 @@
+{
+  "schema_version": "1.1.0",
+  "artifact_type": "questionnaire",
+  "source_file": "cuestionario.xlsx",
+  "source_sha256": "ad022444d91f2f87e7eee0c6e7f9a5aa38299a68e4f488721c9de80b8f9abc47",
+  "questionnaire_version_id": "cuestionario-ad022444",
+  "provider": {
+    "name": "PROVEEDOR",
+    "platform_name": "PLATAFORMA",
+    "url": "URL",
+    "functional_description": null,
+    "stores_personal_data_raw": "SÍ",
+    "stores_personal_data": true
+  },
+  "metadata_hits": [
+    {
+      "field": "name",
+      "row": 4,
+      "label": "Información del Proveedor",
+      "value": null
+    },
+    {
+      "field": "name",
+      "row": 5,
+      "label": "Nombre Proveedor:",
+      "value": "PROVEEDOR"
+    },
+    {
+      "field": "platform_name",
+      "row": 6,
+      "label": "Servicio / Plataforma ofertada:",
+      "value": "PLATAFORMA"
+    },
+    {
+      "field": "url",
+      "row": 7,
+      "label": "URL Servicio (Producción/Demo)",
+      "value": "URL"
+    },
+    {
+      "field": "functional_description",
+      "row": 8,
+      "label": "Breve descripción sobre la funcionalidad de la herramienta",
+      "value": null
+    },
+    {
+      "field": "stores_personal_data",
+      "row": 9,
+      "label": "Indicar si se almacenan datos personales",
+      "value": "SÍ"
+    }
+  ],
+  "table_layout": {
+    "sheet": "Cuestionario Plataforma",
+    "header_row": 14,
+    "detected_columns": {
+      "Apartado": 2,
+      "ID Control": 3,
+      "Requisito": 4,
+      "Descripción": 5,
+      "Respuesta": 7,
+      "Explicación": 8
+    }
+  },
+  "normalization_policy": {
+    "yes_values": [
+      "si",
+      "sí",
+      "Si",
+      "SI",
+      "Sí"
+    ],
+    "no_values": [
+      "no",
+      "No",
+      "NO"
+    ],
+    "normalized_closed_answers": {
+      "SI": "SI",
+      "NO": "NO"
+    },
+    "missing_answer_strategy": "keep_null_and_mark_answer_missing_true",
+    "question_text_fallback_strategy": "adjacent_column_if_merged_else_risk_catalog"
+  },
+  "questions": [
+    {
+      "question_id": "Q_001",
+      "block": "AUDITORÍA",
+      "section": "AUDITORIA",
+      "requirement": "Auditorías internas",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Existen planes de auditoría y controles internos de seguridad que aseguren que la información tratada por el servicio prestado a EMPRESA se encuentra en linea con las normativas legales de tratamiento de datos (GDPR, PCI-DSS,…)?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar planes de auditorías",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 16
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_002",
+      "block": "LEGAL",
+      "section": "PAIS",
+      "requirement": "País CPD",
+      "requirement_source": "questionnaire",
+      "question_text": "Indicar si los países en donde se encuentran ubicados físicamente todos los CPDs principales y de respaldo del servicio SaaS pertenecen a la Unión Europea",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "España",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 18
+      }
+    },
+    {
+      "question_id": "Q_003",
+      "block": "LEGAL",
+      "section": "PAIS",
+      "requirement": "País acceso",
+      "requirement_source": "questionnaire",
+      "question_text": "Indicar si se accede a los datos desde países que se encuentran ubicados fuera de la Unión Europea tanto por parte del propio servicio como de subcontratistas (Ej. Servicios de mantenimiento)",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Especificar países",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 19
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_004",
+      "block": "LEGAL",
+      "section": "PROPIEDAD",
+      "requirement": "Activos",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Los activos que forman parte del servicio son propiedad del proveedor o son subcontratados a terceros?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "SUBCONTRATADOS",
+      "answer": "SUBCONTRATADOS",
+      "answer_missing": false,
+      "explanation": "LOADING SERVICIOS DE HOSTING Y DOMINIO WEB",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 20
+      }
+    },
+    {
+      "question_id": "Q_005",
+      "block": "SEGURIDAD",
+      "section": "VULNERABILIDADES",
+      "requirement": "Ejercicios Red Team y Blue Team",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Se realizan o han realizado ejercicios de Red Team y Blue Team?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Nunca",
+      "answer": "Nunca",
+      "answer_missing": false,
+      "explanation": "Detallar el proceso, alcance y periodicidad de los ejercicios",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 22
+      }
+    },
+    {
+      "question_id": "Q_006",
+      "block": "SEGURIDAD",
+      "section": "VULNERABILIDADES",
+      "requirement": "Test de penetración",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Se realizan test de intrusión?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Nunca",
+      "answer": "Nunca",
+      "answer_missing": false,
+      "explanation": "Detallar el proceso, alcance y periodicidad de los tests de intrusión",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 23
+      }
+    },
+    {
+      "question_id": "Q_007",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": "Tipología de usuarios",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Están todos los usuarios que acceden a la plataforma identificados de manera univoca?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Mediante un registro con roles de usuario",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 24
+      }
+    },
+    {
+      "question_id": "Q_008",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Se tienen identificados todos los usuarios que poseen roles de administración en la plataforma?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": null,
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 25
+      }
+    },
+    {
+      "question_id": "Q_009",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Existirán accesos a la plataforma por parte de usuarios de EMPRESA?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Los que se requiera",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 26
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout"
+      ]
+    },
+    {
+      "question_id": "Q_010",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": "Gestión de usuarios",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Se soporta la federación de usuarios contra proveedores de identidades mediante un protocolo seguro como SAML 2.0 u Oauth?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "NO",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar tecnologías de federación",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 27
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout"
+      ]
+    },
+    {
+      "question_id": "Q_011",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Existe repositorio centralizado de cuentas de usuarios?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "El repositorio se encuentra en una base de datos SQL y esta cifrada",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 28
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout"
+      ]
+    },
+    {
+      "question_id": "Q_012",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Existe un procedimiento de Alta, Baja y Modificación de los usuarios en el servicio ofrecido?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Hay un gestion de usuarios por parte del proveedor",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 29
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout"
+      ]
+    },
+    {
+      "question_id": "Q_013",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Se tiene control de acceso basado a Roles y/o Perfiles en el servicio ofrecido?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Hay un gestion de usuarios por parte del proveedor",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 30
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout"
+      ]
+    },
+    {
+      "question_id": "Q_014",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Política de contraseñas: ¿Existe una longitud mínima para las contraseñas?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "LO GESTIONA EL PROVEEDOR",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 31
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout",
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_015",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Política de contraseñas: ¿Existen reglas para la asegurar la complejidad de las contraseñas?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "LA GESTIONA EL PROVEEDOR BASADA EN CADENAS ALEATORIAS DE 128BITS",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 32
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout"
+      ]
+    },
+    {
+      "question_id": "Q_016",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Política de contraseñas: ¿Existe un diccionario con palabras prohibidas?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "DEFINIDO POR EL PROVEEDOR",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 33
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout",
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_017",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Política de contraseñas: ¿Hay un número máximo de intentos permitidos antes de bloquear la cuenta?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 34
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout",
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_018",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Política de contraseñas: ¿Se fuerza el cambio de la contraseña inicial?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "NO",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 35
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout"
+      ]
+    },
+    {
+      "question_id": "Q_019",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Política de contraseñas: ¿Las contraseñas se almacenan cifradas?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Detallar",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 36
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout"
+      ]
+    },
+    {
+      "question_id": "Q_020",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": "Protección de acceso",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Existe 2FA/MFA (factor de autenticación doble/múltiple)?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "NO",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar mecanismos de autenticación multifactor",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 37
+      }
+    },
+    {
+      "question_id": "Q_021",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Tiene el servicio caducidad de la sesión en caso de inactividad?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Una duracion de 60 minutos",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 38
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_022",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": "Comunicaciones",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Están deshabilitadas las versiones SSL V3 o inferiores?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "No se soporta ninguno",
+      "answer": "No se soporta ninguno",
+      "answer_missing": false,
+      "explanation": "Detallar comunicaciones",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 39
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout"
+      ]
+    },
+    {
+      "question_id": "Q_023",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "HTTPS: ¿qué versiones de TLS están soportadas?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": null,
+      "answer": null,
+      "answer_missing": true,
+      "explanation": "Detallar comunicaciones",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 40
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout",
+        "missing_answer_in_source"
+      ]
+    },
+    {
+      "question_id": "Q_024",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "HTTPS: ¿está habilitado el HSTS?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar comunicaciones",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 41
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout",
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_025",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "HTTPS: ¿Se han deshabilitado los algoritmos RC4?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar comunicaciones",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 42
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout",
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_026",
+      "block": "SEGURIDAD",
+      "section": "ACCESOS",
+      "requirement": "Acceso a la información",
+      "requirement_source": "questionnaire",
+      "question_text": "Indicar mecanismos que dispone EMPRESA para acceder a su información y extraer los datos en cualquier momento",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Exportacioones a excel y pdf",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 43
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_027",
+      "block": "SEGURIDAD",
+      "section": "CIFRADO",
+      "requirement": "Cifrado de datos almacenados",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Se cifran los datos en reposo?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Encripcion con base AES-256 CBC",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 44
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_028",
+      "block": "SEGURIDAD",
+      "section": "CIFRADO",
+      "requirement": "Cifrado de datos de backup",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Se cifran los backups?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Algoritmo utilizado por el hosting",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 45
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_029",
+      "block": "SEGURIDAD",
+      "section": "CIFRADO",
+      "requirement": "Cifrado de datos en tránsito",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Se cifran los datos en tránsito?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "SSL",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 46
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_030",
+      "block": "SEGURIDAD",
+      "section": "BACKUP",
+      "requirement": "Gestión de backup",
+      "requirement_source": "questionnaire",
+      "question_text": "Detallar el proceso de backups de datos de la plataforma y su frecuencia",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "DIARIA",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 47
+      }
+    },
+    {
+      "question_id": "Q_031",
+      "block": "SEGURIDAD",
+      "section": "BACKUP",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Indicar RTO (Objetivo de Tiempo de recuperación) y RPO (Objetivo de Punto de recuperación)",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Otros",
+      "answer": "Otros",
+      "answer_missing": false,
+      "explanation": "DEPENDE EN FUNCION DEL PROBLEMA",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 48
+      }
+    },
+    {
+      "question_id": "Q_032",
+      "block": "SEGURIDAD",
+      "section": "BACKUP",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Detalle de Política de retención del dato ¿Durante cuánto tiempo se retienen los datos? ¿Están los datos almacenados en un lugar seguro? ¿Quién tiene acceso a los datos?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Otros",
+      "answer": "Otros",
+      "answer_missing": false,
+      "explanation": "Tiempo por establecer, Si, El proveedor",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 49
+      }
+    },
+    {
+      "question_id": "Q_033",
+      "block": "SEGURIDAD",
+      "section": "ANTIVIRUS",
+      "requirement": "Antivirus",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Hay desplegado un antivirus/antimalware actualizado de forma continua en los servidores/ordenadores que intervienen en el Servicio? ¿Cada cuanto se actualiza?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "SI",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Diariamente",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 50
+      }
+    },
+    {
+      "question_id": "Q_034",
+      "block": "SEGURIDAD",
+      "section": "FINALIZACIÓN DEL SERVICIO",
+      "requirement": "Proceso",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Existe un proceso estandarizado y documentado para la finalización y baja de servicio?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Otros",
+      "answer": "Otros",
+      "answer_missing": false,
+      "explanation": "A cunsultar con Cliente (EMPRESA)",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 51
+      }
+    },
+    {
+      "question_id": "Q_035",
+      "block": "SEGURIDAD",
+      "section": "FINALIZACIÓN DEL SERVICIO",
+      "requirement": "Destrucción",
+      "requirement_source": "questionnaire",
+      "question_text": "En el caso de la finalización del servicio ¿Existe un mecanismo de destrucción a bajo nivel de los datos?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Puesto que los datos estan en el servidor de hosting",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 52
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_036",
+      "block": "SEGURIDAD",
+      "section": "FINALIZACIÓN DEL SERVICIO",
+      "requirement": "Devolución de los datos",
+      "requirement_source": "questionnaire",
+      "question_text": "En el caso de la finalización del servicio ¿existe un mecanismo para la devolución de los datos y sus backups?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Si, se recuperaria del hosting",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 53
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_037",
+      "block": "SEGURIDAD",
+      "section": "TRAZABILIDAD",
+      "requirement": "Recogida de logs e integración en SIEM o en repositorio externo",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Se recogen Logs en las operaciones y/o accesos realizados por los usuarios finales y operadores del servicio en las distintas infraestructuras involucradas en el servicio (Servidores (web, aplicación, BBDDs), dispositivos de red, …)?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar los campos de los registros de Logs y el periodo de tiempo de conservación de los mismos.",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 54
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_038",
+      "block": "SEGURIDAD",
+      "section": "TRAZABILIDAD",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Se envían los logs recogidos a un SIEM propio del proveedor?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar el SIEM utilizado. Especificar el tiempo de conservación de los Logs recolectados.",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 55
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_039",
+      "block": "SEGURIDAD",
+      "section": "TRAZABILIDAD",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Existe la posibilidad de integrar los logs con el SIEM de EMPRESA?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Indicar el mecanismo de integración con un SIEM externo.",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 56
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_040",
+      "block": "SEGURIDAD",
+      "section": "TRAZABILIDAD",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "La recogida de los logs anteriormente mencionados en el SIEM, ¿provoca alertas generadas por éste?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar el proceso de actuación sobre incidentes a raíz de una alerta generada por el SIEM",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 57
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_041",
+      "block": "ARQUITECTURA",
+      "section": "ARQUITECTURA",
+      "requirement": "Arquitectura básica",
+      "requirement_source": "questionnaire",
+      "question_text": "Especificar la arquitectura base que da soporte a la aplicación: servidores de aplicación, bases de datos, sistema operativos, lenguaje de desarrollo, etc.",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Alojamiento en hosting, PHP, SQL",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 59
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_042",
+      "block": "ARQUITECTURA",
+      "section": "ARQUITECTURA",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Indicar si existe aplicación móvil",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "La aplicaion esta hecha en php responsive",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 60
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_043",
+      "block": "ARQUITECTURA",
+      "section": "ARQUITECTURA",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Indicar si la arquitectura es Multi-tenant",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar información sobre el nivel de personalización para cada cliente en caso de arquitectura multi-tenant",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 61
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_044",
+      "block": "ARQUITECTURA",
+      "section": "ARQUITECTURA",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Las bases de datos o sistemas donde se almacena información de EMPRESA son compartidas por otros clientes?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Separada (Isolated)",
+      "answer": "Separada (Isolated)",
+      "answer_missing": false,
+      "explanation": "No se comparte con ningun otro cliente",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 62
+      }
+    },
+    {
+      "question_id": "Q_045",
+      "block": "ARQUITECTURA",
+      "section": "ENTORNO",
+      "requirement": "Entornos de trabajo",
+      "requirement_source": "questionnaire",
+      "question_text": "¿El servicio dispone de un entorno específico para el desarrollo de nuevas funcionalidades y un entorno de pruebas para verificar su funcionamiento?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Hay un espacion en el hosting dedicado para esto donde solo acceden en local personas dedicadas a probar nuevas funcionalidades.",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 63
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_046",
+      "block": "ARQUITECTURA",
+      "section": "ENTORNO",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Indicar el grado de aislamiento entre los diferentes entornos",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Plataforma del hosting",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 64
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_047",
+      "block": "ARQUITECTURA",
+      "section": "PROTECCIÓN",
+      "requirement": "Seguridad perimetral",
+      "requirement_source": "questionnaire",
+      "question_text": "¿El servicio ofertado se encuentra desplegado siguiendo una arquitectura por capas (publicación, DMZ, red interna…)?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Se encuentra en el hosting",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 65
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_048",
+      "block": "ARQUITECTURA",
+      "section": "PROTECCIÓN",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Se filtra el tráfico entrante a la plataforma mediante un IPS/IDS y/o firewall de capa 7?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 66
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_049",
+      "block": "ARQUITECTURA",
+      "section": "MODELO DE IMPLEMENTACIÓN",
+      "requirement": "Modelo de implementación",
+      "requirement_source": "questionnaire",
+      "question_text": "Indicar los modelos de implementación en la nube",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Privado (Private)",
+      "answer": "Privado (Private)",
+      "answer_missing": false,
+      "explanation": "La aplicaion estaria bajo el dominio de PANTER.ES/ lo que corresponda",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 67
+      }
+    },
+    {
+      "question_id": "Q_050",
+      "block": "ARQUITECTURA",
+      "section": "INTEGRACIÓN",
+      "requirement": "Métodos de integración soportados",
+      "requirement_source": "questionnaire",
+      "question_text": "Integración Cloud-to-Cloud",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar mecanismos de integración Cloud-to-Cloud",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 68
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout",
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_051",
+      "block": "ARQUITECTURA",
+      "section": "INTEGRACIÓN",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Integración Cloud-OnPremise",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar mecanismos de integración Cloud-to-OnPremise",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 69
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout",
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_052",
+      "block": "ARQUITECTURA",
+      "section": "INTEGRACIÓN",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "¿Se permite integración con CyberArk de EMPRESA en caso de ser necesario el uso de cuentas de servicio?",
+      "question_text_source": "questionnaire_adjacent_column",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detallar",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 70
+      },
+      "parse_notes": [
+        "question_text_read_from_adjacent_column_due_to_merged_layout",
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_054",
+      "block": "ARQUITECTURA",
+      "section": "INTEGRACIÓN",
+      "requirement": "APIs",
+      "requirement_source": "questionnaire",
+      "question_text": "Detalles de las APIs",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Especificar APIs",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 71
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_055",
+      "block": "ARQUITECTURA",
+      "section": "INTEGRACIÓN",
+      "requirement": null,
+      "requirement_source": null,
+      "question_text": "Especificar si existen procedimientos documentados y APIs u otros mecanismos para la recuperación de los datos desde la nube y posibles formatos para estos archivos de datos",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "No",
+      "answer": "NO",
+      "answer_missing": false,
+      "explanation": "Detalle de los mecanismos de integración con los servicios Si la aplicación o plataforma no dispone de un sistema ( web service, una API, etc..) que permita extraer los datos, es un claro inconveniente para no adoptar la aplicación en la nube, ya que no podríamos disponer de los datos de la nube.",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 72
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    },
+    {
+      "question_id": "Q_056",
+      "block": "ARQUITECTURA",
+      "section": "ADMINISTRACIÓN",
+      "requirement": "Administración",
+      "requirement_source": "questionnaire",
+      "question_text": "Indicar si existen procesos documentados para la administración, monitorización y aprovisionamiento del servicio (almacenamiento, capacidad de cómputo , ancho de banda, nº de usuarios,…)",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Otros",
+      "answer": "Otros",
+      "answer_missing": false,
+      "explanation": "Se puede generar",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 73
+      }
+    },
+    {
+      "question_id": "Q_057",
+      "block": "SOPORTE",
+      "section": "SOPORTE",
+      "requirement": "Comunicación de incidentes",
+      "requirement_source": "questionnaire",
+      "question_text": "¿Existen procedimientos formalizados de comunicación y escalado de incidentes de seguridad que puedan afectar a la información o disponibilidad de la plataforma prestada a EMPRESA?",
+      "question_text_source": "questionnaire_description",
+      "answer_raw": "Si",
+      "answer": "SI",
+      "answer_missing": false,
+      "explanation": "Por especificar",
+      "source": {
+        "sheet": "Cuestionario Plataforma",
+        "row": 75
+      },
+      "parse_notes": [
+        "answer_normalized"
+      ]
+    }
+  ],
+  "case": {
+    "case_id": "Codigo_del_proyecto",
+    "ingested_at": "2026-06-18T13:11:50"
+  }
+}

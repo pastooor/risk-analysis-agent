@@ -1,0 +1,41 @@
+{
+  "batch_id": "batch_043",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_047",
+      "score": 3,
+      "score_type": "compliant",
+      "answer_summary": "El proveedor indica que el servicio se despliega siguiendo una arquitectura de red por capas.",
+      "decision_reason": "La respuesta afirmativa indica cumplimiento del requisito de arquitectura por capas.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "requires_human_review": false,
+      "validation_warning": "Score ajustado por regla determinista específica.",
+      "generates_finding": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_047",
+          "chunk_id": "RAG-Q_047",
+          "traceability": "Excel: Análisis SaaS, fila 48",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "provider_answer": "SI",
+      "provider_details": "Se encuentra en el hosting"
+    }
+  ],
+  "batch_validation_notes": []
+}

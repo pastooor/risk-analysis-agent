@@ -1,0 +1,46 @@
+{
+  "batch_id": "batch_032",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_032",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "La respuesta es insuficiente. No se especifica el tiempo de retención y la información sobre seguridad y accesos es genérica.",
+      "decision_reason": "El proveedor indica que el tiempo está por establecer y no detalla los controles de seguridad ni los roles con acceso, incumpliendo el requisito de política documentada.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "¿Podría proporcionar la política de retención de datos documentada que especifique el tiempo de retención, las medidas de seguridad aplicadas y los roles con acceso a los datos?"
+      ],
+      "generates_finding": true,
+      "requires_human_review": true,
+      "risk_id": "R_006",
+      "risk_name": "Pérdida de disponibilidad",
+      "control_ids": [
+        "C_056"
+      ],
+      "incumplimiento_identificado": "No se tiene formalizado una política de retención del dato",
+      "controles_asociados": "Se debe asegurar la existencia y la implementación de una política de retención del dato de acuerdo con las normativas, leyes, regulaciones y a las necesidades de negocio.",
+      "amenazas": [
+        "Incumplimiento normativo/regulatorio"
+      ],
+      "mitigation": "Se debe disponer de una política de retención de dato documentada, en la cual se deben tratar como mínimo los puntos de cuánto tiempo",
+      "mitigation_guide": "Se debe asegurar la existencia y la implementación de una política de retención del dato de acuerdo con las normativas, leyes, regulaciones y a las necesidades de negocio.",
+      "report_context_example": "El proveedor indica que no cuenta con una política de retención de datos.",
+      "report_detail_example": "No disponer de una política de retención de datos puede dejar a una organización vulnerable a una serie de riesgos, incluida la pérdida de datos críticos, la interrupción de las operaciones y el incumplimiento normativo. Es fundamental que las organizaciones desarrollen e implementen estas medidas como parte de su estrategia general de gestión de la información y la continuidad del negocio.",
+      "sources": [
+        {
+          "question_id": "Q_032",
+          "chunk_id": "RAG-Q_032",
+          "traceability": "Excel: Análisis SaaS, fila 33",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "BAJO",
+      "tiempo_mitigacion": "Pte.",
+      "provider_answer": "Otros",
+      "provider_details": "Tiempo por establecer, Si, El proveedor"
+    }
+  ],
+  "batch_validation_notes": []
+}

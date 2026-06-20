@@ -1,0 +1,49 @@
+{
+  "batch_id": "batch_052",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_057",
+      "score": 2,
+      "score_type": "insufficient_evidence",
+      "answer_summary": "El proveedor confirma la existencia de procedimientos, pero no aporta la documentación ni el detalle requerido para verificar su formalización y alcance.",
+      "decision_reason": "La respuesta es insuficiente al indicar 'Por especificar'. Se requiere evidencia documental o descripción detallada del procedimiento de escalado para validar el cumplimiento del control.",
+      "requires_provider_followup": true,
+      "followup_questions": [
+        "Por favor, proporcione el procedimiento formalizado de comunicación y escalado de incidentes de seguridad o un resumen detallado que incluya los canales y tiempos de respuesta."
+      ],
+      "generates_finding": true,
+      "requires_human_review": true,
+      "risk_id": "R_006",
+      "risk_name": "Pérdida de disponibilidad",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "Se debe establecer procedimientos formalizados de comunicación y escalado de incidentes de seguridad.",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "sources": [
+        {
+          "question_id": "Q_057",
+          "chunk_id": "RAG-Q_057",
+          "traceability": "Excel: Análisis SaaS, fila 57",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "level": "",
+      "tiempo_mitigacion": "",
+      "provider_answer": "SI",
+      "provider_details": "Por especificar"
+    }
+  ],
+  "batch_validation_notes": [
+    {
+      "type": "manual_review",
+      "description": "No se pudo determinar la severidad para Q_057. Revisar reglas del catálogo.",
+      "question_id": "Q_057",
+      "source": "post_ai_validation"
+    }
+  ]
+}

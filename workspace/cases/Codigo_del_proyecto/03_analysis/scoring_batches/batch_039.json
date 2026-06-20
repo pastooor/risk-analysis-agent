@@ -1,0 +1,41 @@
+{
+  "batch_id": "batch_039",
+  "case_id": "Codigo_del_proyecto",
+  "question_evaluations": [
+    {
+      "question_id": "Q_043",
+      "score": 3,
+      "score_type": "informational",
+      "answer_summary": "El proveedor confirma que la arquitectura no es multi-tenant.",
+      "decision_reason": "La pregunta es informativa y el proveedor ha respondido claramente a la consulta sobre la naturaleza de la arquitectura.",
+      "requires_provider_followup": false,
+      "followup_questions": [],
+      "generates_finding": false,
+      "requires_human_review": false,
+      "level": "SIN RIESGO",
+      "risk_id": "",
+      "risk_name": "",
+      "control_ids": [],
+      "incumplimiento_identificado": "",
+      "controles_asociados": "",
+      "amenazas": [],
+      "mitigation": "",
+      "mitigation_guide": "",
+      "report_context_example": "",
+      "report_detail_example": "",
+      "tiempo_mitigacion": "",
+      "sources": [
+        {
+          "question_id": "Q_043",
+          "chunk_id": "RAG-Q_043",
+          "traceability": "Excel: Análisis SaaS, fila 44",
+          "source": "tfm_rag_manual"
+        }
+      ],
+      "validation_warning": "Pregunta tratada como informativa/no aplicable según catálogo.",
+      "provider_answer": "NO",
+      "provider_details": "Detallar información sobre el nivel de personalización para cada cliente en caso de arquitectura multi-tenant"
+    }
+  ],
+  "batch_validation_notes": []
+}

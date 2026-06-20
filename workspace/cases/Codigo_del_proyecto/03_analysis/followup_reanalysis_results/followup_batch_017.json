@@ -1,0 +1,31 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "batch_id": "followup_batch_017",
+  "followup_round": 1,
+  "question_evaluations": [
+    {
+      "question_id": "Q_045",
+      "final_score": 3,
+      "final_score_type": "compliant",
+      "answer_summary": "El proveedor confirma entornos lógicamente separados, credenciales diferenciadas y uso de datos anonimizados en entornos de desarrollo/pruebas.",
+      "decision_reason": "La respuesta aclara el aislamiento lógico, la gestión independiente de accesos y el tratamiento seguro de datos, cumpliendo con los requisitos de mitigación del riesgo.",
+      "resolved_by_provider": true
+    }
+  ],
+  "batch_validation_notes": [
+    "La herramienta devolvió la ficha de Q_046 en lugar de Q_045. Se procede a evaluar Q_045 basándose en la respuesta del proveedor y los criterios de evaluación definidos en las instrucciones."
+  ],
+  "normalizer_debug": {
+    "raw_model_output_preview": "{\"case_id\":\"Codigo_del_proyecto\",\"batch_id\":\"followup_batch_017\",\"followup_round\":1,\"question_evaluations\":[{\"question_id\":\"Q_045\",\"final_score\":3,\"final_score_type\":\"compliant\",\"answer_summary\":\"El proveedor confirma entornos lógicamente separados, credenciales diferenciadas y uso de datos anonimizados en entornos de desarrollo/pruebas.\",\"decision_reason\":\"La respuesta aclara el aislamiento lógico, la gestión independiente de accesos y el tratamiento seguro de datos, cumpliendo con los requisit",
+    "parsed_question_count": 1,
+    "normalized_question_count": 1,
+    "expected_question_count": 1,
+    "expected_question_ids": [
+      "Q_045"
+    ],
+    "normalized_question_ids": [
+      "Q_045"
+    ],
+    "prompt_batch_data_found": true
+  }
+}

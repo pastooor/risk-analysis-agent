@@ -1,0 +1,22 @@
+{
+  "case_id": "Codigo_del_proyecto",
+  "created_at": "2026-06-18T13:28:01",
+  "google_drive_base_folder": "TFM",
+  "google_drive_project_folder": "Código del proyecto",
+  "google_drive_project_path": "TFM/Código del proyecto",
+  "project_name": "Código del proyecto.",
+  "files": [
+    {
+      "kind": "report",
+      "file_path": "/data/cases/Codigo_del_proyecto/05_report/Informe_Ciberseguridad_Codigo_del_proyecto.docx",
+      "file_name": "Informe_Ciberseguridad_Codigo_del_proyecto.docx",
+      "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "kind": "questionnaire",
+      "file_path": "/data/cases/Codigo_del_proyecto/01_originales/cuestionario.xlsx",
+      "file_name": "cuestionario.xlsx",
+      "mime_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    }
+  ]
+}
