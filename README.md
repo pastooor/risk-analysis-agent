@@ -124,6 +124,7 @@ Workflows/RAG FINAL.json
 se utilizan para preparar la base vectorial en Qdrant.
 
 El workflow `Chat Agente AARR.json` corresponde al chat que te pregunta el TIER del caso antes de comenzar el análisis del mismo.
+
 ---
 
 ### 4.2. `n8n_custom/`
