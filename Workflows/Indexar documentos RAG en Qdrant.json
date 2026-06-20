@@ -1,0 +1,55 @@
+{
+  "name": "Indexar documentos RAG en Qdrant",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2f191490-9c21-4a97-a6b4-6ceb04a45761",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "python /data/scripts/index_manual_qdrant.py \\\n  --catalog-json /data/rag_manual/catalog_questions_v2.json \\\n  --collection tfm_rag_manual \\\n  --qdrant-url http://qdrant:6333 \\\n  --ollama-url http://ollama:11434 \\\n  --embedding-model nomic-embed-text \\\n  --recreate"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d638c1de-e971-4ce1-ab69-51bf59d53976",
+      "name": "Execute Command"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d9eae934-fb3c-4444-8813-2fe811932733",
+  "meta": {
+    "instanceId": "ab1e990902e95383f4a54076b8865c550cd63d72778d0fe5c251c70d680c4dce"
+  },
+  "id": "oJQL23S99fCaj9XH",
+  "tags": []
+}
