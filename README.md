@@ -240,6 +240,7 @@ Codigo_del_proyecto/
     ├── report_generation_status.json
     ├── _sanitized_template_Codigo_del_proyecto.docx
     └── evidencias/
+```
 
 ---
 
